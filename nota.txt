@@ -1,0 +1,57 @@
+
+
+entrar no servidor sve
+ssh imagem@192.168.1.100
+senha:imagem123#
+
+#####servidor servidor.py####################
+
+GET ao vivo
+http://127.0.0.1:6001/video_feed
+
+GET FRAME Imagem
+
+http://127.0.0.1:6001/capture
+
+
+GET config
+
+http://127.0.0.1:6001/config
+
+
+GET Executar Teste executar
+http://127.0.0.1:6001/executar
+
+retorna valor dos tres rois
+
+
+
+instalar requirements
+
+pip install -r requirements.txt
+
+listar cameras basler
+http://127.0.0.1:6001/list_cameras
+
+listar webcams
+ls -l /dev/v4l/by-id/
+
+ comando para verificar o serial do raspberry:
+ cat /proc/cpuinfo | grep Serial | awk '{print $3}'
+
+
+
+ #########################  instalacao tensorflow raspberry pi 5 #########################
+    sudo apt-get install libatlas-base-dev
+    pip install tensorflow == 2.13.0
+    pip install keras == 2.13.1
+    pip install "numpy==1.24.3" "scipy==1.10.1"
+    pip install h5py == 3.9.0
+
+#############################################################################################
+
+
+
+
+
+

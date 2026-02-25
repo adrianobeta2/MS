@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ajuste de Limites</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 50px;
+        }
+        
+        .button-salvar {
+            font-size: 14px;
+            background-color: hsl(229, 100%, 52%);
+            color: hsl(0, 33%, 99%);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            
+        }
+       
+       
+        .roi-group {
+            margin-bottom: 50px;
+        }
+
+        #roi-section{
+            
+            border: 2px solid #007bff;
+            border-radius: 8px;
+            margin-right: 20px;
+            margin-top: 20px;
+            margin-bottom: 80px;
+            font-size:larger;
+        }
+        
+        #label-roisection{
+   
+            margin-left: 10px;
+        }
+
+        .slider-container {
+            position: relative;
+            width: 300px;
+            height: 50px;
+            margin: 0 auto;
+        }
+
+        .slider-track {
+            position: absolute;
+            top: 20px;
+            height: 10px;
+            width: 100%;
+            background: #ddd;
+            border-radius: 5px;
+        }
+
+        .slider-range {
+            position: absolute;
+            top: 20px;
+            height: 10px;
+            background: #007bff;
+            border-radius: 5px;
+        }
+
+        .thumb {
+            position: absolute;
+            top: 10px;
+            width: 20px;
+            height: 20px;
+            background: #fff;
+            border: 2px solid #007bff;
+            border-radius: 50%;
+            cursor: pointer;
+            transform: translateX(-50%);
+        }
+
+        .labels {
+            position: absolute;
+            top: 5px;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        h2 {
+            font-size: 20px;
+            color: #555;
+        }
+
+        .output {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Ajuste de Limites das Ferramentas</h1>
+
+    
+    <div class="roi-group">
+        <label for="roi-section" id ="label-roisection">Selecione a seção ROI:</label>
+        <select id="roi-section">
+            <option value="">-- Selecione --</option>
+            <option value="ROI1">ROI1</option>
+            <option value="ROI2">ROI2</option>
+            <option value="ROI3">ROI3</option>
+        </select>
+        
+        <div class="slider-container">
+            <div class="labels">
+                <span id="outputLowerPixel1">80</span>
+                <span id="outputUpperPixel1">170</span>
+            </div>
+            <div class="slider-track"></div>
+            <div class="slider-range" id="sliderRangePixel1"></div>
+            <div class="thumb" id="thumbLowerPixel1"></div>
+            <div class="thumb" id="thumbUpperPixel1"></div>
+        </div>
+        <p>Pixel</p>
+
+        <div class="slider-container">
+            <div class="labels">
+                <span id="outputLowerTextura1">30</span>
+                <span id="outputUpperTextura1">90</span>
+            </div>
+            <div class="slider-track"></div>
+            <div class="slider-range" id="sliderRangeTextura1"></div>
+            <div class="thumb" id="thumbLowerTextura1"></div>
+            <div class="thumb" id="thumbUpperTextura1"></div>
+        </div>
+        <p>Textura</p>
+        
+    </div>
+
+   
+    <div class="roi-group">
+        
+        <div class="slider-container">
+            <div class="labels">
+                <span id="outputLowerCor1">80</span>
+                <span id="outputUpperCor1">170</span>
+            </div>
+            <div class="slider-track"></div>
+            <div class="slider-range" id="sliderRangeCor1"></div>
+            <div class="thumb" id="thumbLowerCor1"></div>
+            <div class="thumb" id="thumbUpperCor1"></div>
+        </div>
+        <p>Cor</p>
+                
+    </div>
+    <div id="controls"></div>
+        
+        <button class="button-salvar" onclick="sendData()">Salvar Limites</button>
+        
+    </div>
+    <!-- Importa o arquivo config.js -->
+    <script src="servidor.js"></script>
+    <script>
+        document.getElementById('roi-section').value = "ROI1";
+        function initializeSlider(min, max, lowerId, upperId, rangeId, outputLowerId, outputUpperId, valorL, valorH) {
+            const track = document.querySelector(".slider-track");
+            
+            const range = document.getElementById(rangeId);
+            const thumbLower = document.getElementById(lowerId);
+            const thumbUpper = document.getElementById(upperId);
+            const outputLower = document.getElementById(outputLowerId);
+            const outputUpper = document.getElementById(outputUpperId);
+            
+            
+
+            let lowerValue = parseInt(valorL);
+            let upperValue = parseInt(valorH);
+
+            function updatePositions() {
+                const trackWidth = track.offsetWidth;
+                const lowerPercent = ((lowerValue - min) / (max - min)) * 100;
+                const upperPercent = ((upperValue - min) / (max - min)) * 100;
+
+                thumbLower.style.left = `${lowerPercent}%`;
+                thumbUpper.style.left = `${upperPercent}%`;
+                range.style.left = `${lowerPercent}%`;
+                range.style.width = `${upperPercent - lowerPercent}%`;
+
+                outputLower.textContent = lowerValue;
+                outputUpper.textContent = upperValue;
+            }
+
+            thumbLower.addEventListener("mousedown", () => {
+                const moveLower = (e) => {
+                    const rect = track.getBoundingClientRect();
+                    const newValue = Math.min(
+                        Math.max(min, ((e.clientX - rect.left) / rect.width) * (max - min) + min),
+                        upperValue - 1
+                    );
+                    lowerValue = Math.round(newValue);
+                    updatePositions();
+                };
+
+                const stopLower = () => {
+                    document.removeEventListener("mousemove", moveLower);
+                    document.removeEventListener("mouseup", stopLower);
+                };
+
+                document.addEventListener("mousemove", moveLower);
+                document.addEventListener("mouseup", stopLower);
+            });
+
+            thumbUpper.addEventListener("mousedown", () => {
+                const moveUpper = (e) => {
+                    const rect = track.getBoundingClientRect();
+                    const newValue = Math.max(
+                        Math.min(max, ((e.clientX - rect.left) / rect.width) * (max - min) + min),
+                        lowerValue + 1
+                    );
+                    upperValue = Math.round(newValue);
+                    updatePositions();
+                };
+
+                const stopUpper = () => {
+                    document.removeEventListener("mousemove", moveUpper);
+                    document.removeEventListener("mouseup", stopUpper);
+                };
+
+                document.addEventListener("mousemove", moveUpper);
+                document.addEventListener("mouseup", stopUpper);
+            });
+
+            updatePositions();
+
+            
+            
+        }
+
+        // Inicializa os 7 sliders
+
+        
+        const selectElement = document.getElementById('roi-section');
+
+             // Adiciona o evento 'change' ao elemento <select>
+        selectElement.addEventListener('change', receiveData);
+
+
+       
+        async function receiveData() {
+                // Adicionar seleção de seção ROI (ex: ROI1, ROI2, ROI3)
+
+
+                
+                
+                const selectedSection = document.getElementById('roi-section').value;
+                const response = await fetch(`${SERVER_URL}/get_limits/${selectedSection}`);
+
+                if (!response.ok) {
+                    console.error("Erro ao obter os dados do servidor:", await response.text());
+                    return;
+                }
+
+                const data = await response.json();
+
+
+                const texturelowlimit = data.texturelowlimit;
+                const texturehightlimit = data.texturehightlimit;
+                const pixellowlimit = data.pixellowlimit;
+                const pixelhighlimit = data.pixelhighlimit;
+                const threshold_cor = data.threshold_cor;
+                
+                
+                 initializeSlider(0, 255, "thumbLowerPixel1", "thumbUpperPixel1", "sliderRangePixel1", "outputLowerPixel1", "outputUpperPixel1",texturelowlimit,texturehightlimit);
+               
+                 initializeSlider(0, 255, "thumbLowerTextura1", "thumbUpperTextura1", "sliderRangeTextura1", "outputLowerTextura1", "outputUpperTextura1",pixellowlimit,pixelhighlimit);
+
+                 initializeSlider(0, 255, "thumbLowerCor1", "thumbUpperCor1", "sliderRangeCor1", "outputLowerCor1", "outputUpperCor1","0",threshold_cor);
+                
+         }
+
+         // Função para enviar dados ao endpoint
+        async function sendData() {
+
+            const selectedSection = document.getElementById('roi-section').value;
+            const url = `${SERVER_URL}/set_limits/${selectedSection}`;
+            
+            const pixelL = document.getElementById("outputLowerPixel1");
+            const valorpixelL= parseInt(pixelL.textContent);
+
+            const pixelH = document.getElementById("outputUpperPixel1");
+            const valorpixelH= parseInt(pixelH.textContent);
+
+            const textureL = document.getElementById("outputLowerTextura1");
+            const valortextureL= parseInt(textureL.textContent);
+
+            const textureH = document.getElementById("outputUpperTextura1");
+            const valortextureH= parseInt(textureH.textContent);
+
+            const threshold_corL = document.getElementById("outputLowerCor1");
+            const valorthreshold_corL= parseInt(threshold_corL.textContent);
+
+            const threshold_corH = document.getElementById("outputUpperCor1");
+            const valorthreshold_corH= parseInt(threshold_corH.textContent);
+
+
+
+
+            // Dados que serão enviados no corpo da requisição
+            const data = {
+                texturelowlimit: valortextureL,
+                texturehightlimit: valortextureH,
+                pixellowlimit: valorpixelL,
+                pixelhighlimit: valorpixelH,
+                threshold_cor: valorthreshold_corH
+            };
+
+            try {
+                // Faz a requisição POST
+                const response = await fetch(url, {
+                    method: 'POST', // Método HTTP
+                    headers: {
+                        'Content-Type': 'application/json' // Tipo de conteúdo do corpo
+                    },
+                    body: JSON.stringify(data) // Converte o objeto para JSON
+                });
+
+                // Verifica se a requisição foi bem-sucedida
+                if (response.ok) {
+                    const result = await response.json(); // Converte a resposta para JSON
+                    console.log('Dados enviados com sucesso:', result);
+                } else {
+                    console.error('Erro na requisição:', response.status, response.statusText);
+                }
+            } catch (error) {
+                console.error('Erro ao enviar dados:', error);
+            }
+        }
+        receiveData() 
+    </script>
+</body>
+</html>

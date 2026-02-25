@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ajuste de Limites</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 50px; 
+            background-color: #000000;
+
+        }
+        h1 {
+           
+            color: white;
+        }
+        p {
+           
+            color: white;
+        }
+        .button-salvar {
+            font-size: 14px;
+            background-color: hsl(229, 100%, 52%);
+            color: hsl(0, 33%, 99%);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            
+        }
+       
+        .checkbox-container {
+            display: flex; /* Alinha os itens na horizontal */
+            gap: 15px; /* Espaço entre os checkboxes */
+            border: none;
+            margin-left: 140px;
+            border-radius: 10px;
+            width: fit-content; /* Ajusta à largura do conteúdo */
+            background-color: #242629;
+            padding: 15px;
+            text-align: left;
+        }
+        
+        .checkbox-container label {
+            display: flex; /* Mantém o input e o texto alinhados */
+            align-items: center;
+            font-size: 16px;
+            font-weight: bold;
+            color: #bfbbbb;
+            cursor: pointer;
+        }
+        
+        .checkbox-container input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            margin-right: 5px;
+            cursor: pointer;
+        }
+
+        .checkbox-container input{
+            width: 60px;
+            padding: 5px;
+            border-radius: 20px;
+            border: 1px solid #ddd;
+            text-align: center;
+            background-color: #f5f2f2;
+        }
+
+
+        
+       
+        .roi-group {
+            margin-bottom: 50px;
+        }
+
+        #roi-section{
+            
+            border: 2px solid #007bff;
+            border-radius: 8px;
+            margin-right: 20px;
+            margin-top: 50px;
+            margin-bottom: 40px;
+            font-size:larger;
+        }
+        
+        #label-roisection{
+            color: #bfbbbb;
+            margin-left: 10px;
+        }
+
+        .slider-container {
+            position: relative;
+            width: 300px;
+            height: 50px;
+            margin: 0 auto;
+        }
+
+        .slider-track {
+            position: absolute;
+            top: 20px;
+            height: 10px;
+            width: 100%;
+            background: #ddd;
+            border-radius: 5px;
+        }
+
+        .slider-range {
+            position: absolute;
+            top: 20px;
+            height: 10px;
+            background: #007bff;
+            border-radius: 5px;
+        }
+
+        .thumb {
+            position: absolute;
+            top: 10px;
+            width: 20px;
+            height: 20px;
+            background: #fff;
+            border: 2px solid #007bff;
+            border-radius: 50%;
+            cursor: pointer;
+            transform: translateX(-50%);
+        }
+
+        .labels {
+            position: absolute;
+            top: 5px;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            font-weight: bold;
+            color: #bfbbbb;
+        }
+
+        /* Estilo para a label no canto superior direito */
+        #programa-label {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            font-size: 22px;
+            color: #007bff;
+            font-weight: bold;
+        }
+
+        h2 {
+            font-size: 20px;
+            color: #555;
+        }
+
+        .output {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div id="programa-label"></div>
+    <h1>Ajuste de Limites e Ferramentas</h1>
+    
+    <div class="checkbox-container">
+        <label>
+            <input type="checkbox" id="cor"> Cor
+        </label>
+        <label>
+            <input type="checkbox" id="textura"> Textura
+        </label>
+        <label>
+            <input type="checkbox" id="pixel"> Pixel
+        </label>
+        <label>
+            <input type="checkbox" id="ponto_parafuso"> Ponto Parafuso
+        </label>
+        <label>
+            <input type="checkbox" id="ponto_xy"> Ponto XY
+        </label>
+        <label>
+            <input type="checkbox" id="posicao"> Ajuste de Posição
+        </label>
+        <label>
+            <input type="number" id="n_rois" step="1"> Número de Rois 
+        </label>
+       
+    </div>
+    <div>
+     <label>
+        <input type="text" id="programa-section-input" name="programa-section-input" 
+        maxlength="50" placeholder="Digite um nome para o programa"
+        style="width: 400px; margin-top:20px;text-align: center;">
+     </label>
+
+    </div
+    <div class="roi-group">
+        
+        <label for="roi-section" id ="label-roisection">Selecione a seção ROI:</label>
+        <select id="roi-section">
+            <option value="">-- Selecione --</option>
+            <option value="ROI1">ROI1</option>
+            <option value="ROI2">ROI2</option>
+            <option value="ROI3">ROI3</option>
+            <option value="ROI4">ROI4</option>
+            <option value="ROI5">ROI5</option>
+            <option value="ROI6">ROI6</option>
+            <option value="ROI7">ROI7</option>
+            <option value="ROI8">ROI8</option>
+            <option value="ROI9">ROI9</option>
+            <option value="ROI10">ROI10</option>
+            <option value="ROI11">ROI11</option>
+            <option value="ROI12">ROI12</option>
+            <option value="ROI13">ROI13</option>
+            <option value="ROI14">ROI14</option>
+            <option value="ROI15">ROI15</option>
+           
+        </select>
+        
+        <div class="slider-container">
+            <div class="labels">
+                <span id="outputLowerPixel1">80</span>
+                <span id="outputUpperPixel1">170</span>
+            </div>
+            <div class="slider-track"></div>
+            <div class="slider-range" id="sliderRangePixel1"></div>
+            <div class="thumb" id="thumbLowerPixel1"></div>
+            <div class="thumb" id="thumbUpperPixel1"></div>
+               <!-- Label abaixo do slider -->
+            <label for="sliderRangePixel1" style="display: block; color: white;margin-top: 8px; text-align: center;">Tolerância Pixels</label>
+        </div>
+        
+
+        <div class="slider-container">
+            <div class="labels">
+                <span id="outputLowerTextura1">30</span>
+                <span id="outputUpperTextura1">90</span>
+            </div>
+            <div class="slider-track"></div>
+            <div class="slider-range" id="sliderRangeTextura1"></div>
+            <div class="thumb" id="thumbLowerTextura1"></div>
+            <div class="thumb" id="thumbUpperTextura1"></div>
+            <label for="sliderRangeTextura1" style="display: block; color: white;margin-top: 8px; text-align: center;">Tolerância Textura</label>
+        </div>
+        
+        <div class="slider-container">
+            <div class="labels">
+                <span id="outputLowerCor1">80</span>
+                <span id="outputUpperCor1">170</span>
+            </div>
+            <div class="slider-track"></div>
+            <div class="slider-range" id="sliderRangeCor1"></div>
+            <div class="thumb" id="thumbLowerCor1"></div>
+            <div class="thumb" id="thumbUpperCor1"></div>
+            <label for="sliderRangeCor1" style="display: block; color: white;margin-top: 8px; text-align: center;">Tolerância Cor</label>
+        </div>
+
+
+        <div class="slider-container">
+            <div class="labels">
+                <span id="outputLowerPonto1">80</span>
+                <span id="outputUpperPonto1">170</span>
+            </div>
+            <div class="slider-track"></div>
+            <div class="slider-range" id="sliderRangePonto1"></div>
+            <div class="thumb" id="thumbLowerPonto1"></div>
+            <div class="thumb" id="thumbUpperPonto1"></div>
+            <label for="sliderRangePonto1" style="display: block; color: white;margin-top: 8px; text-align: center;">Tolerância Parafuso</label>
+        </div>
+       
+        
+    </div>
+
+   
+    <div id="controls"></div>
+        
+        <button class="button-salvar" onclick="sendData()">Salvar</button>
+        
+    </div>
+    <!-- Incluindo o arquivo JavaScript da pasta static -->
+    <script src="{{ url_for('static', filename='servidor.js') }}"></script>
+    <script>
+        document.getElementById('roi-section').value = "ROI1";
+        function initializeSlider(min, max, lowerId, upperId, rangeId, outputLowerId, outputUpperId, valorL, valorH) {
+            const track = document.querySelector(".slider-track");
+            
+            const range = document.getElementById(rangeId);
+            const thumbLower = document.getElementById(lowerId);
+            const thumbUpper = document.getElementById(upperId);
+            const outputLower = document.getElementById(outputLowerId);
+            const outputUpper = document.getElementById(outputUpperId);
+            
+            
+
+            let lowerValue = parseInt(valorL);
+            let upperValue = parseInt(valorH);
+
+            function updatePositions() {
+                const trackWidth = track.offsetWidth;
+                const lowerPercent = ((lowerValue - min) / (max - min)) * 100;
+                const upperPercent = ((upperValue - min) / (max - min)) * 100;
+
+                thumbLower.style.left = `${lowerPercent}%`;
+                thumbUpper.style.left = `${upperPercent}%`;
+                range.style.left = `${lowerPercent}%`;
+                range.style.width = `${upperPercent - lowerPercent}%`;
+
+                outputLower.textContent = lowerValue;
+                outputUpper.textContent = upperValue;
+            }
+
+            thumbLower.addEventListener("mousedown", () => {
+                const moveLower = (e) => {
+                    const rect = track.getBoundingClientRect();
+                    const newValue = Math.min(
+                        Math.max(min, ((e.clientX - rect.left) / rect.width) * (max - min) + min),
+                        upperValue - 1
+                    );
+                    lowerValue = Math.round(newValue);
+                    updatePositions();
+                };
+
+                const stopLower = () => {
+                    document.removeEventListener("mousemove", moveLower);
+                    document.removeEventListener("mouseup", stopLower);
+                };
+
+                document.addEventListener("mousemove", moveLower);
+                document.addEventListener("mouseup", stopLower);
+            });
+
+            thumbUpper.addEventListener("mousedown", () => {
+                const moveUpper = (e) => {
+                    const rect = track.getBoundingClientRect();
+                    const newValue = Math.max(
+                        Math.min(max, ((e.clientX - rect.left) / rect.width) * (max - min) + min),
+                        lowerValue + 1
+                    );
+                    upperValue = Math.round(newValue);
+                    updatePositions();
+                };
+
+                const stopUpper = () => {
+                    document.removeEventListener("mousemove", moveUpper);
+                    document.removeEventListener("mouseup", stopUpper);
+                };
+
+                document.addEventListener("mousemove", moveUpper);
+                document.addEventListener("mouseup", stopUpper);
+            });
+
+            updatePositions();
+
+            
+            
+        }
+
+        // Inicializa os 7 sliders
+
+        
+        const selectElement = document.getElementById('roi-section');
+
+             // Adiciona o evento 'change' ao elemento <select>
+        selectElement.addEventListener('change', receiveData);
+
+
+       
+        async function receiveData() {
+                // Adicionar seleção de seção ROI (ex: ROI1, ROI2, ROI3)
+
+                const urlParams = new URLSearchParams(window.location.search);
+                const programa = urlParams.get('programa');
+                programaSelect = programa;
+        
+                if (programa) {
+                    document.getElementById('programa-label').textContent = "Programa: "+programa;
+                }
+                    
+                
+                const selectedSection = document.getElementById('roi-section').value;
+                const url = `${SERVER_URL}/get_limits/${encodeURIComponent(selectedSection)}?programa=${encodeURIComponent(programaSelect)}`;
+
+                const response = await fetch(url);
+
+                if (!response.ok) {
+                    console.error("Erro ao obter os dados do servidor:", await response.text());
+                    return;
+                }
+                const data = await response.json();
+
+
+                const textura_tolerancia = data.textura_tolerancia;
+                const pixel_tolerancia= data.pixel_tolerancia;
+                const threshold_cor = data.threshold_cor;
+                const ponto_tolerancia = data.ponto_tolerancia;
+                
+                 
+
+                initializeSlider(0, 255, "thumbLowerPixel1", "thumbUpperPixel1", "sliderRangePixel1", "outputLowerPixel1", "outputUpperPixel1","0",pixel_tolerancia); 
+                initializeSlider(0, 255, "thumbLowerTextura1", "thumbUpperTextura1", "sliderRangeTextura1", "outputLowerTextura1", "outputUpperTextura1", "0",textura_tolerancia);               
+
+                 initializeSlider(0, 255, "thumbLowerCor1", "thumbUpperCor1", "sliderRangeCor1", "outputLowerCor1", "outputUpperCor1","0",threshold_cor); 
+                 initializeSlider(0, 255, "thumbLowerPonto1", "thumbUpperPonto1", "sliderRangePonto1", "outputLowerPonto1", "outputUpperPonto1","0",ponto_tolerancia); 
+                
+                 const response_2 = await fetch(`${SERVER_URL}/ferramentas?programa=${encodeURIComponent(programaSelect)}`);
+                 //const response_2 = await fetch(`${SERVER_URL}/ferramentas`);
+ 
+                 if (!response_2.ok) {
+                     console.error("Erro ao obter os dados do servidor:", await response_2.text());
+                     return;
+                 }
+ 
+                 const data_2 = await response_2.json();
+                 
+                 
+                 // Atualiza os checkboxes conforme os valores do servidor
+                
+                document.getElementById("programa-section-input").value = data_2.nome_programa;
+                document.getElementById("cor").checked = data_2.cor;
+                document.getElementById("textura").checked = data_2.textura;
+                document.getElementById("pixel").checked = data_2.pixel;
+                document.getElementById("ponto_parafuso").checked = data_2.ponto_parafuso;
+                document.getElementById("posicao").checked = data_2.posicao;
+                document.getElementById("ponto_xy").checked = data_2.ponto_xy;
+                document.getElementById("n_rois").value = parseInt(data_2.n_rois, 10);
+
+                  
+
+         }
+
+         // Função para enviar dados ao endpoint
+        async function sendData() {
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const programa = urlParams.get('programa');
+            programaSelect = programa;
+        
+            if (programa) {
+                    document.getElementById('programa-label').textContent = "Programa: "+programa;
+            }
+
+            const selectedSection = document.getElementById('roi-section').value;
+            const url = `${SERVER_URL}/set_limits/${selectedSection}`;
+            
+            const pixel_toleranciaH= document.getElementById("outputUpperPixel1");
+            const valorpixel_toleranciaH= parseInt(pixel_toleranciaH.textContent);
+
+            const textura_toleranciaH= document.getElementById("outputUpperTextura1");
+            const valortextura_toleranciaH= parseInt(textura_toleranciaH.textContent);
+
+            const threshold_corL = document.getElementById("outputLowerCor1");
+            const valorthreshold_corL= parseInt(threshold_corL.textContent);
+
+            const threshold_corH = document.getElementById("outputUpperCor1");
+            const valorthreshold_corH= parseInt(threshold_corH.textContent);
+
+            const ponto_toleranciaH = document.getElementById("outputUpperPonto1");
+            const valorponto_toleranciaH= parseInt(ponto_toleranciaH.textContent);
+
+             
+
+
+            // Dados que serão enviados no corpo da requisição
+            const data = {
+                programa: programaSelect, // Programa selecionado
+                textura_tolerancia: valortextura_toleranciaH,
+                pixel_tolerancia: valorpixel_toleranciaH,
+                threshold_cor: valorthreshold_corH,
+                ponto_tolerancia: valorponto_toleranciaH
+            };
+
+            try {
+                // Faz a requisição POST
+                const response = await fetch(url, {
+                    method: 'POST', // Método HTTP
+                    headers: {
+                        'Content-Type': 'application/json' // Tipo de conteúdo do corpo
+                    },
+                    body: JSON.stringify(data) // Converte o objeto para JSON
+                });
+
+                // Verifica se a requisição foi bem-sucedida
+                if (response.ok) {
+                    const result = await response.json(); // Converte a resposta para JSON
+                    console.log('Dados enviados com sucesso:', result);
+                } else {
+                    console.error('Erro na requisição:', response.status, response.statusText);
+                }
+            } catch (error) {
+                console.error('Erro ao enviar dados:', error);
+            }
+
+            const config = {
+                programa: programaSelect, // Programa selecionado
+                nome_programa: document.getElementById("programa-section-input").value,
+                cor: document.getElementById("cor").checked,
+                textura: document.getElementById("textura").checked,
+                pixel: document.getElementById("pixel").checked,
+                ponto_parafuso: document.getElementById("ponto_parafuso").checked,
+                posicao: document.getElementById("posicao").checked,
+                ponto_xy: document.getElementById("ponto_xy").checked,
+                n_rois: document.getElementById("n_rois").value
+            };
+            const url_ferramentas = `${SERVER_URL}/ferramentas`;
+            fetch(url_ferramentas, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(config)
+            })
+            .then(response => response.json())
+            .then(data => alert(data.message))
+            .catch(error => console.error("Erro:", error))
+        }
+
+
+       
+
+        
+
+        receiveData() // Chama a função ao carregar a página
+    </script>
+</body>
+</html>

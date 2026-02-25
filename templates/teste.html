@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<style>
+  .big-overlay {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    z-index: 9999;
+  }
+  .big-overlay__text {
+    font-size: clamp(48px, 20vw, 100px);
+    font-weight: bold;
+    color: rgba(255,255,255,0.85);
+    text-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    opacity: 0;
+    transform: scale(0.8);
+    transition: opacity .4s, transform .4s;
+  }
+  .big-overlay__text.show {
+    opacity: 1;
+    transform: scale(1);
+  }
+</style>
+</head>
+<body>
+
+<div id="overlay" class="big-overlay">
+  <div id="overlayText" class="big-overlay__text"></div>
+</div>
+
+<script>
+function showOverlayMessage(message, opts = {}) {
+  const el = document.getElementById("overlayText");
+  el.textContent = message;
+  if (opts.color) el.style.color = opts.color;
+  el.classList.add("show");
+
+  setTimeout(() => {
+    el.classList.remove("show");
+    el.textContent = "";
+  }, opts.duration || 1500);
+}
+
+// exemplo:
+showOverlayMessage('PROGRAMA 1', { duration: 1800, color: 'rgba(255,255,255,0.9)' });
+</script>
+
+</body>
+</html>

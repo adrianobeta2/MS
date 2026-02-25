@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Status do Sistema de Visão</title>
+  <!-- Favicon para navegador -->
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='sveNEW.png') }}">
+
+  <!-- Manifest para criar ícone de app -->
+  <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      
+      background: #121212;
+      color: #f0f0f0;
+      padding: 50px 0 0 0; /* adiciona 30px de espaçamento superior */
+    }
+
+    .container {
+      
+      top: 50px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 50px;
+      padding-bottom: 50px;
+      margin-bottom: 40px; /* Espaço entre os painéis */
+      
+    }
+
+    .panel-wrapper {
+      display: flex;
+      flex-direction: row;
+      width: 100%;
+      max-width: 1400px;
+      border-bottom: 2px solid #333;
+      padding-bottom: 20px;
+    }
+
+    .left-panel {
+      width: 20%;
+      padding: 20px;
+      background: #121010;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      border-right: 2px solid #333;
+    }
+
+    .right-panel {
+      width: 12%;
+      padding: 12px;
+      background: #121010;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: center;
+      gap: 20px; /* espaçamento entre programa, status e tempo */
+      border-right: 2px solid #333;
+    }
+    
+   
+    .center-panel {
+      
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      background: #121212;
+    }
+
+    .status-roi {
+      padding: 10px;
+      border-radius: 5px;
+      font-weight: bold;
+      color: white;
+    }
+
+    .ok {
+      background-color: #2e7d32;
+    }
+
+    .nok {
+      background-color: #c62828;
+    }
+    
+    .camera,
+    .programa,
+    .status-geral,
+    .tempo {
+      position: static; /* deixa o navegador organizar via flex */
+      transform: none;  /* remove o translate */
+      top: auto;
+      left: auto;
+    }  
+
+
+    .status-geral {
+      
+      
+      font-size: 24px;
+      font-weight: bold;
+      padding: 10px;
+      border-radius: 5px;
+      color: white;
+    }
+
+    .status-geral.ok {
+      background: #43a047;
+    }
+
+    .status-geral.nok {
+      background: #e53935;
+    }
+
+    .programa {
+     
+      
+      font-size: 18px;
+      font-weight: bold;
+      color: #bdbdbd;
+      
+      
+    }
+
+    .camera {
+      font-size: 18px;
+      font-weight: bold;
+      color: #bdbdbd;  
+    }
+
+    .nome_programa {
+      position: absolute;
+      text-transform: uppercase;
+      top: 5px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 15px;
+      font-weight: bold;
+      color: white;
+    }
+
+    .tempo {
+      
+      font-size: 14px;
+      color: #bdbdbd;
+    }
+
+    img {
+      width: 860px;
+      height: auto;
+      border: 2px solid #444;
+      border-radius: 10px;
+    }
+
+    #logo_sve img {
+      width: 70px;
+      object-fit: contain;
+      left: 5%;
+      position: absolute;
+      border: none;
+      margin: 0;
+      padding: 0;
+      top: 5px;
+    }
+
+    .config-button {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      background: #37474f;
+      color: white;
+      text-decoration: none;
+      padding: 10px 16px;
+      border-radius: 6px;
+      font-weight: bold;
+      transition: background 0.3s;
+    }
+
+    .config-button:hover {
+      background: #546e7a;
+    }
+  </style>
+</head>
+<body>
+  <a href="/configuracoes" class="config-button">⚙️ Configurações</a>
+  <div class="container">
+
+    <!-- Painel da câmera 1 -->
+    <div class="panel-wrapper" id="status-cam1">
+      <div class="left-panel" id="rois1"></div>
+      <div class="center-panel">
+        
+        <div class="nome_programa" id="nome_programa1"></div>
+        
+        <img id="imagemStatus1" src="" alt="Imagem de Status 1">
+        <div id="logo_sve"><img src="{{ url_for('static', filename='sveNEW.png') }}" alt=""></div>
+       
+      </div>
+      <div class="right-panel" id="statusG1">
+        <div class="camera" id="camera1"></div>
+        <div class="programa" id="programa1"></div>
+       <div id="statusGeral1" class="status-geral"></div>
+       <div class="tempo" id="tempoExecucao1"></div>
+      </div>
+    </div>
+
+    <!-- Painel da câmera 2 -->
+    <div class="panel-wrapper" id="status-cam2">
+      <div class="left-panel" id="rois2"></div>
+      <div class="center-panel">
+        
+        <div class="nome_programa" id="nome_programa2"></div>
+        
+        <img id="imagemStatus2" src="" alt="Imagem de Status 2">
+        <div id="logo_sve"><img src="{{ url_for('static', filename='sveNEW.png') }}" alt=""></div>
+       
+      </div>
+      <div class="right-panel" id="statusG2">
+        <div class="camera" id="camera2"></div>
+        <div class="programa" id="programa2"></div>
+        <div id="statusGeral2" class="status-geral"></div>
+        <div class="tempo" id="tempoExecucao2"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    async function atualizarStatus(camera) {
+      try {
+        const res = await fetch(`/status.json?camera=${camera}`);
+        const data = await res.json();
+
+        const roisDiv = document.getElementById(`rois${camera}`);
+        roisDiv.innerHTML = '';
+        for (let i = 1; i <= data.n_rois; i++) {
+          const key = `parcial_p${i}`;
+          const status = data[key];
+          const div = document.createElement('div');
+          div.classList.add('status-roi', status ? 'ok' : 'nok');
+          div.textContent = `ROI ${i}: ${status ? 'OK' : 'NOK'}`;
+          roisDiv.appendChild(div);
+        }
+
+        document.getElementById(`programa${camera}`).textContent = `programa ${data.programa}`;
+        document.getElementById(`camera${camera}`).textContent = `CAM${camera}`;
+        document.getElementById(`nome_programa${camera}`).textContent = `${data.nome_programa}`;
+        document.getElementById(`imagemStatus${camera}`).src = `/imagem_status.jpg?camera=${camera}&t=${new Date().getTime()}`;
+        const statusGeral = document.getElementById(`statusGeral${camera}`);
+        statusGeral.textContent = data.status_geral ? 'APROVADO' : 'REJEITADO';
+        statusGeral.className = 'status-geral ' + (data.status_geral ? 'ok' : 'nok');
+        document.getElementById(`tempoExecucao${camera}`).textContent = `Tempo: ${data.tempo_execucao.toFixed(2)} ms`;
+      } catch (e) {
+        console.error(`Erro ao atualizar status da câmera ${camera}:`, e);
+      }
+    }
+
+    function atualizarAmbas() {
+      atualizarStatus(1);
+      atualizarStatus(2);
+    }
+
+    setInterval(atualizarAmbas, 2000);
+    atualizarAmbas(); // Primeira chamada imediata
+  </script>
+</body>
+</html>

@@ -1,0 +1,2234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SVE</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #000000;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2.5em;
+            color: #333;
+        }
+
+        h1 span {
+            font-weight: bold;
+        }
+
+        /* Oculta os inputs de rádio e o h1 */
+        input[type="radio"], #titulo {
+        display: none;
+         }
+
+        #logo_sve img {
+            width: 600px; /* ou height: 30px; */
+            object-fit: contain; /* mantém a proporção */
+            margin-left:110px;
+        }
+
+        #controls {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            padding: 15px;
+            background: #fff;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 20px;
+            margin-bottom: 20px;
+            border: 2px solid #007bff;
+            border-radius: 20px;
+        }
+
+        #controls button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 15px; 
+            margin: 5px;
+            font-size: 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .footer-label {
+            position: fixed;  /* Fixo na tela */
+            bottom: 10px;     /* Distância do fundo */
+            right: 10px;      /* Distância da direita */
+            font-size: 14px;  /* Tamanho da fonte */
+            color: #9e9999;      /* Cor do texto */
+            
+            padding: 5px 10px; /* Espaçamento interno */
+            border-radius: 5px; /* Borda arredondada */
+        }
+
+        #controls button:hover {
+            background-color: #0056b3;
+        }
+
+        #controls label {
+            margin: 5px 10px;
+            font-size: 14px;
+            color: #918a91;
+        }
+
+        #controls input {
+            width: 50px;
+            padding: 5px;
+            border-radius: 20px;
+            border: 1px solid #ddd;
+            text-align: center;
+            background-color: #f5f2f2;
+        }
+
+        #controls input:focus {
+            border-color: #007bff;
+            outline: none;
+        }
+
+        .status-label {
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-weight: bold;
+            color: white;
+            display: inline-block;
+        }
+
+        .status-ok {
+            background-color: #28a745;
+        }
+
+        .status-nok {
+            background-color: #dc3545;
+        }
+
+        #canvas {
+            border: 2px solid #007bff;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+        }
+
+        #results {
+            border: 2px solid #007bff;
+            border-radius: 20px;
+            margin-top: 20px;
+            padding: 10px;
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+    
+        #coordinates {
+            border: 2px solid #007bff;
+            border-radius: 20px;
+            margin-top: 20px; /* Ajuste a margem superior conforme necessário */
+            margin-top: 20px;
+            padding: 10px;
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+
+
+        select {
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            margin-left: 20px;
+            font-size: 14px;
+        }
+
+        select:focus {
+            border-color: #007bff;
+            outline: none;
+        }
+
+        .button-execute {
+            font-size: 50px;
+            font-weight: bold;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .button-execute:hover {
+            background-color: #218838;
+        }
+
+        .button-live {
+            font-size: 14px;
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .button-gray {
+            font-size: 10px;
+            background-color: #6e696a;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .button-reboot {
+            font-size: 10px;
+            background-color: yellow;
+            color: black;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            margin-top: 20px;
+            margin-left:750px;
+        }
+
+        .button-referenceImg {
+            font-size: 20px;
+            background-color: #02f236;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            margin-top: 10px;
+           
+        }
+        .button-referenceImg_NOK {
+            font-size: 20px;
+            background-color: #f20227;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            margin-top: 10px;
+           
+        }
+
+        .button-imgOkDel {
+            position: relative; 
+            font-size: 10px;
+            background-color: #181a19;
+            color: none;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 10px;
+            cursor: pointer;
+           
+           
+        }
+        .button-imgNokDel {
+            position: relative;
+            font-size: 10px;
+            background-color: #181a19;
+            color: none;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-top: 10px;
+           
+        }
+
+        
+        
+        .button-imgOkDel:hover::after {
+            content: attr(data-tooltip); /* Pega o texto do data-tooltip */
+            position: absolute;
+            bottom: 100%; /* Posiciona acima do botão */
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #333;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            white-space: nowrap;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .button-imgOkDel:hover::after {
+            opacity: 1; /* Mostra ao passar o mouse */
+        }
+        
+
+       
+        
+        
+        .button-imgNokDel:hover::after {
+            content: attr(data-tooltip); /* Pega o texto do data-tooltip */
+            position: absolute;
+            bottom: 100%; /* Posiciona acima do botão */
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #333;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            white-space: nowrap;
+            opacity: 0;
+            transition: opacity 0.3s;
+            
+        }
+        
+        .button-imgNokDel:hover::after {
+            opacity: 1; /* Mostra ao passar o mouse */
+        }
+
+        .button-ajustarPos{
+            font-size: 18px;
+            background-color: blue;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            margin-top: 10px;
+           
+        }
+        .button-limites {
+            font-size: 14px;
+            background-color: #700e74;
+            color: hwb(0 100% 0%);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            margin-top: 10px;
+            margin-left: 70px;
+        }
+        #label-programa {
+            font-size: 16px;
+            color:white;
+            top: 20px
+            margin-left: auto; /* Empurra a label para a direita */
+            padding-left: 10px; /* Espaço opcional para separação */
+            
+            
+           
+        }
+        #NomePrograma {
+            display: flex;
+            justify-content: flex-end;
+            text-transform: uppercase;
+            font-weight: bold;
+            
+        }
+
+        #programa-section{
+            
+            border: 2px solid #007bff;
+            border-radius: 20px;
+            width: 50px;
+        }
+
+        #roi-section{
+            
+            border: 2px solid #007bff;
+            border-radius: 20px;
+            margin-left: 20px;
+            width: 70px;
+        }
+        
+        #label-roisection{
+   
+            margin-left: 80px;
+        }
+
+        .button-live:hover {
+            background-color: #c82333;
+        }
+
+        .flex-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 20px;
+        }
+        /* Estilo padrão do botão */
+        #togglePanMode {
+            background-color: #4CAF50; /* Verde */
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        /* Estilo quando o modo "pan" estiver ativo */
+        #togglePanMode.pan-active {
+            background-color: #f44336; /* Vermelho */
+        }
+
+        .flex-container > div {
+            flex: 1;
+        }
+
+        .machine-learning-group {
+            display: inline-block;
+            background-color: #333232;
+            border: 3px solid #007bff;
+            border-radius: 20px; /* Borda arredondada */
+            padding: 10px;
+            text-align: center; /* Alinhamento centralizado */
+            margin: 0 10px; /* Margem para separar dos outros botões */
+        }
+        
+        
+        
+        .ml-header {
+            display: flex;
+            align-items: center; /* Alinha o texto e a imagem verticalmente */
+            font-weight: bold;
+            justify-content: center; /* Centraliza o conteúdo horizontalmente */
+            margin-bottom: 5px; /* Espaço entre o cabeçalho e os botões */
+        }
+        
+        .ml-header span {
+            margin-right: 10px; /* Espaço entre o texto e a imagem */
+        }
+        
+        .ml-icon {
+            width: 40px; /* Ajuste o tamanho da imagem conforme necessário */
+            height: 40px; /* Ajuste o tamanho da imagem conforme necessário */
+        }
+
+        .del-icon {
+            width: 20px; /* Ajuste o tamanho da imagem conforme necessário */
+            height: 20px; /* Ajuste o tamanho da imagem conforme necessário */
+            transition: transform 0.2s ease-in-out;
+        }
+
+        
+        .pan-icon {
+            width: 40px; /* Ajuste o tamanho da imagem conforme necessário */
+            height: 40px; /* Ajuste o tamanho da imagem conforme necessário */
+            transition: transform 0.2s ease-in-out;
+        }
+        #togglePanMode:hover {
+            transform: scale(1.20); /* Aumenta em 10% */
+        }
+        #togglePanMode:hover .pan-icon {
+            transform: scale(1.20); /* Aumenta o ícone em 10% */
+        }
+        #togglePanMode {
+            transition: transform 0.2s ease-in-out;
+            transform-origin: center; /* Faz o zoom ser centralizado */
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 5px; /* Dá espaço para o zoom */
+        }
+
+
+
+        .zoomMais-icon {
+            width: 40px; /* Ajuste o tamanho da imagem conforme necessário */
+            height: 40px; /* Ajuste o tamanho da imagem conforme necessário */
+            transition: transform 0.2s ease-in-out;
+        }
+        #zoomInBtn:hover {
+            transform: scale(1.20); /* Aumenta em 10% */
+        }
+        #zoomInBtn:hover .zoomMais-icon {
+            transform: scale(1.20); /* Aumenta o ícone em 10% */
+        }
+        #zoomInBtn {
+            transition: transform 0.2s ease-in-out;
+            transform-origin: center; /* Faz o zoom ser centralizado */
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 5px; /* Dá espaço para o zoom */
+        }
+
+        .zoomMenos-icon {
+            width: 40px; /* Ajuste o tamanho da imagem conforme necessário */
+            height: 40px; /* Ajuste o tamanho da imagem conforme necessário */
+            transition: transform 0.2s ease-in-out;
+        }
+        #zoomOutBtn:hover {
+            transform: scale(1.20); /* Aumenta em 10% */
+        }
+        #zoomOutBtn:hover .zoomMenos-icon {
+            transform: scale(1.20); /* Aumenta o ícone em 10% */
+        }
+        #zoomOutBtn {
+            transition: transform 0.2s ease-in-out;
+            transform-origin: center; /* Faz o zoom ser centralizado */
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 5px; /* Dá espaço para o zoom */
+        }
+
+
+
+        .zoomReset-icon {
+            width: 40px; /* Ajuste o tamanho da imagem conforme necessário */
+            height: 40px; /* Ajuste o tamanho da imagem conforme necessário */
+            transition: transform 0.2s ease-in-out;
+        }
+        
+        #resetZoomBtn:hover {
+            transform: scale(1.20); /* Aumenta em 10% */
+        }
+        #resetZoomBtn:hover .zoomReset-icon {
+            transform: scale(1.20); /* Aumenta o ícone em 10% */
+        }
+        #resetZoomBtn {
+            transition: transform 0.2s ease-in-out;
+            transform-origin: center; /* Faz o zoom ser centralizado */
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 5px; /* Dá espaço para o zoom */
+        }
+
+
+
+        .limpar-icon {
+            width: 40px; /* Ajuste o tamanho da imagem conforme necessário */
+            height: 40px; /* Ajuste o tamanho da imagem conforme necessário */
+            transition: transform 0.2s ease-in-out;
+        }
+
+        #deleteBtn:hover {
+            transform: scale(1.20); /* Aumenta em 10% */
+        }
+        #deleteBtn:hover .limpar-icon {
+            transform: scale(1.20); /* Aumenta o ícone em 10% */
+        }
+        #deleteBtn {
+            transition: transform 0.2s ease-in-out;
+            transform-origin: center; /* Faz o zoom ser centralizado */
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 5px; /* Dá espaço para o zoom */
+        }
+
+
+        .editar-icon {
+            width: 40px; /* Ajuste o tamanho da imagem conforme necessário */
+            height: 40px; /* Ajuste o tamanho da imagem conforme necessário */
+            transition: transform 0.2s ease-in-out;
+        }
+        #editBtn:hover {
+            transform: scale(1.20); /* Aumenta em 10% */
+        }
+        #editBtn:hover .editar-icon {
+            transform: scale(1.20); /* Aumenta o ícone em 10% */
+        }
+        #editBtn {
+            transition: transform 0.2s ease-in-out;
+            transform-origin: center; /* Faz o zoom ser centralizado */
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 5px; /* Dá espaço para o zoom */
+        }
+
+
+
+        .circulo-icon {
+            width: 40px; /* Ajuste o tamanho da imagem conforme necessário */
+            height: 40px; /* Ajuste o tamanho da imagem conforme necessário */
+            transition: transform 0.2s ease-in-out;
+        }
+        #drawCircleBtn:hover {
+            transform: scale(1.20); /* Aumenta em 10% */
+        }
+        #drawCircleBtn:hover .circulo-icon {
+            transform: scale(1.20); /* Aumenta o ícone em 10% */
+        }
+        #drawCircleBtn {
+            transition: transform 0.2s ease-in-out;
+            transform-origin: center; /* Faz o zoom ser centralizado */
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 5px; /* Dá espaço para o zoom */
+        }
+
+
+        .retangulo-icon {
+            width: 40px; /* Ajuste o tamanho da imagem conforme necessário */
+            height: 40px; /* Ajuste o tamanho da imagem conforme necessário */
+            transition: transform 0.2s ease-in-out;
+        }
+        #drawRectangleBtn:hover {
+            transform: scale(1.20); /* Aumenta em 10% */
+        }
+        #drawRectangleBtn:hover .retangulo-icon {
+            transform: scale(1.20); /* Aumenta o ícone em 10% */
+        }
+        #drawRectangleBtn {
+            transition: transform 0.2s ease-in-out;
+            transform-origin: center; /* Faz o zoom ser centralizado */
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 5px; /* Dá espaço para o zoom */
+        }
+        
+        .send-icon {
+            width: 40px; /* Ajuste o tamanho da imagem conforme necessário */
+            height: 40px; /* Ajuste o tamanho da imagem conforme necessário */
+            transition: transform 0.2s ease-in-out;
+        }
+        #sendDataBtn:hover {
+            transform: scale(1.20); /* Aumenta em 10% */
+        }
+        #sendDataBtn:hover .send-icon {
+            transform: scale(1.20); /* Aumenta o ícone em 10% */
+        }
+        #sendDataBtn {
+            transition: transform 0.2s ease-in-out;
+            transform-origin: center; /* Faz o zoom ser centralizado */
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 5px; /* Dá espaço para o zoom */
+        }
+
+
+        .receber-icon {
+            width: 40px; /* Ajuste o tamanho da imagem conforme necessário */
+            height: 40px; /* Ajuste o tamanho da imagem conforme necessário */
+            transition: transform 0.2s ease-in-out;
+        }
+        #receiveDataBtn:hover {
+            transform: scale(1.20); /* Aumenta em 10% */
+        }
+        #receiveDataBtn:hover .receber-icon {
+            transform: scale(1.20); /* Aumenta o ícone em 10% */
+        }
+        #receiveDataBtn {
+            transition: transform 0.2s ease-in-out;
+            transform-origin: center; /* Faz o zoom ser centralizado */
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 5px; /* Dá espaço para o zoom */
+        }
+        
+
+        .tool-icon {
+            width: 40px; /* Ajuste o tamanho da imagem conforme necessário */
+            height: 40px; /* Ajuste o tamanho da imagem conforme necessário */
+            transition: transform 0.2s ease-in-out;
+        }
+        #limitesBtn:hover {
+            transform: scale(1.20); /* Aumenta em 10% */
+        }
+        #limitesBtn:hover .tool-icon {
+            transform: scale(1.20); /* Aumenta o ícone em 10% */
+        }
+        #limitesBtn {
+            transition: transform 0.2s ease-in-out;
+            transform-origin: center; /* Faz o zoom ser centralizado */
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 5px; /* Dá espaço para o zoom */
+        }
+        
+
+        .localizador-icon {
+            width: 40px; /* Ajuste o tamanho da imagem conforme necessário */
+            height: 40px; /* Ajuste o tamanho da imagem conforme necessário */
+        }
+        #posicaoBtn:hover {
+            transform: scale(1.20); /* Aumenta em 10% */
+        }
+        #posicaoBtn:hover .localizador-icon {
+            transform: scale(1.20); /* Aumenta o ícone em 10% */
+        }
+        #posicaoBtn {
+            transition: transform 0.2s ease-in-out;
+            transform-origin: center; /* Faz o zoom ser centralizado */
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 5px; /* Dá espaço para o zoom */
+        }
+        
+
+        .live-icon {
+            width: 40px; /* Ajuste o tamanho da imagem conforme necessário */
+            height: 40px; /* Ajuste o tamanho da imagem conforme necessário */
+        }
+        #liveBtn:hover {
+            transform: scale(1.20); /* Aumenta em 10% */
+        }
+        #liveBtn:hover .live-icon {
+            transform: scale(1.20); /* Aumenta o ícone em 10% */
+        }
+        #liveBtn {
+            transition: transform 0.2s ease-in-out;
+            transform-origin: center; /* Faz o zoom ser centralizado */
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 5px; /* Dá espaço para o zoom */
+        }
+
+        .cinza-icon {
+            width: 40px; /* Ajuste o tamanho da imagem conforme necessário */
+            height: 40px; /* Ajuste o tamanho da imagem conforme necessário */
+        }
+        #grayBtn:hover {
+            transform: scale(1.20); /* Aumenta em 10% */
+        }
+        #grayBtn:hover .cinza-icon {
+            transform: scale(1.20); /* Aumenta o ícone em 10% */
+        }
+        #grayBtn {
+            transition: transform 0.2s ease-in-out;
+            transform-origin: center; /* Faz o zoom ser centralizado */
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 5px; /* Dá espaço para o zoom */
+        }
+
+
+        .notok-icon {
+            width: 60px; /* Ajuste o tamanho da imagem conforme necessário */
+            height: 60px; /* Ajuste o tamanho da imagem conforme necessário */
+            transform: scale(1.20); /* Aumenta o ícone em 10% */
+            position: relative;   /* Garante que fique acima do ::before */
+            z-index: 1;
+        }
+        #referenceImgNotBtn:hover {
+            transform: scale(1.20); /* Aumenta em 10% */
+        }
+        #referenceImgNotBtn:hover .notok-icon {
+            transform: scale(1.20); /* Aumenta o ícone em 10% */
+        }
+        #referenceImgNotBtn {
+            font-size: 0px;
+            transition: transform 0.2s ease-in-out;
+            transform-origin: center; /* Faz o zoom ser centralizado */
+            background: #f20227;
+            border-radius: 50%; 
+            border: none;
+            cursor: pointer;
+            padding: 5px; /* Dá espaço para o zoom */
+
+           
+        }
+
+        .ok-icon {
+            width: 60px; /* Ajuste o tamanho da imagem conforme necessário */
+            height: 60px; /* Ajuste o tamanho da imagem conforme necessário */
+            transform: scale(1.20); /* Aumenta o ícone em 10% */
+            position: relative;   /* Garante que fique acima do ::before */
+            z-index: 1;
+        }
+        #referenceImgBtn:hover {
+            transform: scale(1.20); /* Aumenta em 10% */
+        }
+        #referenceImgBtn:hover .ok-icon {
+            transform: scale(1.20); /* Aumenta o ícone em 10% */
+        }
+        #referenceImgBtn {
+            font-size: 1px;
+            transition: transform 0.2s ease-in-out;
+            transform-origin: center; /* Faz o zoom ser centralizado */
+            background: #02f236;
+            border-radius: 50%; 
+            border: none;
+            cursor: pointer;
+            padding: 5px; /* Dá espaço para o zoom */
+
+           
+        }
+
+
+        .executar-icon {
+            width: 90px; /* Ajuste o tamanho da imagem conforme necessário */
+            height: 90px; /* Ajuste o tamanho da imagem conforme necessário */
+            transform: scale(1.20); /* Aumenta o ícone em 10% */
+        }
+
+        #executarBtn:hover {
+            transform: scale(1.20); /* Aumenta em 10% */
+        }
+        #executarBtn:hover .executar-icon {
+            transform: scale(1.20); /* Aumenta o ícone em 10% */
+        }
+        #executarBtn {
+            transition: transform 0.2s ease-in-out;
+            transform-origin: center; /* Faz o zoom ser centralizado */
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 5px; /* Dá espaço para o zoom */
+        }
+        #deleteOKLabel {
+            font-weight: bold;
+            font-size: 14px;
+            color: #02f236;
+        }
+        #deleteNOKLabel {
+            font-weight: bold;
+            font-size: 14px;
+            color: #f20227;
+        }
+        
+    </style>
+</head>
+<body>
+    <div style="display: flex; align-items: center; justify-content: center;">
+        <div style="margin-right: 10px;">
+            <!-- Elemento que ficará à esquerda do h1 -->
+            <input type="radio" name="theme" value="light" onclick="setTheme('light')">
+            <input type="radio" name="theme" value="dark" onclick="setTheme('dark')"checked>
+        </div>
+        <h1 id="titulo">
+            
+             Sistema de Visão Embarcado
+        </h1>
+    </div>
+
+    <div id="controls">
+        <button id="drawRectangleBtn" onclick="setMode('drawRectangle')"title ="Criar um Retangulo"><img src="{{ url_for('static', filename='retangulo.png') }}" alt="" class="retangulo-icon"></button>
+        <button id="drawCircleBtn" onclick="setMode('drawCircle')"title ="Criar um Círculo"><img src="{{ url_for('static', filename='circulo.png') }}" alt="" class="circulo-icon"></button>
+        <button id="editBtn" onclick="setMode('edit')"title ="Editar um Roi"><img src="{{ url_for('static', filename='edit.png') }}" alt="" class="editar-icon"></button>
+        <button id="deleteBtn" onclick="deleteAllROIs()"title ="Limpar a tela"><img src="{{ url_for('static', filename='limpar.png') }}" alt="" class="limpar-icon"></button>
+        <button id="zoomInBtn" onclick="zoomIn()" title ="Diminuir o Zoom"><img src="{{ url_for('static', filename='zoom_mais.png') }}" alt="" class="zoomMenos-icon"></button>
+        <button id="zoomOutBtn" onclick="zoomOut()" title ="Aumentar o Zoom"><img src="{{ url_for('static', filename='zoom_menos.png') }}" alt="" class="zoomMais-icon"></button>
+        <button id="resetZoomBtn" onclick="resetZoom()" title ="Resetar o Zoom"><img src="{{ url_for('static', filename='zoom-reset.png') }}" alt="" class="zoomReset-icon"></button>
+        <button id="togglePanMode" title ="Mover Imagem"><img src="{{ url_for('static', filename='hand.png') }}" alt="" class="pan-icon"></button>
+        <label>Contraste: <input type="number" id="contrast" step="0.1"></label>
+        <label>Brilho: <input type="number" id="brightness"></label>
+        <label>Gamma: <input type="number" id="gamma" step="0.1"></label>
+        <label>Exposição: <input type="number" id="exposure" step="0.1"></label>
+        <button id="sendDataBtn"onclick="sendData()"title ="Enviar para o Controlador"><img src="{{ url_for('static', filename='send.png') }}" alt="" class="send-icon"></button>
+        <button id="receiveDataBtn"onclick="receiveData()"title ="Receber do Controlador"><img src="{{ url_for('static', filename='receber.png') }}" alt="" class="receber-icon"></button>
+        <button id="limitesBtn"class="button-limites" onclick="ajustarLimites()"title ="Limites e Ferramentas"><img src="{{ url_for('static', filename='tool.png') }}" alt="" class="tool-icon"></button>
+    </div>
+    <div id="NomePrograma">
+        <label id ="label-programa"></label> 
+    </div>
+    <div class="flex-container">
+        <!-- Coluna com o botão e o canvas -->
+        <div>
+            <button id="executarBtn" class="button-execute" onclick="Executar()"title ="Executar"><img src="{{ url_for('static', filename='executar.png') }}" alt="" class="executar-icon"></button>
+            
+            <div class="machine-learning-group">
+                <div class="ml-header">
+                    <span>Aprendizado de Máquina</span>
+                    <img src="{{ url_for('static', filename='aprendizado.png') }}" alt="Ícone de Aprendizado de Máquina" class="ml-icon">
+                </div>
+                <div>
+                    <button id="referenceImgBtn" class="button-referenceImg" onclick="CapturarReference()" title ="Criar imagem Positiva"><img src="{{ url_for('static', filename='ok.png') }}" alt="" class="ok-icon"></button>
+                    <button class="button-imgOkDel" onclick="DelReferenceOK()" title ="Apagar Imagens Positivas">
+                        <span id="deleteOKLabel"></span>  <!-- Label dinâmica -->
+                    </button>
+                
+                
+                    <button id="referenceImgNotBtn" class="button-referenceImg_NOK" onclick="CapturarReference_NOK()" title ="Criar imagem Negativa"><img src="{{ url_for('static', filename='notok.png') }}" alt="" class="notok-icon"></button>
+                    <button class="button-imgNokDel" onclick="DelReferenceNOK()" title ="Apagar Imagens Negativas">
+                        <span id="deleteNOKLabel"></span>  <!-- Label dinâmica -->
+                    </button>
+                </div>
+            </div>
+            
+            <button id="posicaoBtn" class="button-ajustarPos" onclick="ajustarPosicaoLocalizador()"title ="Ajustar Posição"><img src="{{ url_for('static', filename='localizador.png') }}" alt="" class="localizador-icon"></button>
+            <button id="liveBtn"class="button-live" onclick="AoVivo()"title ="Transmissão Ao Vivo"><img src="{{ url_for('static', filename='live.png') }}" alt="" class="live-icon"></button>
+            <button id="grayBtn"class="button-gray" onclick="fetchImageGray()"title ="Escala de Cinza"><img src="{{ url_for('static', filename='cinza.png') }}" alt="" class="cinza-icon"></button>
+            <canvas id="canvas" width="800" height="600"></canvas>
+        </div>
+
+        <!-- Resultados do lado direito -->
+        <div>
+            <div>
+            
+            <label for="programa">Selecione o programa:</label>
+                <select id="programa-section">
+                    <option value="">-- Selecione --</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                    <option value="6">6</option>
+                    <option value="7">7</option>
+                    <option value="8">8</option>
+                    <option value="9">9</option>
+                    <option value="10">10</option>
+                </select>
+       
+            <label for="roi-section" id ="label-roisection">Selecione a ROI:</label>
+            <select id="roi-section">
+                <option value="">-- Selecione --</option>
+                <option value="ROI1">ROI1</option>
+                <option value="ROI2">ROI2</option>
+                <option value="ROI3">ROI3</option>
+                <option value="ROI4">ROI4</option>
+                <option value="ROI5">ROI5</option>
+                <option value="ROI6">ROI6</option>
+                <option value="ROI7">ROI7</option>
+                <option value="ROI8">ROI8</option>
+                <option value="ROI9">ROI9</option>
+                <option value="ROI10">ROI10</option>
+                <option value="ROI11">ROI11</option>
+                <option value="ROI12">ROI12</option>
+                <option value="ROI13">ROI13</option>
+                <option value="ROI14">ROI14</option>
+                <option value="ROI15">ROI15</option>
+            </select>
+         
+        </div>   
+            <div id="results">Resultados aparecerão aqui</div>
+            <div id="coordinates"></div>
+            <div id="logo_sve"><img src="{{ url_for('static', filename='sve3.jpeg') }}" alt=""></div>
+            <!-- Label no rodapé inferior direito -->
+            <div class="footer-label">
+               Sistema de Visão Embarcado.
+            </div>
+          <!--   <button class="button-reboot" onclick="reboot()">Reiniciar Controlador</button> -->
+        </div>
+    </div>
+
+    <!-- Incluindo o arquivo JavaScript da pasta static -->
+    <script src="{{ url_for('static', filename='servidor.js') }}"></script>
+    <script>
+
+       
+        setTheme('dark'); // Define o tema escuro como padrão
+        const canvas = new fabric.Canvas('canvas', {
+            selection: false,
+        });
+
+        let currentMode = 'drawRectangle';
+        let isDrawing = false;
+        let shape;
+        let startX, startY;
+        let imageScaleX = 1, imageScaleY = 1;
+        
+        function setTheme(theme) {
+            const h1 = document.getElementById('titulo');
+            const controles = document.getElementById('controls');
+            const resultados = document.getElementById('results'); 
+            const coordenadas = document.getElementById('coordinates');
+          
+            if (theme === 'dark') {
+                document.body.style.backgroundColor = '#000000';
+                document.body.style.color = 'white';
+                h1.style.color = 'white'; 
+                controles.style.backgroundColor =  '#333232';
+                resultados.style.backgroundColor =  '#333232';
+                coordenadas.style.backgroundColor =  '#333232';
+                //controlesInput.style.color = 'white'
+            } else {
+                document.body.style.backgroundColor = '#000000';
+                document.body.style.color = '#333';
+                h1.style.color = '#333'; 
+                controles.style.backgroundColor =  '#fff';
+                resultados.style.backgroundColor =  '#fff';
+                coordenadas.style.backgroundColor =  '#fff';
+                
+            }
+        }
+
+        async function loadImage(url) {
+            fabric.Image.fromURL(url, function(img) {
+                img.scaleToWidth(800);
+                img.scaleToHeight(600);
+                img.selectable = false;
+                img.evented = false;
+                imageScaleX = img.scaleX;
+                imageScaleY = img.scaleY;
+                canvas.add(img).sendToBack();
+            });
+        }
+
+        async function fetchImage() {
+            const response = await fetch('/get_image');
+            const data = await response.json();
+            await loadImage(data.image_url);
+        }
+
+        function setMode(mode) {
+            // Restaura o estilo de todos os botões
+            const buttons = document.querySelectorAll('button');
+            buttons.forEach(button => {
+                button.style.backgroundColor = '';
+                button.style.color = '';
+            });
+             // Define o modo atual
+            currentMode = mode;
+            isDrawing = false;
+            canvas.selection = mode === 'edit';
+
+                    // Altera o estilo do botão selecionado
+            const selectedButton = document.getElementById(`${mode}Btn`);
+            if (selectedButton) {
+                selectedButton.style.backgroundColor = '#00ff3c'; // Cor de fundo azul
+                selectedButton.style.color = '#FFFFFF'; // Cor do texto branco
+            }
+
+            canvas.getObjects().forEach(obj => {
+                if (obj.type === 'rect' || obj.type === 'circle') {
+                    obj.selectable = mode === 'edit';
+                    obj.evented = mode === 'edit';
+                }
+            });
+        }
+
+        let isPanMode = false; // Variável para controlar o modo "pan"
+        let isDragging = false; // Variável para controlar o arrasto no modo "pan"
+        let lastPosX = 0, lastPosY = 0; // Armazenar a última posição do mouse
+        
+        // Função para alternar o modo "pan"
+        document.getElementById('togglePanMode').addEventListener('click', function() {
+            isPanMode = !isPanMode; // Alterna entre ativo e inativo
+            this.textContent = isPanMode ? "Desativar Pan" : "Ativar Pan";
+            canvas.selection = !isPanMode; // Desativa a seleção de objetos no modo "pan"
+            canvas.defaultCursor = isPanMode ? "grab" : "default"; // Altera o cursor
+
+             // Alterna a classe "pan-active" para mudar o estilo do botão
+             this.classList.toggle('pan-active', isPanMode);
+        });
+        
+        // Evento de mouse down
+        canvas.on('mouse:down', function(event) {
+            if (currentMode === 'edit' && event.target) {
+                // Modo de edição: permite mover objetos
+                isDragging = false; // Desativa o arrasto do modo "pan"
+                return;
+            }
+        
+            if (isPanMode) {
+                // Modo "pan": inicia o arrasto
+                isDragging = true;
+                lastPosX = event.e.clientX;
+                lastPosY = event.e.clientY;
+                canvas.defaultCursor = "grabbing"; // Altera o cursor durante o arrasto
+            } else if (currentMode === 'edit') { 
+                return; // Modo de edição, não faz nada
+            } else {
+                // Modo de desenho: inicia o desenho de formas
+                isDrawing = true;
+                const pointer = canvas.getPointer(event.e);
+                startX = pointer.x;
+                startY = pointer.y;
+        
+                if (currentMode === 'drawRectangle') {
+                    shape = new fabric.Rect({
+                        left: startX,
+                        top: startY,
+                        fill: 'rgba(255, 0, 0, 0.1)',
+                        stroke: 'lime',
+                        strokeWidth: 2,
+                        width: 0,
+                        height: 0,
+                    });
+                } else if (currentMode === 'drawCircle') {
+                    shape = new fabric.Circle({
+                        left: startX,
+                        top: startY,
+                        fill: 'rgba(255, 0, 0, 0.1)',
+                        stroke: 'lime',
+                        strokeWidth: 2,
+                        radius: 0,
+                    });
+                }
+                canvas.add(shape);
+            }
+        });
+        
+        // Evento de mouse move
+        canvas.on('mouse:move', function(event) {
+            if (currentMode === 'edit' && event.target) {
+                // Modo de edição: permite mover objetos
+                isDragging = false; // Desativa o arrasto do modo "pan"
+                return;
+            }
+        
+            if (isPanMode && isDragging) {
+                // Modo "pan": move o canvas
+                const deltaX = event.e.clientX - lastPosX;
+                const deltaY = event.e.clientY - lastPosY;
+                canvas.relativePan({ x: deltaX, y: deltaY });
+                lastPosX = event.e.clientX;
+                lastPosY = event.e.clientY;
+            } else if (isDrawing) {
+                // Modo de desenho: atualiza a forma sendo desenhada
+                const pointer = canvas.getPointer(event.e);
+                if (currentMode === 'drawRectangle') {
+                    const width = pointer.x - startX;
+                    const height = pointer.y - startY;
+                    shape.set({
+                        width: Math.abs(width),
+                        height: Math.abs(height),
+                        left: width < 0 ? pointer.x : startX,
+                        top: height < 0 ? pointer.y : startY,
+                    });
+                } else if (currentMode === 'drawCircle') {
+                    const radius = Math.sqrt(
+                        Math.pow(pointer.x - startX, 2) +
+                        Math.pow(pointer.y - startY, 2)
+                    );
+                    shape.set({
+                        radius: radius,
+                        left: startX - radius,
+                        top: startY - radius,
+                    });
+                }
+                canvas.renderAll();
+            }
+        });
+        
+        // Evento de mouse up
+        canvas.on('mouse:up', function() {
+            if (isPanMode) {
+                // Modo "pan": finaliza o arrasto
+                isDragging = false;
+                canvas.defaultCursor = "grab"; // Restaura o cursor
+            } else if (isDrawing || currentMode === 'edit') {
+                // Modo de desenho: finaliza o desenho
+                isDrawing = false;
+                shape.set({ selectable: true, evented: true });
+                updateCoordinates();
+                canvas.renderAll();
+            }
+        });
+                // Alterar a cor depois
+        function changeRectangleColor(rectangle, fillColor, strokeColor) {
+            rectangle.set({
+                fill: fillColor || rectangle.fill, // Atualiza o preenchimento, se fornecido
+                stroke: strokeColor || rectangle.stroke, // Atualiza o contorno, se fornecido
+            });
+
+            canvas.renderAll(); // Renderiza as mudanças no canvas
+        }
+
+        // Função para alterar a cor de preenchimento e borda de um círculo
+        function changeCircleColor(circle, fillColor, strokeColor) {
+            circle.set({
+                fill: fillColor || circle.fill, // Atualiza o preenchimento, se fornecido
+                stroke: strokeColor || circle.stroke, // Atualiza o contorno, se fornecido
+            });
+            canvas.renderAll(); // Renderiza o canvas para aplicar as mudanças
+        }
+        function getAdjustedCoordinates(obj) {
+            if (obj.type === 'rect') {
+                const { left, top, width, height, scaleX, scaleY } = obj;
+                return {
+                    x: (left / imageScaleX).toFixed(1),
+                    y: (top / imageScaleY).toFixed(1),
+                    width: ((width * scaleX) / imageScaleX).toFixed(1),
+                    height: ((height * scaleY) / imageScaleY).toFixed(1),
+                };
+            } else if (obj.type === 'circle') {
+                const { left, top, radius, scaleX, scaleY } = obj;
+                return {
+                    centerX: ((left + radius) / imageScaleX).toFixed(1),
+                    centerY: ((top + radius) / imageScaleY).toFixed(1),
+                    radiusX: ((radius * scaleX) / imageScaleX).toFixed(1),
+                    radiusY: ((radius * scaleY) / imageScaleY).toFixed(1),
+                };
+            }
+            return null;
+        }
+
+        function updateCoordinates() {
+            const coordinatesDiv = document.getElementById('coordinates');
+            coordinatesDiv.innerHTML = '<strong>Coordenadas das ROIs:</strong><br>';
+            canvas.getObjects().forEach(obj => {
+                if (obj.type === 'rect' || obj.type === 'circle') {
+                    const adjusted = getAdjustedCoordinates(obj);
+                    if (adjusted) {
+                        if (obj.type === 'rect') {
+                            coordinatesDiv.innerHTML += `Retângulo - x: ${adjusted.x}, y: ${adjusted.y}, width: ${adjusted.width}, height: ${adjusted.height}<br>`;
+                        } else if (obj.type === 'circle') {
+                            coordinatesDiv.innerHTML += `Círculo - centerX: ${adjusted.centerX}, centerY: ${adjusted.centerY}, radiusX: ${adjusted.radiusX}, radiusY: ${adjusted.radiusY}<br>`;
+                        }
+                    }
+                }
+            });
+        }
+
+        async function sendParamGray() {
+            //const rois = canvas.getObjects().filter(obj => obj.type === 'rect' || obj.type === 'circle').map(getAdjustedCoordinates);
+            
+
+            // Obter valores de contraste, brilho, gamma ,exposicao
+            let contrastValue = document.getElementById('contrast').value;
+            let brightnessValue = document.getElementById('brightness').value;
+            let gammaValue = document.getElementById('gamma').value;
+            let exposureValue = document.getElementById('exposure').value;
+
+            const adjustments = {
+                contrast: contrastValue,
+                brightness: brightnessValue,
+                gamma: gammaValue,
+                exposure: exposureValue,
+            };
+
+            await fetch('/set_adjustments', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(adjustments),
+            });
+        }
+
+        async function receiveData() {
+            const response = await fetch('/config');
+            const data = await response.json();
+
+            canvas.clear();
+            await fetchImage();
+
+            data.rois.forEach(roi => {
+                if (roi.width && roi.height) {
+                    const rect = new fabric.Rect({
+                        left: roi.x * imageScaleX,
+                        top: roi.y * imageScaleY,
+                        width: roi.width * imageScaleX,
+                        height: roi.height * imageScaleY,
+                        fill: 'rgba(255, 0, 0, 0.1)',
+                        stroke: 'lime',
+                        strokeWidth: 2,
+                    });
+                    canvas.add(rect);
+                } else if (roi.radiusX && roi.radiusY) {
+                    const circle = new fabric.Circle({
+                        left: (roi.centerX - roi.radiusX) * imageScaleX,
+                        top: (roi.centerY - roi.radiusY) * imageScaleY,
+                        radius: roi.radiusX * imageScaleX,
+                        fill: 'rgba(255, 0, 0, 0.1)',
+                        stroke: 'lime',
+                        strokeWidth: 2,
+                    });
+                    canvas.add(circle);
+                }
+            });
+            updateCoordinates();
+        }
+
+        function deleteAllROIs() {
+            const rois = canvas.getObjects().filter(obj => obj.type === 'rect' || obj.type === 'circle');
+            rois.forEach(roi => canvas.remove(roi));
+            updateCoordinates();
+        }
+
+        function zoomIn() {
+            canvas.setZoom(canvas.getZoom() * 1.1);
+        }
+
+        function zoomOut() {
+            canvas.setZoom(canvas.getZoom() / 1.1);
+        }
+
+        function resetZoom() {
+            canvas.setZoom(1);
+        }
+
+        // Configure a URL do servidor Flask
+        //const SERVER_URL = 'http://127.0.0.1:6001';
+        //const CARREGAR_IMAGEM_DINAMICA = 'http://127.0.0.1:5001';
+        
+        async function CapturarReference(){
+            
+            //const response = await fetch(`${SERVER_URL}/capture_reference`);
+            try {
+                 // Adicionar seleção de programa
+                const selectedProgram = document.getElementById('programa-section').value;
+                const selectedValue = parseInt(selectedProgram,10); // Converte para número
+                const response = await fetch(`${SERVER_URL}/capture_reference`, {
+                    method: 'POST', // Define o método como POST
+                    headers: {
+                        'Content-Type': 'application/json', // Especifica que o corpo é JSON
+                    },
+                    body: JSON.stringify({ programa: selectedValue }) // Inclui o dado no corpo da requisição
+                });
+                if (!response.ok) {
+                 throw new Error(`Erro na solicitação: ${response.status}`);
+                }
+                else{
+                    const coordinatesDiv = document.getElementById('coordinates');
+                    coordinatesDiv.innerHTML = '<strong></strong><br>';
+                    coordinatesDiv.innerHTML = '<strong>Imagem POSITIVA criada com sucesso!</strong><br>';
+                }
+            fetchImage();
+            count_OK_files();
+           
+            //receiveData();
+            } catch (error) {
+                resultsContainer.innerHTML = 'Erro ao carregar os dados!';
+                console.error(error);
+            }
+
+        }
+
+        async function DelReferenceOK(){
+            
+            //const response = await fetch(`${SERVER_URL}/capture_reference`);
+            try {
+                 // Adicionar seleção de programa
+                const selectedProgram = document.getElementById('programa-section').value;
+                const selectedValue = parseInt(selectedProgram,10); // Converte para número
+                const response = await fetch(`${SERVER_URL}/delete_references_ok`, {
+                    method: 'POST', // Define o método como POST
+                    headers: {
+                        'Content-Type': 'application/json', // Especifica que o corpo é JSON
+                    },
+                    body: JSON.stringify({ programa: selectedValue }) // Inclui o dado no corpo da requisição
+                });
+                if (!response.ok) {
+                 throw new Error(`Erro na solicitação: ${response.status}`);
+                }
+                else{
+                    const coordinatesDiv = document.getElementById('coordinates');
+                    coordinatesDiv.innerHTML = '<strong></strong><br>';
+                    coordinatesDiv.innerHTML = '<strong>Imagens OK apagadas com sucesso!</strong><br>';
+                }
+            //fetchImage();
+            count_OK_files();
+            
+            } catch (error) {
+                resultsContainer.innerHTML = 'Erro ao carregar os dados!';
+                console.error(error);
+            }
+
+        }
+
+        async function count_OK_files() {
+            const selectedProgram = document.getElementById('programa-section').value;
+            const selectedValue = parseInt(selectedProgram, 10);
+            const deleteOKLabel = document.getElementById("deleteOKLabel");
+            
+            try {
+                // Requisição para contar arquivos OK (GET)
+                const response = await fetch(`${SERVER_URL}/count_ok_files/${selectedValue}`);
+                
+                if (!response.ok) {
+                    throw new Error(`Erro na solicitação: ${response.status}`);
+                }
+                
+                const data = await response.json(); // Extrai os dados JSON da resposta
+                
+                // Atualiza a label com a contagem
+                if(`${data.count}` == "0"){
+                    deleteOKLabel.textContent = "Pendente criar imagem OK" ; 
+                }
+                 else{
+                    deleteOKLabel.textContent = `${data.count}`;
+                 }
+               
+                
+                // Opcional: Log dos arquivos encontrados (para debug)
+                console.log("Arquivos encontrados:", data.matching_files);
+                
+            } catch (error) {
+                deleteOKLabel.textContent = "Erro ao contar arquivos OK!";
+                console.error("Falha na requisição:", error);
+            }
+        }
+        async function count_NOK_files() {
+            const selectedProgram = document.getElementById('programa-section').value;
+            const selectedValue = parseInt(selectedProgram, 10);
+            const deleteNOKLabel = document.getElementById("deleteNOKLabel");
+            
+            try {
+                // Requisição para contar arquivos OK (GET)
+                const response = await fetch(`${SERVER_URL}/count_nok_files/${selectedValue}`);
+                
+                if (!response.ok) {
+                    throw new Error(`Erro na solicitação: ${response.status}`);
+                }
+                
+                const data = await response.json(); // Extrai os dados JSON da resposta
+                
+                // Atualiza a label com a contagem
+                if(`${data.count}` == "0"){
+                    deleteNOKLabel.textContent = "Pendente criar imagem NOK" ; 
+                }
+                 else{
+                    deleteNOKLabel.textContent = `${data.count}`;
+                 }
+               
+                
+                // Opcional: Log dos arquivos encontrados (para debug)
+                console.log("Arquivos encontrados:", data.matching_files);
+                
+            } catch (error) {
+                deleteNOKLabel.textContent = "Erro ao contar arquivos OK!";
+                console.error("Falha na requisição:", error);
+            }
+        }
+
+
+        async function DelReferenceNOK(){
+            
+            //const response = await fetch(`${SERVER_URL}/capture_reference`);
+            try {
+                 // Adicionar seleção de programa
+                const selectedProgram = document.getElementById('programa-section').value;
+                const selectedValue = parseInt(selectedProgram,10); // Converte para número
+                const response = await fetch(`${SERVER_URL}/delete_references_nok`, {
+                    method: 'POST', // Define o método como POST
+                    headers: {
+                        'Content-Type': 'application/json', // Especifica que o corpo é JSON
+                    },
+                    body: JSON.stringify({ programa: selectedValue }) // Inclui o dado no corpo da requisição
+                });
+                if (!response.ok) {
+                 throw new Error(`Erro na solicitação: ${response.status}`);
+                }
+                else{
+                    const coordinatesDiv = document.getElementById('coordinates');
+                    coordinatesDiv.innerHTML = '<strong></strong><br>';
+                    coordinatesDiv.innerHTML = '<strong>Imagens NOK apagadas com sucesso!</strong><br>';
+                }
+            //fetchImage();
+            count_NOK_files();
+            } catch (error) {
+                resultsContainer.innerHTML = 'Erro ao carregar os dados!';
+                console.error(error);
+            }
+
+        }
+
+
+        async function CapturarReference_NOK(){
+            
+            //const response = await fetch(`${SERVER_URL}/capture_reference`);
+            try {
+                 // Adicionar seleção de programa
+                const selectedProgram = document.getElementById('programa-section').value;
+                const selectedValue = parseInt(selectedProgram,10); // Converte para número
+                const response = await fetch(`${SERVER_URL}/capture_reference_NOK`, {
+                    method: 'POST', // Define o método como POST
+                    headers: {
+                        'Content-Type': 'application/json', // Especifica que o corpo é JSON
+                    },
+                    body: JSON.stringify({ programa: selectedValue }) // Inclui o dado no corpo da requisição
+                });
+                if (!response.ok) {
+                 throw new Error(`Erro na solicitação: ${response.status}`);
+                }
+                else{
+                    const coordinatesDiv = document.getElementById('coordinates');
+                    coordinatesDiv.innerHTML = '<strong></strong><br>';
+                    coordinatesDiv.innerHTML = '<strong>Imagem NEGATIVA criada com sucesso!</strong><br>';
+                }
+            fetchImage();
+            count_NOK_files();
+            //receiveData();
+            } catch (error) {
+                resultsContainer.innerHTML = 'Erro ao carregar os dados!';
+                console.error(error);
+            }
+
+        }
+        
+        
+         // Substituir endpoints pelos definidos no servidor Flask
+         async function Executar() {
+            const selectedProgram = document.getElementById('programa-section').value;
+            const selectedValue = parseInt(selectedProgram,10); // Converte para número
+            const resultsContainer = document.getElementById('results');
+            resultsContainer.innerHTML = 'Carregando...';
+            let ExecStatus = true;
+            try {
+                const response = await fetch(`${SERVER_URL}/executar`, {
+                    method: 'POST', // Define o método como POST
+                    headers: {
+                        'Content-Type': 'application/json', // Especifica que o corpo é JSON
+                    },
+                    body: JSON.stringify({ programa: selectedValue}) // Inclui o dado no corpo da requisição
+                });
+                if (!response.ok) {
+                 throw new Error(`Erro na solicitação: ${response.status}`);
+                }
+                
+                
+                const data = await response.json();
+
+                resultsContainer.innerHTML = ''; // Limpa resultados anteriores
+                   
+                fetchImage();
+                receiveData();
+                 // Label para status       
+                data.rois_data.forEach(roi => {
+                    const textura_on = roi.textura_ativo
+                    const cor_on = roi.cor_ativo
+                    const pixel_on = roi.pixel_ativo
+                    const forma = roi.forma
+                    const parafuso_on = roi.parafuso_ativo
+                    const posicao_on =  roi.posicao_ativo
+                    const ponto_xy_on = roi.ponto_xy_ativo
+
+                    const resultDiv = document.createElement('div');
+                    resultDiv.classList.add('input-field');
+
+                    // Label da ROI
+                    const roiLabel = document.createElement('label');
+                    roiLabel.classList.add('label-title');
+                    roiLabel.textContent = `ROI${roi.roi_index}: `;
+                    roiLabel.style.fontWeight = 'bold'; // Texto em negrito
+                    resultDiv.appendChild(roiLabel);
+                    
+                    if(pixel_on){
+                    // Label e input para média ROI
+                    const mediaRoiLabel = document.createElement('label');
+                    mediaRoiLabel.classList.add('label-title');
+                    mediaRoiLabel.textContent = 'Media Pixel: ';
+                    mediaRoiLabel.style.marginLeft = '50px'; // Margem à esquerda de 10px
+                    resultDiv.appendChild(mediaRoiLabel);
+
+                    const mediaRoiInput = document.createElement('input');
+                    mediaRoiInput.type = 'text';
+                    mediaRoiInput.style.color = 'white';
+                    mediaRoiInput.value = roi.media_roi;
+                    mediaRoiInput.readOnly = true;
+                    if(roi.pixel_status){
+                        mediaRoiInput.classList.add('status-ok');
+                    }
+                    else{
+                        mediaRoiInput.classList.add('status-nok');
+                    }
+                    mediaRoiInput.style.width = '50px'; // largura
+                    mediaRoiInput.style.height = '20px'; // altura
+                    resultDiv.appendChild(mediaRoiInput);
+                    }
+                    
+                    if(textura_on){
+                    // Label e input para média textura
+                    const mediaTexturaLabel = document.createElement('label');
+                    mediaTexturaLabel.classList.add('label-title');
+                    mediaTexturaLabel.textContent = 'Media Textura: ';
+                    mediaTexturaLabel.style.marginLeft = '10px'; // Margem à esquerda de 10px
+                    resultDiv.appendChild(mediaTexturaLabel);
+
+                    const mediaTexturaInput = document.createElement('input');
+                    mediaTexturaInput.type = 'text';
+                    mediaTexturaInput.style.color = 'white';
+                    mediaTexturaInput.value = roi.media_textura;
+                    mediaTexturaInput.readOnly = true;
+                    if(roi.textura_status){
+                        mediaTexturaInput.classList.add('status-ok');
+                    }
+                    else{
+                        mediaTexturaInput.classList.add('status-nok');
+                    }
+                    mediaTexturaInput.style.width = '50px'; // largura
+                    mediaTexturaInput.style.height = '20px'; // altura
+                    resultDiv.appendChild(mediaTexturaInput);
+                     }
+                     
+                    if(parafuso_on){
+                    // Label e input para Parafuso
+                    const parafusoLabel = document.createElement('label');
+                    parafusoLabel.classList.add('label-title');
+                    parafusoLabel.textContent = 'Parafuso: ';
+                    parafusoLabel.style.marginLeft = '10px'; // Margem à esquerda de 10px
+                    resultDiv.appendChild(parafusoLabel);
+
+                    const parafusoInput = document.createElement('input');
+                    parafusoInput.type = 'text';
+                    parafusoInput.style.color = 'white';
+                    parafusoInput.value = roi.parafuso;
+                    parafusoInput.readOnly = true;
+                    if(roi.parafuso){
+                        parafusoInput.classList.add('status-ok');
+                    }
+                    else{
+                        parafusoInput.classList.add('status-nok');
+                    }
+                    parafusoInput.style.width = '50px'; // largura
+                    parafusoInput.style.height = '20px'; // altura
+                    resultDiv.appendChild(parafusoInput);
+
+                    const parafusoX = document.createElement('input');
+                    parafusoX.type = 'text';
+                    parafusoX.style.color = 'white';
+                    parafusoX.style.backgroundColor = 'black';
+                    parafusoX.value = roi.ponto_x;
+                    parafusoX.readOnly = true;
+                    parafusoX.style.width = '40px'; // largura
+                    parafusoX.style.height = '20px'; // altura
+                    resultDiv.appendChild(parafusoX);
+
+                    const parafusoY = document.createElement('input');
+                    parafusoY.type = 'text';
+                    parafusoY.style.color = 'white';
+                    parafusoY.style.backgroundColor = 'black';
+                    parafusoY.value = roi.ponto_y;
+                    parafusoY.readOnly = true;
+                    parafusoY.style.width = '40px'; // largura
+                    parafusoY.style.height = '20px'; // altura
+                    resultDiv.appendChild(parafusoY);
+                     }
+
+                     if(ponto_xy_on){
+                        // Label e input para Ponto de parafusamento
+                        const pontoLabel = document.createElement('label');
+                        pontoLabel.classList.add('label-title');
+                        pontoLabel.textContent = 'Ponto: ';
+                        pontoLabel.style.marginLeft = '10px'; // Margem à esquerda de 10px
+                        resultDiv.appendChild(pontoLabel);
+    
+                        const pontoInput = document.createElement('input');
+                        pontoInput.type = 'text';
+                        pontoInput.style.color = 'white';
+                        pontoInput.value = roi.ponto_xy;
+                        pontoInput.readOnly = true;
+                        if(roi.ponto_xy){
+                            pontoInput.classList.add('status-ok');
+                        }
+                        else{
+                            pontoInput.classList.add('status-nok');
+                        }
+                        pontoInput.style.width = '50px'; // largura
+                        pontoInput.style.height = '20px'; // altura
+                        resultDiv.appendChild(pontoInput);
+    
+                        const pontoX = document.createElement('input');
+                        pontoX.type = 'text';
+                        pontoX.style.color = 'white';
+                        pontoX.style.backgroundColor = 'black';
+                        pontoX.value = roi.ponto_x;
+                        pontoX.readOnly = true;
+                        pontoX.style.width = '40px'; // largura
+                        pontoX.style.height = '20px'; // altura
+                        resultDiv.appendChild(pontoX);
+    
+                        const pontoY = document.createElement('input');
+                        pontoY.type = 'text';
+                        pontoY.style.color = 'white';
+                        pontoY.style.backgroundColor = 'black';
+                        pontoY.value = roi.ponto_y;
+                        pontoY.readOnly = true;
+                        pontoY.style.width = '40px'; // largura
+                        pontoY.style.height = '20px'; // altura
+                        resultDiv.appendChild(pontoY);
+                    }
+
+                     if(posicao_on){
+                        // Label e input para Posicao
+                        const posicaoLabel = document.createElement('label');
+                        posicaoLabel.classList.add('label-title');
+                        posicaoLabel.textContent = 'Posicao: ';
+                        posicaoLabel.style.marginLeft = '10px'; // Margem à esquerda de 10px
+                        resultDiv.appendChild(posicaoLabel);
+    
+                        const posicaoInput = document.createElement('input');
+                        posicaoInput.type = 'text';
+                        posicaoInput.style.color = 'white';
+                        posicaoInput.value = roi.posicao;
+                        posicaoInput.readOnly = true;
+                        if(roi.posicao){
+                            posicaoInput.classList.add('status-ok');
+                        }
+                        else{
+                            posicaoInput.classList.add('status-nok');
+                        }
+                        posicaoInput.style.width = '50px'; // largura
+                        posicaoInput.style.height = '20px'; // altura
+                        resultDiv.appendChild(posicaoInput);
+                    }
+                     
+
+                    
+                     if(cor_on){
+                    // Label e input para Cor
+                    const corStatusLabel = document.createElement('label');
+                    corStatusLabel.classList.add('label-title');
+                    corStatusLabel.textContent = 'Cor Status: ';
+                    corStatusLabel.style.marginLeft = '10px'; // Margem à esquerda de 10px
+                    resultDiv.appendChild(corStatusLabel);
+                    
+
+                    const corStatusInput = document.createElement('input');
+                    corStatusInput.type = 'text';
+                    corStatusInput.style.color = 'white';
+                    corStatusInput.value = roi.cor_status;
+                    corStatusInput.readOnly = true;
+                    if(roi.cor_status){
+                        corStatusInput.classList.add('status-ok');
+                    }
+                    else{
+                        corStatusInput.classList.add('status-nok');
+                    }
+
+                    // Definir tamanho da caixa de entrada
+                    corStatusInput.style.width = '50px'; // largura
+                    corStatusInput.style.height = '20px'; // altura
+                    
+                    resultDiv.appendChild(corStatusInput);
+                     }
+                   
+                    const statusLabel = document.createElement('span');
+                    statusLabel.classList.add('status-label');
+                    if (roi.status) {
+                        statusLabel.textContent = 'OK';
+                        statusLabel.classList.add('status-ok');
+                        statusLabel.style.marginLeft = '50px'; // Margem à esquerda de 10px
+                        
+                    } else {
+                        statusLabel.textContent = 'NOK';
+                        statusLabel.classList.add('status-nok');
+                        statusLabel.style.marginLeft = '50px'; // Margem à esquerda de 10px
+                        if(ExecStatus == true)ExecStatus = false
+                        
+                        if(ExecStatus == false){
+
+                            document.getElementById('roi-section').value = `ROI${roi.roi_index}`;
+                            fetchImage();
+                            receiveData();
+                            if(forma =="retangulo"){
+                                changeRectangleColor(retanguloRef, 'rgba(0, 0, 255, 0.3)', 'yellow'); 
+                             }
+                             else{
+                                changeCircleColor(circuloRef, 'rgba(0, 0, 255, 0.3)', 'yellow'); 
+                             }
+
+                        }
+                       
+
+                     
+                    }
+
+
+                    resultDiv.appendChild(statusLabel);
+
+                    resultsContainer.appendChild(resultDiv);
+                });
+                
+            } catch (error) {
+                resultsContainer.innerHTML = 'Erro ao carregar os dados!';
+                console.error(error);
+            }
+        }
+
+
+        // Substituir endpoints pelos definidos no servidor Flask
+        async function fetchImage() {
+            //const response = await fetch(`${SERVER_URL}/image`);
+            const response = await fetch(`${SERVER_URL}/capture`);
+            const imageBlob = await response.blob(); // Obter o blob da imagem
+            const imageUrl = URL.createObjectURL(imageBlob); // Criar uma URL para o blob da imagem      
+
+            await loadImage(imageUrl); // Carregar a imagem no canvas// Definir a imagem como plano de fundo
+           
+        }
+
+         // Retorna a imagem tom de cinza.
+         async function fetchImageGray() {
+            //const response = await fetch(`${SERVER_URL}/image`);
+
+            const selectedProgram = document.getElementById('programa-section').value;
+
+            //const response = await fetch(`${SERVER_URL}/processWithImage`);
+
+            const response = await fetch(`${SERVER_URL}/processWithImage?programa=${encodeURIComponent(selectedProgram)}`);
+            const imageBlob = await response.blob(); // Obter o blob da imagem
+            const imageUrl = URL.createObjectURL(imageBlob); // Criar uma URL para o blob da imagem      
+
+            await loadImage(imageUrl); // Carregar a imagem no canvas// Definir a imagem como plano de fundo
+           
+        }
+
+        async function sendData() {
+            // Obter as ROIs ajustadas
+            const rois = canvas.getObjects()
+                .filter(obj => obj.type === 'rect' || obj.type === 'circle')
+                .map(obj => {
+                    const adjusted = getAdjustedCoordinates(obj);
+
+                    if(obj.type === 'rect'){
+                    return {
+                        
+                        x: parseInt(adjusted.x),
+                        y: parseInt(adjusted.y),
+                        width: parseInt(adjusted.width),
+                        height: parseInt(adjusted.height),
+                    };
+                  }else{
+                    return {
+                        
+                        x: parseInt(adjusted.centerX),
+                        y: parseInt(adjusted.centerY),
+                        width: parseInt(adjusted.radiusX),
+                        height: parseInt(adjusted.radiusY),
+                    };
+                  }
+                });
+
+            // Garantir que pelo menos uma ROI está presente
+            if (rois.length === 0) {
+                alert("Nenhuma ROI encontrada para envio.");
+                return;
+            }
+
+            // Selecionar a última ROI criada (ou outro critério, se necessário)
+            const roi = rois[rois.length - 1];
+
+            // Obter valores de contraste, brilho, gamma ,exposicao
+            let contrastValue = document.getElementById('contrast').value;
+            let brightnessValue = document.getElementById('brightness').value;
+            let gammaValue = document.getElementById('gamma').value;
+            let exposureValue = document.getElementById('exposure').value;
+
+            // Adicionar seleção de seção ROI (ex: ROI1, ROI2, ROI3)
+            const selectedSection = document.getElementById('roi-section').value;
+
+           
+            // Garantir que a seção foi selecionada
+            if (!selectedSection) {
+                alert("Por favor, selecione uma seção de ROI.");
+                return;
+            }
+
+            // Ajustes de imagem
+            const adjustments = {
+                contrast: contrastValue, // Valores ajustáveis
+                brightness: brightnessValue,
+                gamma: gammaValue,
+                exposure: exposureValue,
+                roi: {
+                    section: selectedSection, // Adiciona a seção selecionada
+                    ...roi,
+                },
+            };
+
+            try {
+
+                const selectedProgram = document.getElementById('programa-section').value;
+
+                // Adiciona o programa dentro do objeto adjustments
+                const requestData = {
+                    programa: selectedProgram,
+                    ...adjustments // Mantém os outros ajustes já existentes
+                };
+
+                const response = await fetch(`${SERVER_URL}/config`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(requestData),
+                });
+
+                if (!response.ok) {
+                    const errorMessage = await response.text();
+                    console.error("Erro ao enviar dados:", errorMessage);
+                    alert("Erro ao enviar dados. Verifique o console para mais detalhes.");
+                } else {
+                    const coordinatesDiv = document.getElementById('coordinates');
+                    coordinatesDiv.innerHTML = '<strong>Dados enviados com sucesso!</strong><br>';
+                }
+            } catch (error) {
+                console.error("Erro de comunicação com o servidor:", error);
+                alert("Erro ao conectar ao servidor.");
+            }
+        }
+
+        
+        const brightnessSelect = document.getElementById('brightness');
+        const gammaSelect = document.getElementById('gamma');
+        const exposureSelect = document.getElementById('exposure');     
+        const contrastSelect = document.getElementById('contrast');
+        const programaSelect = document.getElementById('programa-section')
+
+        gammaSelect.addEventListener('change', handleGammaChange);
+        brightnessSelect.addEventListener('change', handleBrightnessChange);
+        contrastSelect.addEventListener('change', handleContrastChange);
+        exposureSelect.addEventListener('change', handleExposureChange);
+
+        programaSelect.addEventListener('change', handleProgramaChange);
+        function handleProgramaChange() {
+            count_OK_files();
+            count_NOK_files(); 
+            receiveData();
+            getNomePrograma();
+           
+        }
+        
+        function handleGammaChange() {
+            
+            sendDataGray();
+            fetchImageGray() ;
+            const coordinatesDiv = document.getElementById('coordinates');
+            coordinatesDiv.innerHTML = '<strong> Gamma enviado com sucesso!</strong><br>';
+            // suaFuncao(contrastValue);
+        }
+
+        function handleExposureChange() {
+            
+            sendDataGray();
+            fetchImageGray() 
+            const coordinatesDiv = document.getElementById('coordinates');
+            coordinatesDiv.innerHTML = '<strong>Exposure enviado com sucesso!</strong><br>';
+            // suaFuncao(contrastValue);
+        }
+
+
+
+
+        function handleBrightnessChange() {
+            
+            sendDataGray();
+            fetchImageGray() ;
+            const coordinatesDiv = document.getElementById('coordinates');
+            coordinatesDiv.innerHTML = '<strong> Brilho enviado com sucesso!</strong><br>';
+            // suaFuncao(contrastValue);
+        }
+
+        function handleContrastChange() {
+            
+            sendDataGray();
+            fetchImageGray() 
+            const coordinatesDiv = document.getElementById('coordinates');
+            coordinatesDiv.innerHTML = '<strong>Constraste enviado com sucesso!</strong><br>';
+            // suaFuncao(contrastValue);
+        }
+
+
+
+        async function sendDataGray() {
+          
+            
+
+            // Obter valores de contraste, brilho, gamma ,exposicao
+            let contrastValue = document.getElementById('contrast').value;
+            let brightnessValue = document.getElementById('brightness').value;
+            let gammaValue = document.getElementById('gamma').value;
+            let exposureValue = document.getElementById('exposure').value;
+
+            // Adicionar seleção de seção ROI (ex: ROI1, ROI2, ROI3)
+            const selectedSection = document.getElementById('roi-section').value;
+
+           
+            // Garantir que a seção foi selecionada
+            if (!selectedSection) {
+                alert("Por favor, selecione uma seção de ROI.");
+                return;
+            }
+
+            // Ajustes de imagem
+            const adjustments = {
+                contrast: contrastValue, // Valores ajustáveis
+                brightness: brightnessValue,
+                gamma: gammaValue,
+                exposure: exposureValue,
+               
+            };
+
+            try {
+
+                const selectedProgram = document.getElementById('programa-section').value;
+
+                // Adiciona o programa dentro do objeto adjustments
+                const requestData = {
+                    programa: selectedProgram,
+                    ...adjustments // Mantém os outros ajustes já existentes
+                };
+
+                const response = await fetch(`${SERVER_URL}/config`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(requestData),
+                });
+
+                if (!response.ok) {
+                    const errorMessage = await response.text();
+                    console.error("Erro ao enviar dados:", errorMessage);
+                    alert("Erro ao enviar dados. Verifique o console para mais detalhes.");
+                } else {
+                    const coordinatesDiv = document.getElementById('coordinates');
+                    coordinatesDiv.innerHTML = '<strong>Dados enviados com sucesso!</strong><br>';
+                }
+            } catch (error) {
+                console.error("Erro de comunicação com o servidor:", error);
+                alert("Erro ao conectar ao servidor.");
+            }
+        }
+
+
+        async function sendRegiaoLocalizador() {
+            // Obter as ROIs ajustadas
+            const rois = canvas.getObjects()
+                .filter(obj => obj.type === 'rect' || obj.type === 'circle')
+                .map(obj => {
+                    const adjusted = getAdjustedCoordinates(obj);
+
+                    if(obj.type === 'rect'){
+                    return {
+                        
+                        x: parseInt(adjusted.x),
+                        y: parseInt(adjusted.y),
+                        width: parseInt(adjusted.width),
+                        height: parseInt(adjusted.height),
+                    };
+                  }else{
+                    return {
+                        
+                        x: parseInt(adjusted.centerX),
+                        y: parseInt(adjusted.centerY),
+                        width: parseInt(adjusted.radiusX),
+                        height: parseInt(adjusted.radiusY),
+                    };
+                  }
+                });
+
+            // Garantir que pelo menos uma ROI está presente
+            if (rois.length === 0) {
+                alert("Nenhuma ROI encontrada para envio.");
+                return;
+            }
+
+            // Selecionar a última ROI criada (ou outro critério, se necessário)
+            const roi = rois[rois.length - 1];
+
+
+
+            // Ajustes de imagem
+            const adjustments = {
+                
+                roi: {
+                    
+                    ...roi,
+                },
+            };
+
+            try {
+                const response = await fetch(`${SERVER_URL}/config`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(adjustments),
+                });
+
+                if (!response.ok) {
+                    const errorMessage = await response.text();
+                    console.error("Erro ao enviar dados:", errorMessage);
+                    alert("Erro ao enviar dados. Verifique o console para mais detalhes.");
+                } else {
+                    const coordinatesDiv = document.getElementById('coordinates');
+                    coordinatesDiv.innerHTML = '<strong>Dados enviados com sucesso!</strong><br>';
+                }
+            } catch (error) {
+                console.error("Erro de comunicação com o servidor:", error);
+                alert("Erro ao conectar ao servidor.");
+            }
+        }
+        
+        let retanguloRef = null
+        let circuloRef = null
+        
+        async function receiveData() {
+            // Adicionar seleção de seção ROI (ex: ROI1, ROI2, ROI3)
+            await fetchImage();
+
+            const selectedProgram = document.getElementById('programa-section').value;
+            const selectedSection = document.getElementById('roi-section').value;
+            //const response = await fetch(`${SERVER_URL}/config?section=${selectedSection}`);
+            const response = await fetch(`${SERVER_URL}/config?programa=${encodeURIComponent(selectedProgram)}&section=${encodeURIComponent(selectedSection)}`);
+
+            if (!response.ok) {
+                console.error("Erro ao obter os dados do servidor:", await response.text());
+                return;
+            }
+
+            const data = await response.json();
+
+            // Log para depuração
+            console.log("Dados recebidos do servidor:", data);
+
+            // Atualizar os campos de brilho, contraste e gamma
+            document.getElementById('contrast').value = data.contrast;
+            document.getElementById('brightness').value = data.brightness;
+            document.getElementById('gamma').value = data.gamma;
+            document.getElementById('exposure').value = data.exposure;
+
+            // Verificar se existe uma propriedade 'roi'
+            if (data.roi) {
+                console.log("ROI detectado:", data.roi);
+
+                const roi = data.roi;
+                //canvas.clear();
+                
+
+                // Caso o ROI seja um retângulo
+                if (roi.width != roi.height) {
+                    const rect = new fabric.Rect({
+                        left: roi.x * imageScaleX,
+                        top: roi.y * imageScaleY,
+                        width: roi.width * imageScaleX,
+                        height: roi.height * imageScaleY,
+                        fill: 'rgba(255, 0, 0, 0.1)',
+                        stroke: 'lime',
+                        strokeWidth: 2,
+                    });
+                    
+                    retanguloRef = rect; 
+                   
+                    canvas.add(rect);
+                } else if (roi.width == roi.height) {
+                    const circle = new fabric.Circle({
+                        left: (roi.x - roi.width) * imageScaleX,
+                        top: (roi.y - roi.height) * imageScaleY,
+                        radius: roi.width * imageScaleX,
+                        fill: 'rgba(255, 0, 0, 0.1)',
+                        stroke: 'lime',
+                        strokeWidth: 2,
+                    });
+                    circuloRef =circle
+                   
+                    canvas.add(circle);
+                    
+                }
+
+                updateCoordinates();
+            } else {
+                console.warn("Nenhuma ROI encontrada na resposta.");
+            }
+        }
+
+        // Função para abrir a janela pop-up com o vídeo ao vivo
+        function AoVivo() {
+            const videoFeedUrl = `${SERVER_URL}/video_feed`; 
+            //const videoFeedUrl = 'http://127.0.0.1:6001/video_feed';
+            const width = 800;
+            const height = 600;
+            const left = (screen.width - width) / 2;
+            const top = (screen.height - height) / 2;
+            window.open(
+                videoFeedUrl,
+                'VideoAoVivo',
+                `width=${width},height=${height},left=${left},top=${top},resizable=no,scrollbars=no`
+            );
+        }
+
+        // Função para reboot o controlador
+        async function reboot() {
+            try {
+                const response = await fetch(`${SERVER_URL}/reboot`, {
+                    method: "POST", // Especificando o método correto
+                    headers: {
+                        "Content-Type": "application/json"
+                    }
+                });
+        
+                if (!response.ok) {
+                    console.error("Erro ao obter os dados do servidor:", await response.text());
+                    return;
+                }
+        
+                console.log("Requisição enviada com sucesso:", await response.json());
+            } catch (error) {
+                console.error("Erro ao realizar a requisição:", error);
+            }
+        }
+        
+        
+        // Função para abrir o popup
+        function ajustarLimites() {
+            // URL da página que será aberta no popup
+
+            const selectedProgram = document.getElementById('programa-section').value;
+           
+            const caminho = "{{ url_for('limites') }}?programa=" + encodeURIComponent(selectedProgram);
+
+            // Configurações do popup
+            const largura = 1000;
+            const altura = 800;
+            const left = (window.innerWidth - largura) / 2; // Centraliza horizontalmente
+            const top = (window.innerHeight - altura) / 2; // Centraliza verticalmente
+
+            // Abre o popup
+            window.open(
+                caminho, // URL da página
+                'Popup', // Nome da janela (opcional)
+                `width=${largura},height=${altura},left=${left},top=${top},resizable=no,scrollbars=no` // Configurações
+            );
+        }
+
+        // Função para abrir o popup e passar o programa selecionado
+        function ajustarPosicaoLocalizador() {
+            // Obtém o valor do programa selecionado
+            const selectedProgram = document.getElementById('programa-section').value;
+
+            // URL da página que será aberta no popup com o programa como parâmetro
+            const caminho = "{{ url_for('localizador') }}?programa=" + encodeURIComponent(selectedProgram);
+
+            // Configurações do popup
+            const largura = 1000;
+            const altura = 900;
+            const left = (window.innerWidth - largura) / 2; // Centraliza horizontalmente
+            const top = (window.innerHeight - altura) / 2; // Centraliza verticalmente
+
+            // Abre o popup com o programa na query string
+            window.open(
+                caminho, // URL com o parâmetro
+                'Popup', // Nome da janela (opcional)
+                `width=${largura},height=${altura},left=${left},top=${top},resizable=no,scrollbars=no` // Configurações
+            );
+        }
+
+        async function getNomePrograma() {
+
+            const selectedProgram = document.getElementById('programa-section').value;
+
+            const response_2 = await fetch(`${SERVER_URL}/ferramentas?programa=${encodeURIComponent(selectedProgram)}`);
+           
+
+            if (!response_2.ok) {
+                console.error("Erro ao obter os dados do servidor:", await response_2.text());
+                return;
+            }
+
+            const data_2 = await response_2.json();
+             
+            document.getElementById("label-programa").textContent = data_2.nome_programa;
+           
+        }
+
+
+        document.getElementById('roi-section').value = "ROI1";
+        document.getElementById('programa-section').value = "1";
+        // Carregar a imagem inicial ao carregar a página
+        getNomePrograma();
+        fetchImage();
+        receiveData();
+       
+        count_OK_files();
+        count_NOK_files();
+    </script>
+    
+</body>
+</html>
+

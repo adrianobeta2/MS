@@ -1,0 +1,76 @@
+
+
+def open_camera(src):
+    # Câmera IP (RTSP)
+    if src.startswith("rtsp://"):
+        return cv2.VideoCapture(src, cv2.CAP_FFMPEG)
+
+    # Webcam / CSI
+    if src.startswith("/dev/"):
+        cap = cv2.VideoCapture(src, cv2.CAP_V4L2)
+        cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
+        return cap
+
+    # Fallback (segurança)
+    return cv2.VideoCapture(src)
+
+def webcam_watchdog_loop(cam_id):
+    while True:
+        cam_data = cameras_web[cam_id]
+
+        if cam_data.get("ociosa", False):
+            time.sleep(3)
+            continue
+
+        try:
+            print(f"[WATCHDOG WEBCAM {cam_id}] Iniciando conexão...")
+            #camera = cv2.VideoCapture(cam_id)
+            #camera = cv2.VideoCapture(cam_id, cv2.CAP_FFMPEG)
+            #camera = cv2.VideoCapture(cam_id, cv2.CAP_V4L2) 
+            camera = open_camera(cam_id)
+            camera.set(cv2.CAP_PROP_BUFFERSIZE, 1)
+            camera.set(cv2.CAP_PROP_FPS, 16)
+
+            if not camera.isOpened():
+                print(f"[WATCHDOG WEBCAM {cam_id}] Não foi possível abrir a câmera.")
+                time.sleep(3)
+                continue
+
+            cam_data["camera"] = camera
+            cam_data["capture_thread_running"] = True
+
+            webcam_loop(cam_id)
+
+        except Exception as e:
+            print(f"[WATCHDOG WEBCAM {cam_id}] Erro: {e}")
+            cam_data["camera"] = None
+            cam_data["capture_thread_running"] = False
+
+        time.sleep(3)
+
+
+def webcam_loop(cam_id):
+    cam_data = cameras_web[cam_id]
+    camera = cam_data["camera"]
+
+    while cam_data["capture_thread_running"] and camera.isOpened():
+        try:
+            ret, frame = camera.read()
+            if ret:
+                with cam_data["lock"]:
+                    frame = cv2.resize(frame, (TARGET_WIDTH, TARGET_HEIGHT), interpolation=cv2.INTER_AREA)
+                    cam_data["last_frame"] = frame.copy()
+                    # cam_data["ultima_atividade"] = datetime.now()  # deixe o controle externo
+
+            #time.sleep(0.03)
+
+        except Exception as e:
+            print(f"[CAPTURA WEBCAM {cam_id}] Erro: {e}")
+            cam_data["capture_thread_running"] = False
+            break
+
+    print(f"[CAPTURA WEBCAM {cam_id}] Thread finalizada.")
+
+
+
+

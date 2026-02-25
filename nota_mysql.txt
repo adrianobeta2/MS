@@ -1,0 +1,97 @@
+
+1- instalr o mysql
+
+sudo apt update
+sudo apt install mysql-server -y
+
+
+2- verificar se está rodando
+  systemctl status mysql
+
+3- acessar o mysql como root
+ sudo mysql -u root -p
+
+4- criar o banco 
+CREATE DATABASE reconhecimento_facial;
+
+5 - listar o banco para confirmar
+ SHOW DATABASES;
+
+6- usar o banco
+USE reconhecimento_facial;
+
+7- criar a tabela colaboradores
+
+CREATE TABLE colaboradores (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    matricula VARCHAR(20) NOT NULL UNIQUE,
+    nome VARCHAR(100) NOT NULL,
+    setor VARCHAR(100) NOT NULL,
+    funcao VARCHAR(100) NOT NULL,
+    caminho_imagem VARCHAR(255) NOT NULL,
+    caminho_embedding VARCHAR(255) NOT NULL,
+    data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+8- mostrar tabela
+SHOW TABLES;
+
+9- mostrar estrutura
+  DESCRIBE colaboradores;
+
+10 - criar o usuario sve
+CREATE USER 'sve'@'localhost' IDENTIFIED BY 'sve123#';
+GRANT ALL PRIVILEGES ON reconhecimento_facial.* TO 'sve'@'localhost';
+FLUSH PRIVILEGES;
+
+
+
+11 -Instalar o conector MySQL para Python
+pip install mysql-connector-python
+
+12 - Arquivo db.py (já preparado)
+
+import mysql.connector
+
+def get_db():
+    return mysql.connector.connect(
+        host="localhost",
+        user="sve",          
+        password="sve123#",     
+        database="reconhecimento_facial"
+    )
+
+
+
+
+92221258
+
+
+SELECT * FROM colaboradores;
+
+
+ DELETE FROM colaboradores WHERE matricula = '060818';
+
+
+ CREATE TABLE saudacoes_operadores (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    matricula VARCHAR(20) NOT NULL,
+    data DATE NOT NULL,
+    UNIQUE KEY uk_saudacao (matricula, data)
+);
+
+
+
+DELETE FROM saudacoes_operadores
+WHERE matricula = '289299'
+  AND data = '2026-02-06';
+
+
+correcao 
+UPDATE colaboradores
+SET matricula = '287695'
+WHERE matricula = '287695<';
+
+
+
+ 

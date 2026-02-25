@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Visão</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .status-label {
+            display: inline-block;
+            padding: 10px 20px;
+            border-radius: 5px;
+            color: white;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        .status-ok {
+            background-color: green;
+        }
+        .status-nok {
+            background-color: red;
+        }
+        .input-field {
+            margin-bottom: 20px;
+        }
+        .label-title {
+            font-weight: bold;
+            margin-right: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Sistema de Visão</h1>
+    <div>
+        <button id="executeButton">Executar</button>
+    </div>
+    <div id="results" style="margin-top: 20px;">
+        <!-- Resultados aparecerão aqui -->
+    </div>
+
+    <script>
+        document.getElementById('executeButton').addEventListener('click', async () => {
+            const resultsContainer = document.getElementById('results');
+            resultsContainer.innerHTML = 'Carregando...';
+
+            try {
+                const response = await fetch('http://127.0.0.1:6001/executar');
+                const data = await response.json();
+
+                resultsContainer.innerHTML = ''; // Limpa resultados anteriores
+
+                data.rois_data.forEach(roi => {
+                    const resultDiv = document.createElement('div');
+                    resultDiv.classList.add('input-field');
+
+                    // Label da ROI
+                    const roiLabel = document.createElement('label');
+                    roiLabel.classList.add('label-title');
+                    roiLabel.textContent = `ROI${roi.roi_index}: `;
+                    resultDiv.appendChild(roiLabel);
+
+                    // Label e input para média ROI
+                    const mediaRoiLabel = document.createElement('label');
+                    mediaRoiLabel.classList.add('label-title');
+                    mediaRoiLabel.textContent = 'Media ROI: ';
+                    resultDiv.appendChild(mediaRoiLabel);
+
+                    const mediaRoiInput = document.createElement('input');
+                    mediaRoiInput.type = 'text';
+                    mediaRoiInput.value = roi.media_roi;
+                    mediaRoiInput.readOnly = true;
+                    resultDiv.appendChild(mediaRoiInput);
+
+                    // Label e input para média textura
+                    const mediaTexturaLabel = document.createElement('label');
+                    mediaTexturaLabel.classList.add('label-title');
+                    mediaTexturaLabel.textContent = 'Media Textura: ';
+                    resultDiv.appendChild(mediaTexturaLabel);
+
+                    const mediaTexturaInput = document.createElement('input');
+                    mediaTexturaInput.type = 'text';
+                    mediaTexturaInput.value = roi.media_textura;
+                    mediaTexturaInput.readOnly = true;
+                    resultDiv.appendChild(mediaTexturaInput);
+
+                    // Label para status
+                    const statusLabel = document.createElement('span');
+                    statusLabel.classList.add('status-label');
+                    if (roi.status) {
+                        statusLabel.textContent = 'OK';
+                        statusLabel.classList.add('status-ok');
+                    } else {
+                        statusLabel.textContent = 'NOK';
+                        statusLabel.classList.add('status-nok');
+                    }
+
+                    resultDiv.appendChild(statusLabel);
+
+                    resultsContainer.appendChild(resultDiv);
+                });
+            } catch (error) {
+                resultsContainer.innerHTML = 'Erro ao carregar os dados!';
+                console.error(error);
+            }
+        });
+    </script>
+</body>
+</html>

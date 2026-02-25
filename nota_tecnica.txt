@@ -1,0 +1,412 @@
+entrar no servidor sve
+
+ssh imagem@192.168.1.100
+senha:imagem123#
+
+
+exemplo de copia de arquivo:
+
+ scp /home/adriano/Documentos/visionEmbarcado/templates sve@192.168.1.100:/home/sve/sve
+scp /home/adriano/Documentos/visionEmbarcado/static sve@192.168.1.100:/home/sve/sve
+scp /home/adriano/Documentos/visionEmbarcado/*.ini sve@192.168.1.100:/home/sve/sve
+
+scp -r /home/adriano/Documentos/visionEmbarcado/imagem_status_1.jpg sve@192.168.1.100:/home/sve/sve/
+scp -r /home/adriano/Documentos/visionEmbarcado/pylon-25.09.0_linux-aarch64_debs.tar.gz sve@192.168.1.100:/home/sve/sve/
+scp -r /home/adriano/Documentos/visionEmbarcado/angulo.py sve@192.168.1.100:/home/sve/sve/
+scp -r /home/adriano/Documentos/visionEmbarcado/monitorar_movimentos.py sve@192.168.1.100:/home/sve/sve/
+scp -r /home/adriano/Documentos/visionEmbarcado/centroPonto.py sve@192.168.1.100:/home/sve/
+scp -r /home/adriano/Documentos/visionEmbarcado/AnaliseParafuso.py sve@192.168.1.100:/home/sve/sve/
+scp -r /home/adriano/Documentos/visionEmbarcado/AnaliseTextura.py sve@192.168.1.100:/home/sve/sve/
+ scp -r /home/adriano/Documentos/visionEmbarcado/AnalisePixel.py sve@192.168.1.100:/home/sve/sve/
+scp -r /home/adriano/Documentos/visionEmbarcado/AnaliseCor.py sve@192.168.1.100:/home/sve/sve/
+
+scp -r /home/adriano/Documentos/visionEmbarcado/Localizador.py sve@192.168.1.100:/home/sve/sve/
+
+##inverso###
+scp "imagem@192.168.1.110:/home/imagem/Documentos/visionEmbarcado/templates/configuracoes quadrante.html" /home/adriano/Documentos/visionEmbarcado/templates
+scp "imagem@192.168.1.110:/home/imagem/Documentos/visionEmbarcado/servidor.py" /home/adriano/Documentos/visionEmbarcado/
+
+
+
+
+
+ no servidor :
+ 
+ - entre na pasta do sve
+ cd sve
+ 
+ - ative o ambiente:
+ source venv/bin/activate
+ 
+ - ativacao e status do flaskapp // inicializacao do serviço
+ sudo systemctl start flaskapp.service
+ sudo systemctl stop flaskapp.service
+ sudo systemctl status flaskapp.service
+ 
+ sudo nano /etc/systemd/system/flaskapp.service  // editar
+
+
+
+ ################## listar as cameras com o id do dispositivo ##################
+ ls -l /dev/v4l/by-id/
+
+
+
+
+ 
+
+
+
+ - verifica o status da tela incial:
+ sudo systemctl status tela_inicial.service
+ 
+ sudo systemctl start tela_inicial.service
+
+sudo systemctl stop tela_inicial.service
+
+sudo nano /etc/systemd/system/tela_inicial.service //editar
+
+systemctl daemon-reload
+
+
+ 
+ 
+ - comando para verificar o serial do raspberry:
+ cat /proc/cpuinfo | grep Serial | awk '{print $3}'
+
+
+ -  editar as configuracoes de servico da tela incial:
+ sudo nano /etc/systemd/system/tela_inicial.service
+ 
+ - entrar na pasta template
+ cd templates
+
+- static
+cd static // para configurar o ip  servidor
+
+
+
+ - dentro do raspberry, mas posso
+###########compilacao para proteger o arquivo############
+
+python -m py_compile servidor.py
+
+entre na pasta:
+cd __pycache__
+
+mover e renomear para a pasta sve:
+ mv __pycache__/servidor.cpython-311.pyc /home/imagem/sve/servidor.pyc
+ 
+
+
+ ################basler ###################################
+
+ 1 - apos baixar o pacote pylon-25.08.0_linux-x86_64_setup gz 
+
+ # Cria pasta temporária para extrair o setup
+mkdir ~/pylon_setup
+cd ~/pylon_setup
+
+
+#Extrair o arquivo tar.gz do setup
+ 
+tar -xzf ~/Downloads/pylon-*_setup.tar.gz
+
+ 
+ #Instalar o SDK em /opt/pylon
+sudo mkdir -p /opt/pylon
+sudo tar -C /opt/pylon -xzf ./pylon-*.tar.gz
+
+
+#ajuste permissao
+sudo chmod -R 755 /opt/pylon
+
+
+#configurar variaveis de ambiente
+export PYTHONPATH=/opt/pylon/lib64/python3:$PYTHONPATH
+export PATH=/opt/pylon/bin:$PATH
+export LD_LIBRARY_PATH=/opt/pylon/lib64:$LD_LIBRARY_PATH
+
+#recarregue o sheel
+source ~/.bashrc
+
+
+# instaler o pylon
+pip3 install pypylon
+
+ 
+ 2 - ########  permissao USB para camera basler ########
+
+ sudo nano /etc/udev/rules.d/99-basler.rules
+
+ # Cole no editor
+SUBSYSTEM=="usb", ATTR{idVendor}=="2676", MODE="0666"
+
+# recarregue as regras
+sudo udevadm control --reload-rules
+sudo udevadm trigger
+
+ 
+
+3 - ######## listar as cameras basler ########
+
+#lista cameras basler conectadas.
+
+http://127.0.0.1:6001/list_cameras
+
+http://192.168.1.100:6001/list_cameras
+
+
+
+#atualiza github
+git add .
+git commit -m "adicionado banco face id"
+git push origin main
+
+
+
+#reinstalar a biblioteca pypylon da basler
+pip install --force-reinstall pypylon
+
+
+
+######procedimento para instala o  face_recognition #####################
+
+sudo apt install cmake -y
+pip install dlib
+
+
+pip install --no-cache-dir git+https://github.com/ageitgey/face_recognition_models
+pip install --no-cache-dir face-recognition
+
+pip install --upgrade setuptools
+
+pip install face-recognition
+
+
+ 
+ 
+
+#####################serias raspberry###############
+
+serial raspberry spare 163d90eebde2841a
+serial op30 regio 
+serial s5 stellants 2bfa9f2a43fe3e38
+
+
+
+
+
+ #########################  instalacao tensorflow raspberry pi 5 #########################
+ sudo apt-get install libatlas-base-dev
+ pip install tensorflow==2.13.0
+ pip install keras==2.13.1
+ pip install "numpy==1.24.3" "scipy==1.10.1"
+ pip install h5py == 3.9.0
+
+#############################################################################################
+
+
+
+
+
+###########################jetson nano GPU CUDA ###########################################
+
+1 - instale Prerequisites and Dependencies:
+https://docs.nvidia.com/deeplearning/frameworks/install-tf-jetson-platform/index.html
+
+versao do tensorflow
+tensorflow-2.16.1+nv24.08-cp310-cp310-linux_aarch64.whl
+
+############################################################################################
+2- YOLO 8
+pip install ultralytics[export]
+
+sudo reboot
+
+pip install https://github.com/ultralytics/assets/releases/download/v0.0.0/torch-2.5.0a0+872d972e41.nv24.08-cp310-cp310-linux_aarch64.whl
+pip install https://github.com/ultralytics/assets/releases/download/v0.0.0/torchvision-0.20.0a0+afc54f7-cp310-cp310-linux_aarch64.whl
+
+corrigir Dependencias:
+wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/arm64/cuda-keyring_1.1-1_all.deb
+sudo dpkg -i cuda-keyring_1.1-1_all.deb
+sudo apt-get update
+sudo apt-get -y install libcusparselt0 libcusparselt-dev
+pip install ultralytics --upgrade
+#################################################################################################
+
+
+####################################  NVIDIA No notebook ACER ###################################
+
+sudo apt install --reinstall nvidia-driver-580-open
+sudo apt install cuda-toolkit-12-5
+
+
+###################################### converter wav ###############################
+ffmpeg -i arquivo.mp3 arquivo.wav
+
+
+################################################### end cameras FPK ###################################################
+
+lrwxrwxrwx 1 root root 12 jan  5 07:58 usb-EMEET_EMEET_SmartCam_S600_A241025000401331-video-index0 -> ../../video4
+lrwxrwxrwx 1 root root 12 jan  5 07:58 usb-EMEET_EMEET_SmartCam_S600_A241025000401331-video-index1 -> ../../video5
+lrwxrwxrwx 1 root root 12 jan  5 07:58 usb-EMEET_EMEET_SmartCam_S600_A241025000401386-video-index0 -> ../../video2
+lrwxrwxrwx 1 root root 12 jan  5 07:58 usb-EMEET_EMEET_SmartCam_S600_A241025000401386-video-index1 -> ../../video3
+lrwxrwxrwx 1 root root 12 jan  5 07:58 usb-EMEET_EMEET_SmartCam_S600_A241025000402358-video-index0 -> ../../video0
+lrwxrwxrwx 1 root root 12 jan  5 07:58 usb-EMEET_EMEET_SmartCam_S600_A241025000402358-video-index1 -> ../../video1
+
+
+
+#############################################ARQUIVO PARA LIBERAR O SCRIP DE  REBOOT#########################################################################
+sudo visudo
+
+ubuntu ALL=(ALL) NOPASSWD: /sbin/reboot
+
+
+
+
+############################# serivico no login do usuario ###############################
+▶️ 2️⃣ Ativar o serviço de usuário
+systemctl --user daemon-reload
+systemctl --user enable sve
+systemctl --user start sve
+
+
+
+############################ ajustar volume #############################
+pactl set-sink-volume bluez_output.A5_E2_DD_32_7D_0A.1 85%
+
+
+######## desbloquear a chave #######
+
+ssh-keygen -f "/home/adriano/.ssh/known_hosts" -R "192.168.1.100"
+
+
+
+###################################################### WINDOWS #############################################################
+1️⃣ Instalar Python no Windows 11
+
+👉 Baixe Python 3.10 ou 3.11 (64 bits)
+⚠️ Recomendo Python 3.10 (melhor compatibilidade com OpenCV, TensorFlow, ONNX)
+
+🔗 https://www.python.org/downloads/windows/
+
+⚠️ MUITO IMPORTANTE NA INSTALAÇÃO
+
+✔ Marque “Add Python to PATH”
+✔ Clique em Install Now
+
+2️⃣ Desativar as politicas de segurança no power shell(como admistrador):
+
+Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
+
+4️⃣ Criar ambiente virtual (venv)
+
+Dentro da pasta do projeto:
+
+python -m venv venv
+
+5️⃣ Ativar o ambiente virtual
+
+🔹 CMD
+venv\Scripts\activate
+
+
+########################################3 procedimentos para a GPU #############################
+
+1 confirmar que o driver está instalado:
+nvidia-smi
+
+2 Se não aparecer, instale o driver:
+👉 https://www.nvidia.com/Download/index.aspx
+
+
+3 Instalar PyTorch com CUDA (RTX 4050)
+
+
+Para Windows + RTX 4050:
+
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+
+
+4 Teste GPU
+
+
+python - << EOF
+import torch
+print("Torch:", torch.__version__)
+print("CUDA disponível:", torch.cuda.is_available())
+print("GPU:", torch.cuda.get_device_name(0))
+EOF
+
+5 - Instalar todas as bibliotecas:
+pip install ultralytics
+onnx onnxruntime-gpu
+tensorflow
+pip install opencv-python opencv-contrib-python
+pypylon(basler)
+scikit-learn
+Flask==3.1.2
+flask-cors==6.0.2
+onnx
+ ...
+ mais detalhes no arquivo Requeriments.txt
+
+
+
+
+ ############################################ procedimento servico nssm ########################
+ instalar o nssm : 
+ 2️⃣ EXTRAIR - nssm-2.24
+Extraia o zip para uma pasta fixa como:
+
+C:\nssm\
+
+3️⃣ TESTAR NO POWERHELL
+
+Abra PowerShell como Administrador e execute:
+
+& "C:\nssm\win64\nssm.exe" version
+
+4 - Criar o serviço
+& "C:\nssm\win64\nssm.exe" install SVE
+
+5  Crie a bat o arquivo:
+
+obs: verique o caminho correto do projeto
+C:\Users\adriano\Documents\visionEmbarcado\start_sve.bat
+
+Conteúdo:
+
+@echo off
+cd /d C:\Users\adriano\Documents\visionEmbarcado
+call venv\Scripts\activate
+python servidor.py
+
+6 - no nssm preencha:
+
+2️⃣ Preencher ASSIM (MUITO IMPORTANTE):
+
+🔹 Application → Path
+C:\Windows\System32\cmd.exe
+
+🔹 Arguments
+/c C:\Users\adriano\Documents\visionEmbarcado\start_sve.bat
+
+
+🔹 Startup directory
+C:\Users\adriano\Documents\visionEmbarcado
+
+7 -  INICIAR O SERVIÇO
+net start SVE
+
+
+8 - comandos uteis (no PowerShell):
+net start SVE // iniciar 
+net stop SVE  // parar o serviço 
+
+sc query SVE // status do serviço
+
+sc edit SVE  // editar
+
+

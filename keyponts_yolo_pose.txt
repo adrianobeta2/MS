@@ -1,0 +1,21 @@
+Índices corretos para YOLOv8 Pose (17 keypoints)
+
+YOLOv8 usa o padrão COCO para keypoints, mas os nomes dos pontos são:
+
+0: nariz
+1: olho esquerdo
+2: olho direito
+3: ouvido esquerdo
+4: ouvido direito
+5: ombro esquerdo
+6: ombro direito
+7: cotovelo esquerdo
+8: cotovelo direito
+9: punho esquerdo
+10: punho direito
+11: quadril esquerdo
+12: quadril direito
+13: joelho esquerdo
+14: joelho direito
+15: tornozelo esquerdo
+16: tornozelo direito

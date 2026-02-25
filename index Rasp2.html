@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SVE</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f2f5;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2.5em;
+            color: #333;
+        }
+
+        h1 span {
+            font-weight: bold;
+        }
+
+        #controls {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            padding: 15px;
+            background: #fff;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 2px solid #007bff;
+            border-radius: 8px;
+        }
+
+        #controls button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            margin: 5px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        #controls button:hover {
+            background-color: #0056b3;
+        }
+
+        #controls label {
+            margin: 5px 10px;
+            font-size: 14px;
+            color: #555;
+        }
+
+        #controls input {
+            width: 60px;
+            padding: 5px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+
+        #controls input:focus {
+            border-color: #007bff;
+            outline: none;
+        }
+
+        .status-label {
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-weight: bold;
+            color: white;
+            display: inline-block;
+        }
+
+        .status-ok {
+            background-color: #28a745;
+        }
+
+        .status-nok {
+            background-color: #dc3545;
+        }
+
+        #canvas {
+            border: 2px solid #007bff;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+        }
+
+        #results {
+            border: 2px solid #007bff;
+            border-radius: 8px;
+            margin-top: 20px;
+            padding: 10px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+    
+        #coordinates {
+            border: 2px solid #007bff;
+            border-radius: 8px;
+            margin-top: 20px; /* Ajuste a margem superior conforme necessário */
+            margin-top: 20px;
+            padding: 10px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+
+
+        select {
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-left: 20px;
+            font-size: 14px;
+        }
+
+        select:focus {
+            border-color: #007bff;
+            outline: none;
+        }
+
+        .button-execute {
+            font-size: 30px;
+            font-weight: bold;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .button-execute:hover {
+            background-color: #218838;
+        }
+
+        .button-live {
+            font-size: 14px;
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .button-gray {
+            font-size: 10px;
+            background-color: #6e696a;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .button-live:hover {
+            background-color: #c82333;
+        }
+
+        .flex-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 20px;
+        }
+
+        .flex-container > div {
+            flex: 1;
+        }
+    </style>
+</head>
+<body>
+    <div style="display: flex; align-items: center; justify-content: center;">
+        <div style="margin-right: 10px;">
+            <!-- Elemento que ficará à esquerda do h1 -->
+            <input type="radio" name="theme" value="light" onclick="setTheme('light')" checked>
+            <input type="radio" name="theme" value="dark" onclick="setTheme('dark')">
+        </div>
+        <h1 id="titulo">
+            <span style="color: red;">S</span>
+            <span style="color: green;">V</span>
+            <span style="color: blue;">E</span>
+            - Sistema de Visão Embarcado
+        </h1>
+    </div>
+
+    <div id="controls">
+        <button onclick="setMode('drawRectangle')">Desenhar Retângulo</button>
+        <button onclick="setMode('drawCircle')">Desenhar Círculo</button>
+        <button onclick="setMode('edit')">Editar ROIs</button>
+        <button onclick="deleteAllROIs()">Apagar Todos os ROIs</button>
+        <button onclick="zoomIn()">Zoom In</button>
+        <button onclick="zoomOut()">Zoom Out</button>
+        <button onclick="resetZoom()">Resetar Zoom</button>
+        <label>Contraste: <input type="number" id="contrast" step="0.1"></label>
+        <label>Brilho: <input type="number" id="brightness"></label>
+        <label>Gamma: <input type="number" id="gamma" step="0.1"></label>
+        <button onclick="sendData()">Enviar</button>
+        <button onclick="receiveData()">Receber</button>
+    </div>
+
+    <div class="flex-container">
+        <!-- Coluna com o botão e o canvas -->
+        <div>
+            <button class="button-execute" onclick="Executar()">Executar</button>
+            <button class="button-live" onclick="AoVivo()">Ao Vivo</button>
+            <button class="button-gray" onclick="fetchImageGray()">Imagem Cinza</button>
+            <canvas id="canvas" width="800" height="600"></canvas>
+        </div>
+
+        <!-- Resultados do lado direito -->
+        <div>
+            <label for="roi-section">Selecione a seção ROI:</label>
+            <select id="roi-section">
+                <option value="">-- Selecione --</option>
+                <option value="ROI1">ROI1</option>
+                <option value="ROI2">ROI2</option>
+                <option value="ROI3">ROI3</option>
+            </select>
+
+            <div id="results">Resultados aparecerão aqui</div>
+            <div id="coordinates"></div>
+        </div>
+    </div>
+
+    
+    <script>
+        const canvas = new fabric.Canvas('canvas', {
+            selection: false,
+        });
+
+        let currentMode = 'drawRectangle';
+        let isDrawing = false;
+        let shape;
+        let startX, startY;
+        let imageScaleX = 1, imageScaleY = 1;
+        
+        function setTheme(theme) {
+            const h1 = document.getElementById('titulo');
+            const controles = document.getElementById('controls');
+            const resultados = document.getElementById('results'); 
+            const coordenadas = document.getElementById('coordinates');
+          
+            if (theme === 'dark') {
+                document.body.style.backgroundColor = '#060707';
+                document.body.style.color = 'white';
+                h1.style.color = 'white'; 
+                controles.style.backgroundColor =  '#333232';
+                resultados.style.backgroundColor =  '#333232';
+                coordenadas.style.backgroundColor =  '#333232';
+                controlesInput.style.color = 'white'
+            } else {
+                document.body.style.backgroundColor = '#f0f2f5';
+                document.body.style.color = '#333';
+                h1.style.color = '#333'; 
+                controles.style.backgroundColor =  '#fff';
+                resultados.style.backgroundColor =  '#fff';
+                coordenadas.style.backgroundColor =  '#fff';
+                
+            }
+        }
+
+        async function loadImage(url) {
+            fabric.Image.fromURL(url, function(img) {
+                img.scaleToWidth(800);
+                img.scaleToHeight(600);
+                img.selectable = false;
+                img.evented = false;
+                imageScaleX = img.scaleX;
+                imageScaleY = img.scaleY;
+                canvas.add(img).sendToBack();
+            });
+        }
+
+        async function fetchImage() {
+            const response = await fetch('/get_image');
+            const data = await response.json();
+            await loadImage(data.image_url);
+        }
+
+        function setMode(mode) {
+            currentMode = mode;
+            isDrawing = false;
+            canvas.selection = mode === 'edit';
+
+            canvas.getObjects().forEach(obj => {
+                if (obj.type === 'rect' || obj.type === 'circle') {
+                    obj.selectable = mode === 'edit';
+                    obj.evented = mode === 'edit';
+                }
+            });
+        }
+
+        canvas.on('mouse:down', function(event) {
+            if (currentMode === 'edit') return;
+
+            isDrawing = true;
+            const pointer = canvas.getPointer(event.e);
+            startX = pointer.x;
+            startY = pointer.y;
+
+            if (currentMode === 'drawRectangle') {
+                shape = new fabric.Rect({
+                    left: startX,
+                    top: startY,
+                    fill: 'rgba(255, 0, 0, 0.1)',
+                    stroke: 'lime',
+                    strokeWidth: 2,
+                    width: 0,
+                    height: 0,
+                });
+            } else if (currentMode === 'drawCircle') {
+                shape = new fabric.Circle({
+                    left: startX,
+                    top: startY,
+                    fill: 'rgba(255, 0, 0, 0.1)',
+                    stroke: 'lime',
+                    strokeWidth: 2,
+                    radius: 0,
+                });
+            }
+            canvas.add(shape);
+        });
+
+        canvas.on('mouse:move', function(event) {
+            if (!isDrawing) return;
+
+            const pointer = canvas.getPointer(event.e);
+            if (currentMode === 'drawRectangle') {
+                const width = pointer.x - startX;
+                const height = pointer.y - startY;
+
+                shape.set({
+                    width: Math.abs(width),
+                    height: Math.abs(height),
+                    left: width < 0 ? pointer.x : startX,
+                    top: height < 0 ? pointer.y : startY,
+                });
+            } else if (currentMode === 'drawCircle') {
+                const radius = Math.sqrt(
+                    Math.pow(pointer.x - startX, 2) +
+                    Math.pow(pointer.y - startY, 2)
+                );
+                shape.set({
+                    radius: radius,
+                    left: startX - radius,
+                    top: startY - radius,
+                });
+            }
+            canvas.renderAll();
+        });
+
+        canvas.on('mouse:up', function() {
+            isDrawing = false;
+            shape.set({ selectable: true, evented: true });
+            updateCoordinates();
+            canvas.renderAll();
+        });
+                // Alterar a cor depois
+        function changeRectangleColor(rectangle, fillColor, strokeColor) {
+            rectangle.set({
+                fill: fillColor || rectangle.fill, // Atualiza o preenchimento, se fornecido
+                stroke: strokeColor || rectangle.stroke, // Atualiza o contorno, se fornecido
+            });
+
+            canvas.renderAll(); // Renderiza as mudanças no canvas
+        }
+        function getAdjustedCoordinates(obj) {
+            if (obj.type === 'rect') {
+                const { left, top, width, height, scaleX, scaleY } = obj;
+                return {
+                    x: (left / imageScaleX).toFixed(1),
+                    y: (top / imageScaleY).toFixed(1),
+                    width: ((width * scaleX) / imageScaleX).toFixed(1),
+                    height: ((height * scaleY) / imageScaleY).toFixed(1),
+                };
+            } else if (obj.type === 'circle') {
+                const { left, top, radius, scaleX, scaleY } = obj;
+                return {
+                    centerX: ((left + radius) / imageScaleX).toFixed(1),
+                    centerY: ((top + radius) / imageScaleY).toFixed(1),
+                    radiusX: ((radius * scaleX) / imageScaleX).toFixed(1),
+                    radiusY: ((radius * scaleY) / imageScaleY).toFixed(1),
+                };
+            }
+            return null;
+        }
+
+        function updateCoordinates() {
+            const coordinatesDiv = document.getElementById('coordinates');
+            coordinatesDiv.innerHTML = '<strong>Coordenadas das ROIs:</strong><br>';
+            canvas.getObjects().forEach(obj => {
+                if (obj.type === 'rect' || obj.type === 'circle') {
+                    const adjusted = getAdjustedCoordinates(obj);
+                    if (adjusted) {
+                        if (obj.type === 'rect') {
+                            coordinatesDiv.innerHTML += `Retângulo - x: ${adjusted.x}, y: ${adjusted.y}, width: ${adjusted.width}, height: ${adjusted.height}<br>`;
+                        } else if (obj.type === 'circle') {
+                            coordinatesDiv.innerHTML += `Círculo - centerX: ${adjusted.centerX}, centerY: ${adjusted.centerY}, radiusX: ${adjusted.radiusX}, radiusY: ${adjusted.radiusY}<br>`;
+                        }
+                    }
+                }
+            });
+        }
+
+        async function sendData() {
+            const rois = canvas.getObjects().filter(obj => obj.type === 'rect' || obj.type === 'circle').map(getAdjustedCoordinates);
+            const response = await fetch('/config', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ rois }),
+            });
+
+            const adjustments = {
+                contrast: 1.2,
+                brightness: 10,
+                gamma: 1.0,
+            };
+
+            await fetch('/set_adjustments', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(adjustments),
+            });
+        }
+
+        async function receiveData() {
+            const response = await fetch('/config');
+            const data = await response.json();
+
+            canvas.clear();
+            await fetchImage();
+
+            data.rois.forEach(roi => {
+                if (roi.width && roi.height) {
+                    const rect = new fabric.Rect({
+                        left: roi.x * imageScaleX,
+                        top: roi.y * imageScaleY,
+                        width: roi.width * imageScaleX,
+                        height: roi.height * imageScaleY,
+                        fill: 'rgba(255, 0, 0, 0.1)',
+                        stroke: 'lime',
+                        strokeWidth: 2,
+                    });
+                    canvas.add(rect);
+                } else if (roi.radiusX && roi.radiusY) {
+                    const circle = new fabric.Circle({
+                        left: (roi.centerX - roi.radiusX) * imageScaleX,
+                        top: (roi.centerY - roi.radiusY) * imageScaleY,
+                        radius: roi.radiusX * imageScaleX,
+                        fill: 'rgba(255, 0, 0, 0.1)',
+                        stroke: 'lime',
+                        strokeWidth: 2,
+                    });
+                    canvas.add(circle);
+                }
+            });
+            updateCoordinates();
+        }
+
+        function deleteAllROIs() {
+            const rois = canvas.getObjects().filter(obj => obj.type === 'rect' || obj.type === 'circle');
+            rois.forEach(roi => canvas.remove(roi));
+            updateCoordinates();
+        }
+
+        function zoomIn() {
+            canvas.setZoom(canvas.getZoom() * 1.1);
+        }
+
+        function zoomOut() {
+            canvas.setZoom(canvas.getZoom() / 1.1);
+        }
+
+        function resetZoom() {
+            canvas.setZoom(1);
+        }
+
+        // Configure a URL do servidor Flask
+        const SERVER_URL = 'http://127.0.0.1:6001';
+        //const CARREGAR_IMAGEM_DINAMICA = 'http://127.0.0.1:5001';
+        
+        
+        
+         // Substituir endpoints pelos definidos no servidor Flask
+         async function Executar() {
+            const resultsContainer = document.getElementById('results');
+            resultsContainer.innerHTML = 'Carregando...';
+            let ExecStatus = true;
+            try {
+                const response = await fetch('http://127.0.0.1:6001/executar');
+                const data = await response.json();
+
+                resultsContainer.innerHTML = ''; // Limpa resultados anteriores
+                   
+                fetchImage();
+                receiveData();
+                 // Label para status       
+                data.rois_data.forEach(roi => {
+                    const resultDiv = document.createElement('div');
+                    resultDiv.classList.add('input-field');
+
+                    // Label da ROI
+                    const roiLabel = document.createElement('label');
+                    roiLabel.classList.add('label-title');
+                    roiLabel.textContent = `ROI${roi.roi_index}: `;
+                    resultDiv.appendChild(roiLabel);
+
+                    // Label e input para média ROI
+                    const mediaRoiLabel = document.createElement('label');
+                    mediaRoiLabel.classList.add('label-title');
+                    mediaRoiLabel.textContent = 'Media ROI: ';
+                    resultDiv.appendChild(mediaRoiLabel);
+
+                    const mediaRoiInput = document.createElement('input');
+                    mediaRoiInput.type = 'text';
+                    mediaRoiInput.value = roi.media_roi;
+                    mediaRoiInput.readOnly = true;
+                    resultDiv.appendChild(mediaRoiInput);
+
+                    // Label e input para média textura
+                    const mediaTexturaLabel = document.createElement('label');
+                    mediaTexturaLabel.classList.add('label-title');
+                    mediaTexturaLabel.textContent = 'Media Textura: ';
+                    resultDiv.appendChild(mediaTexturaLabel);
+
+                    const mediaTexturaInput = document.createElement('input');
+                    mediaTexturaInput.type = 'text';
+                    mediaTexturaInput.value = roi.media_textura;
+                    mediaTexturaInput.readOnly = true;
+                    resultDiv.appendChild(mediaTexturaInput);
+
+                   
+                    const statusLabel = document.createElement('span');
+                    statusLabel.classList.add('status-label');
+                    if (roi.status) {
+                        statusLabel.textContent = 'OK';
+                        statusLabel.classList.add('status-ok');
+                        
+                    } else {
+                        statusLabel.textContent = 'NOK';
+                        statusLabel.classList.add('status-nok');
+                        if(ExecStatus == true)ExecStatus = false
+                        
+                        if(ExecStatus == false)changeRectangleColor(retanguloRef, 'rgba(0, 0, 255, 0.3)', 'yellow'); 
+
+                     
+                    }
+
+
+                    resultDiv.appendChild(statusLabel);
+
+                    resultsContainer.appendChild(resultDiv);
+                });
+                
+            } catch (error) {
+                resultsContainer.innerHTML = 'Erro ao carregar os dados!';
+                console.error(error);
+            }
+        }
+
+
+        // Substituir endpoints pelos definidos no servidor Flask
+        async function fetchImage() {
+            //const response = await fetch(`${SERVER_URL}/image`);
+            const response = await fetch(`${SERVER_URL}/capture`);
+            const imageBlob = await response.blob(); // Obter o blob da imagem
+            const imageUrl = URL.createObjectURL(imageBlob); // Criar uma URL para o blob da imagem      
+
+            await loadImage(imageUrl); // Carregar a imagem no canvas// Definir a imagem como plano de fundo
+           
+        }
+
+         // Retorna a imagem tom de cinza.
+         async function fetchImageGray() {
+            //const response = await fetch(`${SERVER_URL}/image`);
+            const response = await fetch(`${SERVER_URL}/processWithImage`);
+            const imageBlob = await response.blob(); // Obter o blob da imagem
+            const imageUrl = URL.createObjectURL(imageBlob); // Criar uma URL para o blob da imagem      
+
+            await loadImage(imageUrl); // Carregar a imagem no canvas// Definir a imagem como plano de fundo
+           
+        }
+
+        async function sendData() {
+            // Obter as ROIs ajustadas
+            const rois = canvas.getObjects()
+                .filter(obj => obj.type === 'rect' || obj.type === 'circle')
+                .map(obj => {
+                    const adjusted = getAdjustedCoordinates(obj);
+                    return {
+                        x: parseInt(adjusted.x),
+                        y: parseInt(adjusted.y),
+                        width: parseInt(adjusted.width),
+                        height: parseInt(adjusted.height),
+                    };
+                });
+
+            // Garantir que pelo menos uma ROI está presente
+            if (rois.length === 0) {
+                alert("Nenhuma ROI encontrada para envio.");
+                return;
+            }
+
+            // Selecionar a última ROI criada (ou outro critério, se necessário)
+            const roi = rois[rois.length - 1];
+
+            // Obter valores de contraste, brilho e gamma
+            let contrastValue = document.getElementById('contrast').value;
+            let brightnessValue = document.getElementById('brightness').value;
+            let gammaValue = document.getElementById('gamma').value;
+
+            // Adicionar seleção de seção ROI (ex: ROI1, ROI2, ROI3)
+            const selectedSection = document.getElementById('roi-section').value;
+
+           
+            // Garantir que a seção foi selecionada
+            if (!selectedSection) {
+                alert("Por favor, selecione uma seção de ROI.");
+                return;
+            }
+
+            // Ajustes de imagem
+            const adjustments = {
+                contrast: contrastValue, // Valores ajustáveis
+                brightness: brightnessValue,
+                gamma: gammaValue,
+                roi: {
+                    section: selectedSection, // Adiciona a seção selecionada
+                    ...roi,
+                },
+            };
+
+            try {
+                const response = await fetch(`${SERVER_URL}/config`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(adjustments),
+                });
+
+                if (!response.ok) {
+                    const errorMessage = await response.text();
+                    console.error("Erro ao enviar dados:", errorMessage);
+                    alert("Erro ao enviar dados. Verifique o console para mais detalhes.");
+                } else {
+                    const coordinatesDiv = document.getElementById('coordinates');
+                    coordinatesDiv.innerHTML = '<strong>Dados enviados com sucesso!</strong><br>';
+                }
+            } catch (error) {
+                console.error("Erro de comunicação com o servidor:", error);
+                alert("Erro ao conectar ao servidor.");
+            }
+        }
+        
+        let retanguloRef = null
+        
+        async function receiveData() {
+            // Adicionar seleção de seção ROI (ex: ROI1, ROI2, ROI3)
+            await fetchImage();
+            const selectedSection = document.getElementById('roi-section').value;
+            const response = await fetch(`${SERVER_URL}/config?section=${selectedSection}`);
+
+            if (!response.ok) {
+                console.error("Erro ao obter os dados do servidor:", await response.text());
+                return;
+            }
+
+            const data = await response.json();
+
+            // Log para depuração
+            console.log("Dados recebidos do servidor:", data);
+
+            // Atualizar os campos de brilho, contraste e gamma
+            document.getElementById('contrast').value = data.contrast;
+            document.getElementById('brightness').value = data.brightness;
+            document.getElementById('gamma').value = data.gamma;
+
+            // Verificar se existe uma propriedade 'roi'
+            if (data.roi) {
+                console.log("ROI detectado:", data.roi);
+
+                const roi = data.roi;
+                //canvas.clear();
+                
+
+                // Caso o ROI seja um retângulo
+                if (roi.width && roi.height) {
+                    const rect = new fabric.Rect({
+                        left: roi.x * imageScaleX,
+                        top: roi.y * imageScaleY,
+                        width: roi.width * imageScaleX,
+                        height: roi.height * imageScaleY,
+                        fill: 'rgba(255, 0, 0, 0.1)',
+                        stroke: 'lime',
+                        strokeWidth: 2,
+                    });
+                    
+                    retanguloRef = rect; 
+                   
+                    canvas.add(rect);
+                } else if (roi.radiusX && roi.radiusY) {
+                    const circle = new fabric.Circle({
+                        left: (roi.centerX - roi.radiusX) * imageScaleX,
+                        top: (roi.centerY - roi.radiusY) * imageScaleY,
+                        radius: roi.radiusX * imageScaleX,
+                        fill: 'rgba(255, 0, 0, 0.1)',
+                        stroke: 'lime',
+                        strokeWidth: 2,
+                    });
+                    canvas.add(circle);
+                }
+
+                updateCoordinates();
+            } else {
+                console.warn("Nenhuma ROI encontrada na resposta.");
+            }
+        }
+
+        // Função para abrir a janela pop-up com o vídeo ao vivo
+        function AoVivo() {
+            const videoFeedUrl = 'http://127.0.0.1:6001/video_feed';
+            const width = 800;
+            const height = 600;
+            const left = (screen.width - width) / 2;
+            const top = (screen.height - height) / 2;
+            window.open(
+                videoFeedUrl,
+                'VideoAoVivo',
+                `width=${width},height=${height},left=${left},top=${top},resizable=no,scrollbars=no`
+            );
+        }
+        document.getElementById('roi-section').value = "ROI1";
+        // Carregar a imagem inicial ao carregar a página
+        fetchImage();
+        receiveData();
+    </script>
+</body>
+</html>
+

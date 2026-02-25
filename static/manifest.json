@@ -1,0 +1,21 @@
+{
+    "name": "Sistema de Visão Embarcado",
+    "short_name": "SV",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#121212",
+    "theme_color": "#121212",
+    "icons": [
+      {
+        "src": "/static/favicon.png",
+        "type": "image/png",
+        "sizes": "192x192"
+      },
+      {
+        "src": "/static/favicon.png",
+        "type": "image/png",
+        "sizes": "512x512"
+      }
+    ]
+  }
+  

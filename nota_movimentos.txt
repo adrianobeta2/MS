@@ -1,0 +1,5 @@
+
+
+#### nota projeto - assistente de linha #############
+
+se houver cluster no berço, cluster no carrinho (buffer), operadores nas demais operacoes e o tempo ultrapassar 150 segundos, alertar operador que a máquinas está ociosa 

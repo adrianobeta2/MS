@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controle de Limites</title>
+    <style>
+        .range-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .range-slider {
+            width: 300px;
+        }
+
+        .output {
+            display: flex;
+            justify-content: space-between;
+            width: 300px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Ajuste de Limites</h1>
+    <div class="range-container">
+        <div>
+            <label for="lowerLimit">Limite Inferior: </label>
+            <input id="lowerLimit" type="range" min="0" max="100" step="1" value="20" class="range-slider">
+        </div>
+        <div>
+            <label for="upperLimit">Limite Superior: </label>
+            <input id="upperLimit" type="range" min="0" max="100" step="1" value="80" class="range-slider">
+        </div>
+        <div class="output">
+            <span id="lowerOutput">20</span>
+            <span id="upperOutput">80</span>
+        </div>
+    </div>
+
+    <script>
+        const lowerLimit = document.getElementById("lowerLimit");
+        const upperLimit = document.getElementById("upperLimit");
+        const lowerOutput = document.getElementById("lowerOutput");
+        const upperOutput = document.getElementById("upperOutput");
+
+        // Atualiza os valores exibidos conforme o usuário ajusta os sliders
+        lowerLimit.addEventListener("input", () => {
+            if (parseInt(lowerLimit.value) >= parseInt(upperLimit.value)) {
+                lowerLimit.value = upperLimit.value - 1; // Garante que o limite inferior seja menor que o superior
+            }
+            lowerOutput.textContent = lowerLimit.value;
+        });
+
+        upperLimit.addEventListener("input", () => {
+            if (parseInt(upperLimit.value) <= parseInt(lowerLimit.value)) {
+                upperLimit.value = parseInt(lowerLimit.value) + 1; // Garante que o limite superior seja maior que o inferior
+            }
+            upperOutput.textContent = upperLimit.value;
+        });
+    </script>
+</body>
+</html>

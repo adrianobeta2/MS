@@ -1,0 +1,204 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Status do Sistema de Visão</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #121212;
+      color: #f0f0f0;
+    }
+  
+    .container {
+      display: flex;
+      flex-direction: row;
+      height: 100vh;
+    }
+  
+    .left-panel {
+      width: 20%;
+      padding: 20px;
+      background: #1e1e1e;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      border-right: 2px solid #333;
+    }
+  
+    .center-panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      background: #121212;
+    }
+  
+    .status-roi {
+      padding: 10px;
+      border-radius: 5px;
+      font-weight: bold;
+      color: white;
+    }
+  
+    .ok {
+      background-color: #2e7d32; /* Verde escuro */
+    }
+  
+    .nok {
+      background-color: #c62828; /* Vermelho escuro */
+    }
+  
+    .status-geral {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 24px;
+      font-weight: bold;
+      padding: 10px 20px;
+      border-radius: 5px;
+      color: white;
+    }
+  
+    .status-geral.ok {
+      background: #43a047; /* Verde */
+    }
+  
+    .status-geral.nok {
+      background: #e53935; /* Vermelho */
+    }
+  
+    .programa {
+      position: absolute;
+      top: 70px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 20px;
+      font-weight: bold;
+      color: #90caf9; /* Azul claro */
+    }
+
+    .nome_programa {
+      position: absolute;
+      text-transform: uppercase;
+      top: 110px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 25px;
+      font-weight: bold;
+      color: white; /* Azul claro */
+    }
+  
+    .tempo {
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      font-size: 18px;
+      color: #bdbdbd;
+    }
+  
+    img {
+      width: 800px;
+      height: auto;
+      border: 2px solid #444;
+      border-radius: 10px;
+    }
+
+    #logo_sve img {
+      width: 100px; /* ou height: 30px; */
+      object-fit: contain; /* mantém a proporção */
+      left: 1%;
+      position: absolute;
+      text-transform: uppercase;
+      border: none;
+      margin: 0;
+      padding: 0;
+      top: 10px;
+    
+    }
+
+    .config-button {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      background: #37474f;
+      color: white;
+      text-decoration: none;
+      padding: 10px 16px;
+      border-radius: 6px;
+      font-weight: bold;
+      transition: background 0.3s;
+    }
+    
+    .config-button:hover {
+      background: #546e7a;
+    }
+    
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="left-panel" id="rois"></div>
+    <!-- Botão para configurações -->
+    
+    <a href="/configuracoes" class="config-button">⚙️ Configurações</a>
+
+    <div class="center-panel">
+      
+      <div class="programa" id="programa"></div>
+      <div class="nome_programa" id="nome_programa"></div>
+      <div id="statusGeral" class="status-geral"></div>
+      <img id="imagemStatus" src="" alt="Imagem de Status">
+      <div id="logo_sve"><img src="{{ url_for('static', filename='sveNEW.png') }}" alt=""></div>
+      <div class="tempo" id="tempoExecucao"></div>
+    </div>
+  </div>
+  
+
+  <script>
+    async function atualizarStatus() {
+      try {
+        const res = await fetch('/status.json'); // seu backend precisa servir este JSON
+        const data = await res.json();
+
+        // Atualizar ROIs
+        const roisDiv = document.getElementById('rois');
+        roisDiv.innerHTML = ''; // limpa conteúdo anterior
+        for (let i = 1; i <= data.n_rois; i++) {
+          const key = `parcial_p${i}`; document.getElementById('programa').textContent = `Programa: ${data.programa}`;
+          const status = data[key];
+          const div = document.createElement('div');
+          div.classList.add('status-roi', status ? 'ok' : 'nok');
+          div.textContent = `ROI ${i}: ${status ? 'OK' : 'NOK'}`;
+          roisDiv.appendChild(div);
+        }
+
+        // Programa
+        document.getElementById('programa').textContent = `Programa ${data.programa}`;
+        document.getElementById('nome_programa').textContent = `${data.nome_programa}`;
+
+        // Imagem
+        document.getElementById('imagemStatus').src = data.imagem + '?t=' + new Date().getTime();
+
+        // Status Geral
+        const statusGeral = document.getElementById('statusGeral');
+        statusGeral.textContent = data.status_geral ? 'APROVADO' : 'REJEITADO';
+        statusGeral.className = 'status-geral ' + (data.status_geral ? 'ok' : 'nok');
+
+        // Tempo Execução
+        document.getElementById('tempoExecucao').textContent = `Tempo: ${data.tempo_execucao.toFixed(2)} ms`;
+      } catch (e) {
+        console.error('Erro ao atualizar status:', e);
+      }
+    }
+
+    setInterval(atualizarStatus, 2000);
+    atualizarStatus(); // primeira chamada imediata
+  </script>
+</body>
+</html>
