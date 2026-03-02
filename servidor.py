@@ -751,10 +751,14 @@ logging.basicConfig(
     format="%(asctime)s - %(message)s"
 )
 
-def reiniciar_jetson(delay=5):
+def reiniciar_ms_vision(delay=5):
     logging.info(f"Reboot autorizado. Reiniciando em {delay} segundos")
     time.sleep(delay)
-    subprocess.run(["sudo", "/sbin/reboot"])
+    subprocess.run(
+        ["restart.bat"],
+        shell=True,
+        check=False
+    )
 
 @app.route("/reboot", methods=["POST"])
 def reboot():
@@ -764,7 +768,7 @@ def reboot():
      #   logging.warning("Tentativa de reboot não autorizada")
       #  return jsonify({"error": "Não autorizado"}), 401
 
-    threading.Thread(target=reiniciar_jetson, args=(5,), daemon=True).start()
+    threading.Thread(target=reiniciar_ms_vision, args=(5,), daemon=True).start()
 
     return jsonify({
         "status": "ok",
@@ -833,70 +837,104 @@ def predizer_frame_new(camera, programa, roi, frame, coordenadas, threshold=0.5)
 
     # --- Decisão ---
     return prob_ok >= threshold
+######################################################## TREINO IA ########################################################
+
+from training_state import read_status
 
 
+@app.route("/training_status")
+def training_status_api():
+    return jsonify(read_status())
 
-@app.route("/treinar", methods=["POST"])
-def treinar():
+from training_state import write_status
+
+def executar_treino_async(camera, programa, tipo_neural):
+    global modo_treino
+
     try:
-        global modo_treino
-        modo_treino = True
-        data = request.get_json()
-
-        programa = data.get("programa")
-        camera = data.get("camera")
-
-         # Ler o arquivo de configuração INI
-        config = configparser.ConfigParser()
-        config.read(f'config_{camera}_{programa}.ini')
-        tipo_neural = str(config['Modelos']['tipo_rede_neural_artificial'])
-
-
-        print("Entrando em modo treino para câmera:", camera, "programa:", programa)
-        parar_todas_cameras()
-        time.sleep(2)
-        import torch
-        torch.cuda.empty_cache()
-        print("🟢 Iniciando treinamento...")
-       
         if tipo_neural == "yolo":
-
-            model_sumary = treinar_modelo_new.gerar_modelo(
-            #model_sumary = treinar_modelo_new.treinar_resnet(
+            treinar_modelo_new.gerar_modelo(
                 camera=camera,
                 programa=programa
             )
-          
         elif tipo_neural == "resnet":
-            model_sumary = treinar_modelo_new.gerar_modelo_resnet(
-                camera=camera,
-                programa=programa
-            )
-            
+            treinar_modelo_new.gerar_modelo_resnet(camera, programa)
         elif tipo_neural == "resnet50":
-            model_sumary = treinar_modelo_new.gerar_modelo_resnet50(
-                camera=camera,
-                programa=programa
-            )
-        
+            treinar_modelo_new.gerar_modelo_resnet50(camera, programa)
         elif tipo_neural == "mobilenetv2":
-            model_sumary = treinar_modelo_new.gerar_modelo_mobilenet(
-                camera=camera,
-                programa=programa
-            )
-        else:
-            return jsonify({"status": "erro", "mensagem": f"Tipo de rede neural não suportada: {tipo_neural}"}), 400
+            treinar_modelo_new.gerar_modelo_mobilenet(camera, programa)
 
-
-        modo_treino = False
-        initialize_all_cameras_basler()
-        return jsonify({
-            "status": "sucesso",
-            "mensagem": f"Treinamento concluído."
+        #  FINALIZA COM SUCESSO
+        write_status({
+            "running": False,
+            "epoch": 100,
+            "total_epochs": 100,
+            "progress": 100,
+            "mensagem": "Treinamento concluído"
         })
 
     except Exception as e:
-        return jsonify({"status": "erro", "mensagem": str(e)}), 500
+        write_status({
+            "running": False,
+            "epoch": 0,
+            "total_epochs": 0,
+            "progress": 0,
+            "mensagem": f"Erro: {str(e)}"
+        })
+
+    finally:
+        modo_treino = False
+        initialize_all_cameras_basler()
+
+
+
+
+from threading import Thread
+
+from threading import Thread
+from training_state import write_status
+EPOCHS =100
+@app.route("/treinar", methods=["POST"])
+def treinar():
+    global modo_treino
+
+    data = request.get_json()
+    programa = data.get("programa")
+    camera = data.get("camera")
+
+    config = configparser.ConfigParser()
+    config.read(f'config_{camera}_{programa}.ini')
+    tipo_neural = str(config['Modelos']['tipo_rede_neural_artificial'])
+
+    modo_treino = True
+
+    # ✅ INICIALIZA STATUS NO ARQUIVO
+    write_status({
+        "running": True,
+        "epoch": 0,
+        "total_epochs": EPOCHS,
+        "progress": 0,
+        "mensagem": "Iniciando treinamento..."
+    })
+
+    parar_todas_cameras()
+    time.sleep(2)
+
+    import torch
+    torch.cuda.empty_cache()
+
+    # ✅ THREAD DE TREINO
+    Thread(
+        target=executar_treino_async,
+        args=(camera, programa, tipo_neural),
+        daemon=True
+    ).start()
+
+    # ✅ RESPONDE IMEDIATAMENTE
+    return jsonify({
+        "status": "sucesso",
+        "mensagem": "Treinamento iniciado"
+    })
 ########################################################################################################
 
 url = "http://127.0.0.1:6001/capture"
@@ -2568,9 +2606,9 @@ def definirTemplate():
     
     roi_regiao_template.append((x_interes, y_interes, w_interes, h_interes))
 
-    template = cv2.imread(f'template_{camera}_{programa}.png', 0)
+    #template = cv2.imread(f'template_{camera}_{programa}.png', 0)
 
-    frame = cv2.imread(f'cam{camera}_ref_programa{programa}.png', 0)
+    #frame = cv2.imread(f'cam{camera}_ref_programa{programa}.png', 0)
   
     # salvar referencia.
     ref_coord = Localizador.coord_ref(recorte, roi_regiao_template[0], img)
@@ -2985,5 +3023,5 @@ if __name__ == '__main__':
        
     else:
        initialize_all_cameras_basler()  # Inicia a câmera antes de rodar o servidor Flask
-    app.run(host='0.0.0.0', port=6001) 
+    app.run(host='0.0.0.0', port=6001, use_reloader=False) 
 

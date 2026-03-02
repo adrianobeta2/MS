@@ -339,6 +339,23 @@ from pathlib import Path
 from ultralytics import YOLO
 import torch
 
+
+from training_state import write_status
+
+def on_epoch_end(trainer):
+    epoch = trainer.epoch + 1
+    total = trainer.args.epochs  # YOLO v8+
+
+    write_status({
+        "running": True,
+        "epoch": epoch,
+        "total_epochs": total,
+        "progress": int((epoch / total) * 100),
+        "mensagem": f"Epoch {epoch}/{total}"
+    })
+
+    print(f"[CALLBACK] Epoch {epoch}/{total}")
+
 def criar_modelo(camera, programa):
     # Diretório do dataset (Path é 100% compatível com Windows)
     dataset_dir = Path(get_dataset_dir(camera, programa))
@@ -349,7 +366,17 @@ def criar_modelo(camera, programa):
 
     # Carrega modelo base
     model = YOLO(MODEL_BASE)
+    from training_state import write_status
 
+    write_status({
+        "running": True,
+        "epoch": 0,
+        "total_epochs": EPOCHS,
+        "progress": 0,
+        "mensagem": "Iniciando treinamento..."
+    })
+   
+    model.add_callback("on_train_epoch_end", on_epoch_end)
     # Treinamento
     model.train(
         data=str(data_yaml),      
@@ -359,9 +386,15 @@ def criar_modelo(camera, programa):
         name=f"cam{camera}_prog{programa}",
         batch=16,
         device=device,
-        workers=0                
+        workers=0                    
     )
-
+    write_status({
+        "running": False,
+        "epoch": EPOCHS,
+        "total_epochs": EPOCHS,
+        "progress": 100,
+        "mensagem": "Treinamento concluído"
+    })
     print("\n🎯 Treinamento finalizado!")
 
 from pathlib import Path
@@ -500,6 +533,7 @@ def gerar_dataset_resnet(camera, programa):
 
     random.shuffle(amostras)
     split = int(len(amostras) * TRAIN_SPLIT)
+    
 
     for idx, (img_path, roi, classe) in enumerate(amostras):
 
@@ -530,6 +564,7 @@ import torch.nn as nn
 import torchvision.models as models
 from torchvision import datasets, transforms
 from torch.utils.data import DataLoader
+EPOCHS_RESNET = 20
 
 def treinar_resnet(camera, programa):
 
@@ -568,6 +603,13 @@ def treinar_resnet(camera, programa):
     criterion = nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
     scaler = torch.amp.GradScaler("cuda")
+    write_status({
+        "running": True,
+        "epoch": 0,
+        "total_epochs": EPOCHS_RESNET,
+        "progress": 0,
+        "mensagem": "Iniciando treinamento ResNet..."
+    })
     for epoch in range(20):
         model.train()
         total_loss = 0
@@ -589,7 +631,16 @@ def treinar_resnet(camera, programa):
             total_loss += loss.item()
 
         print(f"Epoch {epoch+1} | Loss: {total_loss:.4f}")
-    
+        progress = int(((epoch + 1) / EPOCHS_RESNET) * 100)
+
+        write_status({
+            "running": True,
+            "epoch": epoch + 1,
+            "total_epochs": EPOCHS_RESNET,
+            "progress": progress,
+            "mensagem": f"Epoch {epoch + 1}/{EPOCHS_RESNET} | Loss: {total_loss:.4f}"
+        })
+            
     print("Train size:", len(train_dataset))
     print("Val size:", len(val_dataset))
    
@@ -604,6 +655,13 @@ def treinar_resnet(camera, programa):
     print(cm)
     torch.save(model.state_dict(), dataset_dir / "modelo_resnet34.pth")
     print(train_dataset.class_to_idx)
+    write_status({
+        "running": False,
+        "epoch": EPOCHS_RESNET,
+        "total_epochs": EPOCHS_RESNET,
+        "progress": 100,
+        "mensagem": "Treinamento ResNet concluído"
+    })
     print("🎯 Modelo ResNet treinado!")
     
 

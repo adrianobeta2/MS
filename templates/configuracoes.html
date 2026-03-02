@@ -1,64 +1,414 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SVE</title>
-   
+    <title>Vision Embarcado</title>
+
     <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            background-color: #000000;
-            color: #333;
+        * {
             margin: 0;
-            padding: 20px;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, Helvetica, sans-serif;
         }
 
-        h1 {
-            text-align: center;
-            font-size: 2.5em;
-            color: #333;
-        }
-
-        h1 span {
-            font-weight: bold;
-        }
-
-        /* Oculta os inputs de rádio e o h1 */
-        input[type="radio"], #titulo {
-        display: none;
-         }
-
-        #logo_sve img {
-            width: 600px; /* ou height: 30px; */
-            object-fit: contain; /* mantém a proporção */
-            margin-left:110px;
-        }
-
-        #controls {
+        body {
+            height: 100vh;
             display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
+            background:  #00050a;
+        }
+        @keyframes spin {
+        from { transform: rotate(0deg); }
+        to   { transform: rotate(360deg); }
+        }
+
+    .spinner {
+        width: 50px;
+        height: 50px;
+        border: 6px solid rgba(255,255,255,0.3);
+        border-top: 6px solid #3498db;
+        border-radius: 50%;
+        margin: 0 auto 15px auto;
+        animation: spin 1s linear infinite;
+    }
+
+    .loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+    }
+
+    .loading-content {
+        background: #050505;
+        padding: 20px 40px;
+        border-radius: 12px;
+        text-align: center;
+        box-shadow: 0px 0px 15px rgba(0,0,0,0.4);
+    }
+
+    .loading-content p {
+        color: #ffffff;
+        font-size: 16px;
+        font-weight: bold;
+    }
+        /* ===============================
+           SIDEBAR DE CONTROLES
+           =============================== */
+        #controls {
+            width: 90px;
+            background: hsl(0, 2%, 12%);
+            box-shadow: -2px 0 10px rgba(0,0,0,0.15); /* sombra correta */
+            display: flex;
+            flex-direction: column;
             align-items: center;
-            padding: 15px;
-            background: #fff;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            border-radius: 20px;
-            margin-bottom: 10px;
-            /*border: 2px solid #007bff;*/
-            border-radius: 20px;
+            padding: 10px 5px;
+            gap: 8px;
+          
+            
+        }
+
+        #controls select {
+            width: 70px;
+            padding: 5px;
+            border-radius: 10px;
+            border: 1px solid #ccc;
+            text-align: center;
+            font-size: 13px;
         }
 
         #controls button {
-            /*background-color: #007bff;*/
-            color: white;
-            border: none;
-            padding: 10px 15px; 
-            margin: 5px;
-            font-size: 16px;
-            border-radius: 20px;
+            width: 60px;
+            height: 60px;
+            border: 1px solid hwb(279 4% 4%);
+            border-radius: 15px;
+            background: #00050a;
             cursor: pointer;
-            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.25s;
+        }
+
+        #controls button:hover {
+            background: #00050a;
+            transform: scale(1.2);
+        }
+
+        #controls button img {
+            width: 55px;
+            height: 55px;
+        }
+
+         /* ===============================
+           SIDEBAR DE CONTROLES a direita
+           =============================== */
+       #controls_right {
+        width: 90px;
+        background: hsl(0, 2%, 12%);
+        box-shadow: -2px 0 10px rgba(0,0,0,0.15); /* sombra correta */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 10px 5px;
+        gap: 8px;
+        
+      }
+
+        #controls_right select {
+            width: 70px;
+            padding: 5px;
+            border-radius: 10px;
+            border: 1px solid #ccc;
+            text-align: center;
+            font-size: 13px;
+        }
+
+        #controls_right button {
+            width: 65px;
+            height: 65px;
+            border: 1px solid hwb(66 4% 4%);
+            border-radius: 15px;
+            background: #00050a;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.25s;
+        }
+
+        #controls_right button:hover {
+            background:  #00050a;
+            transform: scale(1.2);
+        }
+
+        #controls_right button img {
+            width: 60px;
+            height: 60px;
+        }
+
+        
+        #controls_IA {
+            display: inline-flex;        /* ⬅️ encolhe ao conteúdo */
+            flex-direction: row;
+            gap: 8px;
+            align-items: center;
+            background: hsl(0, 2%, 12%);
+                
+            padding: 8px 10px;           /* justo aos botões */
+            
+            
+            box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+        }
+            
+        #controls_IA select {
+            width: 70px;
+            padding: 5px;
+            border-radius: 10px;
+            border: 1px solid #ccc;
+            text-align: center;
+            font-size: 13px;
+        }
+
+        #controls_IA button {
+            width: 65px;
+            height: 65px;
+           
+            border-radius: 15px;
+            background: #00050a;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.25s;
+            border: 1px solid hsl(209, 93%, 50%);
+        }
+
+        #controls_IA button:hover {
+            background: #00050a;
+            transform: scale(1.2);
+        }
+
+        #controls_IA button img {
+            width: 60px;
+            height: 60px;
+        }
+
+
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            margin-top: 6px;
+        }
+
+        .control-group label {
+            font-size: 11px;
+            color: #555;
+        }
+
+        .control-group input {
+            width: 60px;
+            padding: 4px;
+            border-radius: 10px;
+            border: 1px solid #ccc;
+            text-align: center;
+            background: #f5f5f5;
+        }
+
+        .button-limites {
+            background: #28a745;
+        }
+
+        .button-reboot {
+            background: #dc3545;
+        }
+
+        /* ===============================
+           ÁREA DO CANVAS (ESQUERDA)
+           =============================== */
+            /* ===============================
+        ÁREA CENTRAL (CANVAS + MENU DIREITO)
+        =============================== */
+       #workspace {
+            flex: 1;
+            display: flex;
+            align-items: flex-start; /* ⬅️ ALINHA NO TOPO */
+            background:  #00050a;
+            padding-top: 50px;   /* ⬅️ MARGEM SUPERIOR GLOBAL */
+        }
+
+        /* Canvas container agora só cuida do canvas */
+        #canvas-container {
+            display: flex;
+            align-items: center;
+            padding-left: 10px;
+        }
+
+        #canvas {
+            border: 1px solid hsl(33, 93%, 50%);
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.4);
+            background: #000;
+        }
+                /* Empilha canvas + controles */
+        .canvas-stack {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+       #image-controls {
+            width: 100%;
+            max-width: 800px;
+            margin-top: 8px;
+            display: flex;
+            gap: 8px;
+            justify-content: flex-start;
+            align-items: center;
+        }
+
+        #image-controls .control-group {
+            min-width: auto;
+        }
+
+        #image-controls .control-group label {
+            font-size: 12px;
+            color: #dad3d3f4;
+        }
+
+        #image-controls .control-group input {
+            width: 55px;
+            padding: 3px 5px;
+            font-size: 11px;
+            color: #000;
+        }
+
+        /* Ajuste visual fino */
+        #image-controls .control-group {
+            min-width: 90px;
+        }
+        /* Permite overlay absoluto */
+        .canvas-stack {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* CONTROLES SUPERIORES NO CANTO ESQUERDO DO CANVAS */
+        #canvas-top-controls {
+            position: absolute;
+            top: 12px;     /* distância do topo do canvas */
+            left: 12px;    /* distância da borda esquerda do canvas */
+
+            display: flex;
+            gap: 10px;          /* ⬅️ era 16–20px */
+            padding: 6px 10px;  /* ⬅️ era 10px 14px */
+            border-radius: 8px; /* ⬅️ era 12px */
+
+            background: rgba(255, 255, 255, 0.55);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            z-index: 10;
+        }
+
+        
+
+        /* Cada bloco (Programa / ROI) */
+        .top-control {
+            display: flex;
+            flex-direction: column;
+            font-size: 12px;
+        }
+
+        .top-control label {
+            margin-bottom: 2px;
+            font-size: 10px;      /* ⬅️ menor */
+            font-weight: 600;
+            color: rgba(0,0,0,0.7);
+        }
+
+        .top-control select {
+            min-width: 110px;   /* ⬅️ era 140px */
+            padding: 4px 6px;   /* ⬅️ menor */
+            font-size: 11px;    /* ⬅️ texto menor */
+
+            border-radius: 6px;
+            border: 1px solid rgba(0,0,0,0.25);
+            background: rgba(255, 255, 255, 0.6); /* ⬅️ translúcido */
+        }
+        /* ===============================
+        DIVISOR VERTICAL ENTRE CONTROLS_RIGHT 
+        =============================== */
+         #vertical-divider {
+                    width: 3px;                 /* espessura da linha */
+                    background: rgba(0,0,0,0.15);
+                    margin: 0 12px;              /* espaço lateral */
+                    
+                    /* acompanha a altura do workspace */
+                    align-self: stretch;
+        }
+        
+        #deleteOKLabel {
+        position: absolute;
+        bottom: 4px;        /* ⬅️ posição sobre a imagem */
+        right: 6px;
+
+        min-width: 18px;
+        height: 18px;
+        padding: 0 4px;
+
+        background: #069b26;
+        color: #fff;
+        font-size: 12px;
+        font-weight: bold;
+
+        border-radius: 10px;
+        line-height: 18px;
+        text-align: center;
+
+        pointer-events: none; /* ⬅️ não atrapalha clique */
+    }
+        #deleteNOKLabel {   
+        position: absolute;
+        bottom: 4px;        /* ⬅️ posição sobre a imagem */
+        right: 6px;
+        min-width: 18px;    
+        height: 18px;  
+        padding: 0 4px;
+        background: #f20202;
+        color: #fff;
+        font-size: 12px;
+        font-weight: bold;
+        border-radius: 10px;
+        line-height: 18px;
+        text-align: center;
+        pointer-events: none; /* ⬅️ não atrapalha clique */
+        }
+        /* Botão vira referência */
+        .btn-with-overlay {
+            position: relative;   /* ⬅️ base do overlay */
+            width: 60px;
+            height: 60px;
+            padding: 0;
+            border-radius: 15px;
+        }
+
+        /* Imagem normal */
+        .btn-with-overlay img {
+            width: 48px;
+            height: 48px;
         }
 
         .footer-label {
@@ -70,41 +420,44 @@
             
             padding: 5px 10px; /* Espaçamento interno */
             border-radius: 5px; /* Borda arredondada */
-        }
+        } 
 
-        #controls button:hover {
-            background-color: #676a6e;
+        /* ===============================
+        PAINEL DIREITO (RESULTS + COORDINATES)
+        =============================== */
+        #right-panel {
+            width: 260px;                /* largura do painel */
+            display: flex;
+            flex-direction: column;
+            align-items: center;         /* ⬅️ CENTRALIZA HORIZONTALMENTE */
+            padding-top: 20px;
+            gap: 20px;
         }
-
-        #controls label {
-            margin: 5px 10px;
+        #results {
+           /* border: 2px solid #007bff;*/
+            width: 100%;
+            max-width: 100%;
             font-size: 14px;
-            color: #918a91;
+            color:  #dad3d3f4;
+            margin-top: 20px;
+         
         }
-
-        #controls input {
-            width: 50px;
-            padding: 5px;
-            border-radius: 20px;
-            border: 5px solid #ddd;
-            text-align: center;
-            background-color: #f5f2f2;
+        #coordinates {
+            width: 100%;
+            padding: 10px 4px;     /* ⬅️ menos compressão lateral */
+         
+            border-radius: 0;
+            font-size: 14px;
+            color:  #dad3d3f4;
         }
-
-        #controls input:focus {
-            border-color: #007bff;
-            outline: none;
-        }
-
-        .status-label {
+                .status-label {
             padding: 8px 12px;
             border-radius: 20px;
             font-weight: bold;
-            color: white;
+            color: rgb(255, 255, 255);
             display: inline-block;
         }
-
-        .status-ok {
+         .status-ok {
             background-color: #28a745;
         }
 
@@ -112,862 +465,7 @@
             background-color: #dc3545;
         }
 
-        #canvas {
-            border: 10px solid #333232;
-            border-radius: 15px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            margin-top: 20px;
-        }
-
-        #results {
-           /* border: 2px solid #007bff;*/
-            border-radius: 20px;
-            margin-top: 20px;
-            padding: 10px;
-            background: #fff;
-            border-radius: 20px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        
-    
-        #coordinates {
-            /*border: 2px solid #007bff;*/
-            border-radius: 20px;
-            margin-top: 20px; /* Ajuste a margem superior conforme necessário */
-            margin-top: 20px;
-            padding: 10px;
-            background: #fff;
-            border-radius: 20px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-
-
-        select {
-            padding: 5px;
-            border: 1px solid #ddd;
-            border-radius: 20px;
-            margin-left: 20px;
-            font-size: 14px;
-        }
-
-        select:focus {
-            border-color: #007bff;
-            outline: none;
-        }
-
-        .button-execute {
-            font-size: 50px;
-            font-weight: bold;
-            background-color: #28a745;
-            color: white;
-            border: none;
-            padding: 15px 25px;
-            border-radius: 20px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-top: 10px;
-        }
-
-        .button-execute:hover {
-            background-color: #218838;
-        }
-
-        .button-live {
-            font-size: 14px;
-            background-color: #dc3545;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 20px;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-        .button-gray {
-            font-size: 10px;
-            background-color: #6e696a;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 20px;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-
-        .button-reboot {
-            font-size: 10px;
-            background-color: yellow;
-            color: black;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 20px;
-            cursor: pointer;
-            margin-top: 20px;
-            margin-left:750px;
-        }
-
-        .button-referenceImg {
-            font-size: 20px;
-            background-color: #02f236;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 20px;
-            cursor: pointer;
-            margin-top: 10px;
-           
-        }
-        .button-referenceImg_NOK {
-            font-size: 20px;
-            background-color: #f20227;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 20px;
-            cursor: pointer;
-            margin-top: 10px;
-           
-        }
-
-        .button-treinar_nra {
-            font-size: 20px;
-            background-color: #f20227;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 20px;
-            cursor: pointer;
-            margin-top: 10px;
-           
-        }
-
-        .button-imgOkDel {
-            position: relative; 
-            font-size: 10px;
-            background-color: #181a19;
-            color: none;
-            border: none;
-            padding: 5px 10px;
-            border-radius: 10px;
-            cursor: pointer;
-           
-           
-        }
-        .button-imgNokDel {
-            position: relative;
-            font-size: 10px;
-            background-color: #181a19;
-            color: none;
-            border: none;
-            padding: 5px 10px;
-            border-radius: 10px;
-            cursor: pointer;
-            margin-top: 10px;
-           
-        }
-
-        
-        
-        .button-imgOkDel:hover::after {
-            content: attr(data-tooltip); /* Pega o texto do data-tooltip */
-            position: absolute;
-            bottom: 100%; /* Posiciona acima do botão */
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: #333;
-            color: white;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            white-space: nowrap;
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-        
-        .button-imgOkDel:hover::after {
-            opacity: 1; /* Mostra ao passar o mouse */
-        }
-        
-
-       
-        
-        
-        .button-imgNokDel:hover::after {
-            content: attr(data-tooltip); /* Pega o texto do data-tooltip */
-            position: absolute;
-            bottom: 100%; /* Posiciona acima do botão */
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: #333;
-            color: white;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            white-space: nowrap;
-            opacity: 0;
-            transition: opacity 0.3s;
-            
-        }
-        
-        .button-imgNokDel:hover::after {
-            opacity: 1; /* Mostra ao passar o mouse */
-        }
-
-        .button-ajustarPos{
-            font-size: 18px;
-            background-color: blue;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 20px;
-            cursor: pointer;
-            margin-top: 10px;
-           
-        }
-        .button-limites {
-            font-size: 14px;
-            background-color: #700e74;
-            color: hwb(0 100% 0%);
-            border: none;
-            padding: 10px 20px;
-            border-radius: 20px;
-            cursor: pointer;
-            margin-top: 10px;
-            margin-left: 70px;
-        }
-        #label-programa {
-            font-size: 16px;
-            color:white;
-            top: 20px
-            margin-left: auto; /* Empurra a label para a direita */
-            padding-left: 10px; /* Espaço opcional para separação */
-             
-        }
-
-        #camera {
-            font-size: 32px;
-            color:white;
-            top: 20px
-            margin-left: auto; /* Empurra a label para a direita */
-            padding-left: 10px; /* Espaço opcional para separação */
-             
-        }
-        #NomePrograma {
-            display: flex;
-            justify-content: flex-end;
-            text-transform: uppercase;
-            font-weight: bold;
-            
-        }
-
-        #programa-section{
-            
-            border: 2px solid #007bff;
-            border-radius: 20px;
-            width: 50px;
-        }
-
-        #camera-section{
-            
-            border: 2px solid #007bff;
-            border-radius: 20px;
-            width: 50px;
-        }
-
-        #roi-section{
-            
-            border: 2px solid #007bff;
-            border-radius: 20px;
-            margin-left: 20px;
-            width: 70px;
-        }
-        
-        #label-roisection{
-   
-            margin-left: 80px;
-        }
-
-        .button-live:hover {
-            background-color: #c82333;
-        }
-
-        .flex-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            gap: 20px;
-        }
-        /* Estilo padrão do botão */
-        #togglePanMode {
-            background-color: #4CAF50; /* Verde */
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            cursor: pointer;
-            border-radius: 5px;
-            transition: background-color 0.3s ease;
-        }
-
-        /* Estilo quando o modo "pan" estiver ativo */
-        #togglePanMode.pan-active {
-            background-color: #f44336; /* Vermelho */
-        }
-
-        .flex-container > div {
-            flex: 1;
-        }
-
-        .machine-learning-group {
-            display: inline-block;
-            background-color: #333232;
-           /* border: 3px solid #007bff;*/
-            border-radius: 20px; /* Borda arredondada */
-            padding: 10px;
-            text-align: center; /* Alinhamento centralizado */
-            margin: 0 10px; /* Margem para separar dos outros botões */
-        }
-        
-        
-        
-        .ml-header {
-            display: flex;
-            align-items: center; /* Alinha o texto e a imagem verticalmente */
-            font-weight: bold;
-            justify-content: center; /* Centraliza o conteúdo horizontalmente */
-            margin-bottom: 5px; /* Espaço entre o cabeçalho e os botões */
-        }
-        
-        .ml-header span {
-            margin-right: 10px; /* Espaço entre o texto e a imagem */
-        }
-        
-        .ml-icon {
-            width: 40px; /* Ajuste o tamanho da imagem conforme necessário */
-            height: 40px; /* Ajuste o tamanho da imagem conforme necessário */
-        }
-
-        .del-icon {
-            width: 20px; /* Ajuste o tamanho da imagem conforme necessário */
-            height: 20px; /* Ajuste o tamanho da imagem conforme necessário */
-            transition: transform 0.2s ease-in-out;
-        }
-
-        
-        .pan-icon {
-            width: 40px; /* Ajuste o tamanho da imagem conforme necessário */
-            height: 40px; /* Ajuste o tamanho da imagem conforme necessário */
-            transition: transform 0.2s ease-in-out;
-        }
-        #togglePanMode:hover {
-            transform: scale(1.20); /* Aumenta em 10% */
-        }
-        #togglePanMode:hover .pan-icon {
-            transform: scale(1.20); /* Aumenta o ícone em 10% */
-        }
-        #togglePanMode {
-            transition: transform 0.2s ease-in-out;
-            transform-origin: center; /* Faz o zoom ser centralizado */
-            background: none;
-            border: none;
-            cursor: pointer;
-            padding: 5px; /* Dá espaço para o zoom */
-        }
-
-
-
-        .zoomMais-icon {
-            width: 40px; /* Ajuste o tamanho da imagem conforme necessário */
-            height: 40px; /* Ajuste o tamanho da imagem conforme necessário */
-            transition: transform 0.2s ease-in-out;
-        }
-        #zoomInBtn:hover {
-            transform: scale(1.20); /* Aumenta em 10% */
-        }
-        #zoomInBtn:hover .zoomMais-icon {
-            transform: scale(1.20); /* Aumenta o ícone em 10% */
-        }
-        #zoomInBtn {
-            transition: transform 0.2s ease-in-out;
-            transform-origin: center; /* Faz o zoom ser centralizado */
-            background: none;
-            border: none;
-            cursor: pointer;
-            padding: 5px; /* Dá espaço para o zoom */
-        }
-
-        .zoomMenos-icon {
-            width: 40px; /* Ajuste o tamanho da imagem conforme necessário */
-            height: 40px; /* Ajuste o tamanho da imagem conforme necessário */
-            transition: transform 0.2s ease-in-out;
-        }
-        #zoomOutBtn:hover {
-            transform: scale(1.20); /* Aumenta em 10% */
-        }
-        #zoomOutBtn:hover .zoomMenos-icon {
-            transform: scale(1.20); /* Aumenta o ícone em 10% */
-        }
-        #zoomOutBtn {
-            transition: transform 0.2s ease-in-out;
-            transform-origin: center; /* Faz o zoom ser centralizado */
-            background: none;
-            border: none;
-            cursor: pointer;
-            padding: 5px; /* Dá espaço para o zoom */
-        }
-
-
-
-        .zoomReset-icon {
-            width: 40px; /* Ajuste o tamanho da imagem conforme necessário */
-            height: 40px; /* Ajuste o tamanho da imagem conforme necessário */
-            transition: transform 0.2s ease-in-out;
-        }
-        
-        #resetZoomBtn:hover {
-            transform: scale(1.20); /* Aumenta em 10% */
-        }
-        #resetZoomBtn:hover .zoomReset-icon {
-            transform: scale(1.20); /* Aumenta o ícone em 10% */
-        }
-        #resetZoomBtn {
-            transition: transform 0.2s ease-in-out;
-            transform-origin: center; /* Faz o zoom ser centralizado */
-            background: none;
-            border: none;
-            cursor: pointer;
-            padding: 5px; /* Dá espaço para o zoom */
-        }
-
-
-
-        .limpar-icon {
-            width: 40px; /* Ajuste o tamanho da imagem conforme necessário */
-            height: 40px; /* Ajuste o tamanho da imagem conforme necessário */
-            transition: transform 0.2s ease-in-out;
-        }
-
-        #deleteBtn:hover {
-            transform: scale(1.20); /* Aumenta em 10% */
-        }
-        #deleteBtn:hover .limpar-icon {
-            transform: scale(1.20); /* Aumenta o ícone em 10% */
-        }
-        #deleteBtn {
-            transition: transform 0.2s ease-in-out;
-            transform-origin: center; /* Faz o zoom ser centralizado */
-            background: none;
-            border: none;
-            cursor: pointer;
-            padding: 5px; /* Dá espaço para o zoom */
-        }
-
-
-        .editar-icon {
-            width: 40px; /* Ajuste o tamanho da imagem conforme necessário */
-            height: 40px; /* Ajuste o tamanho da imagem conforme necessário */
-            transition: transform 0.2s ease-in-out;
-        }
-        #editBtn:hover {
-            transform: scale(1.20); /* Aumenta em 10% */
-        }
-        #editBtn:hover .editar-icon {
-            transform: scale(1.20); /* Aumenta o ícone em 10% */
-        }
-        #editBtn {
-            transition: transform 0.2s ease-in-out;
-            transform-origin: center; /* Faz o zoom ser centralizado */
-            background: none;
-            border: none;
-            cursor: pointer;
-            padding: 5px; /* Dá espaço para o zoom */
-        }
-
-
-
-        .circulo-icon {
-            width: 40px; /* Ajuste o tamanho da imagem conforme necessário */
-            height: 40px; /* Ajuste o tamanho da imagem conforme necessário */
-            transition: transform 0.2s ease-in-out;
-        }
-        #drawCircleBtn:hover {
-            transform: scale(1.20); /* Aumenta em 10% */
-        }
-        #drawCircleBtn:hover .circulo-icon {
-            transform: scale(1.20); /* Aumenta o ícone em 10% */
-        }
-        #drawCircleBtn {
-            transition: transform 0.2s ease-in-out;
-            transform-origin: center; /* Faz o zoom ser centralizado */
-            background: none;
-            border: none;
-            cursor: pointer;
-            padding: 5px; /* Dá espaço para o zoom */
-        }
-
-
-        .retangulo-icon {
-            width: 40px; /* Ajuste o tamanho da imagem conforme necessário */
-            height: 40px; /* Ajuste o tamanho da imagem conforme necessário */
-            transition: transform 0.2s ease-in-out;
-        }
-        #drawRectangleBtn:hover {
-            transform: scale(1.20); /* Aumenta em 10% */
-        }
-        #drawRectangleBtn:hover .retangulo-icon {
-            transform: scale(1.20); /* Aumenta o ícone em 10% */
-        }
-        #drawRectangleBtn {
-            transition: transform 0.2s ease-in-out;
-            transform-origin: center; /* Faz o zoom ser centralizado */
-            background: none;
-            border: none;
-            cursor: pointer;
-            padding: 5px; /* Dá espaço para o zoom */
-        }
-        
-        .send-icon {
-            width: 40px; /* Ajuste o tamanho da imagem conforme necessário */
-            height: 40px; /* Ajuste o tamanho da imagem conforme necessário */
-            transition: transform 0.2s ease-in-out;
-        }
-        #sendDataBtn:hover {
-            transform: scale(1.20); /* Aumenta em 10% */
-        }
-        #sendDataBtn:hover .send-icon {
-            transform: scale(1.20); /* Aumenta o ícone em 10% */
-        }
-        #sendDataBtn {
-            transition: transform 0.2s ease-in-out;
-            transform-origin: center; /* Faz o zoom ser centralizado */
-            background: none;
-            border: none;
-            cursor: pointer;
-            padding: 5px; /* Dá espaço para o zoom */
-        }
-
-
-        .receber-icon {
-            width: 40px; /* Ajuste o tamanho da imagem conforme necessário */
-            height: 40px; /* Ajuste o tamanho da imagem conforme necessário */
-            transition: transform 0.2s ease-in-out;
-        }
-        #receiveDataBtn:hover {
-            transform: scale(1.20); /* Aumenta em 10% */
-        }
-        #receiveDataBtn:hover .receber-icon {
-            transform: scale(1.20); /* Aumenta o ícone em 10% */
-        }
-        #receiveDataBtn {
-            transition: transform 0.2s ease-in-out;
-            transform-origin: center; /* Faz o zoom ser centralizado */
-            background: none;
-            border: none;
-            cursor: pointer;
-            padding: 5px; /* Dá espaço para o zoom */
-        }
-        
-
-        .tool-icon {
-            width: 40px; /* Ajuste o tamanho da imagem conforme necessário */
-            height: 40px; /* Ajuste o tamanho da imagem conforme necessário */
-            transition: transform 0.2s ease-in-out;
-        }
-        #limitesBtn:hover {
-            transform: scale(1.20); /* Aumenta em 10% */
-        }
-        #limitesBtn:hover .tool-icon {
-            transform: scale(1.20); /* Aumenta o ícone em 10% */
-        }
-        #limitesBtn {
-            transition: transform 0.2s ease-in-out;
-            transform-origin: center; /* Faz o zoom ser centralizado */
-            background: none;
-            border: none;
-            cursor: pointer;
-            padding: 5px; /* Dá espaço para o zoom */
-        }
-         .reboot-icon {
-            width: 60px; /* Ajuste o tamanho da imagem conforme necessário */
-            height: 60px; /* Ajuste o tamanho da imagem conforme necessário */
-            transition: transform 0.2s ease-in-out;
-        }
-        #rebootBtn:hover {
-            transform: scale(1.60); /* Aumenta em 10% */
-        }
-        #rebootBtn:hover .reboot-icon {
-            transform: scale(1.60); /* Aumenta o ícone em 10% */
-        }
-        #rebootBtn {
-            transition: transform 0.2s ease-in-out;
-            transform-origin: center; /* Faz o zoom ser centralizado */
-            background: none;
-            border: none;
-            cursor: pointer;
-            padding: 5px; /* Dá espaço para o zoom */
-        }
-        
-
-        .localizador-icon {
-            width: 60px; /* Ajuste o tamanho da imagem conforme necessário */
-            height: 60px; /* Ajuste o tamanho da imagem conforme necessário */
-        }
-        #posicaoBtn:hover {
-            transform: scale(1.20); /* Aumenta em 10% */
-        }
-        #posicaoBtn:hover .localizador-icon {
-            transform: scale(1.20); /* Aumenta o ícone em 10% */
-        }
-        #posicaoBtn {
-            transition: transform 0.2s ease-in-out;
-            transform-origin: center; /* Faz o zoom ser centralizado */
-            background: none;
-            border: none;
-            cursor: pointer;
-            padding: 5px; /* Dá espaço para o zoom */
-        }
-        
-
-        .live-icon {
-            width: 60px; /* Ajuste o tamanho da imagem conforme necessário */
-            height: 60px; /* Ajuste o tamanho da imagem conforme necessário */
-        }
-        #liveBtn:hover {
-            transform: scale(1.20); /* Aumenta em 10% */
-        }
-        #liveBtn:hover .live-icon {
-            transform: scale(1.20); /* Aumenta o ícone em 10% */
-        }
-        #liveBtn {
-            transition: transform 0.2s ease-in-out;
-            transform-origin: center; /* Faz o zoom ser centralizado */
-            background: none;
-            border: none;
-            cursor: pointer;
-            padding: 5px; /* Dá espaço para o zoom */
-        }
-
-         .pose-icon {
-            width: 60px; /* Ajuste o tamanho da imagem conforme necessário */
-            height: 60px; /* Ajuste o tamanho da imagem conforme necessário */
-        }
-        #poseBtn:hover {
-            transform: scale(1.20); /* Aumenta em 10% */
-        }
-        #poseBtn:hover .pose-icon {
-            transform: scale(1.20); /* Aumenta o ícone em 10% */
-        }
-        #poseBtn {
-            transition: transform 0.2s ease-in-out;
-            transform-origin: center; /* Faz o zoom ser centralizado */
-            background: none;
-            border: none;
-            cursor: pointer;
-            padding: 5px; /* Dá espaço para o zoom */
-        }
-
-        .pessoas-icon {
-            width: 60px; /* Ajuste o tamanho da imagem conforme necessário */
-            height: 60px; /* Ajuste o tamanho da imagem conforme necessário */
-        }
-
-        #pessoasBtn:hover {
-            transform: scale(1.20); /* Aumenta em 10% */
-        }
-        #pessoasBtn:hover .pessoas-icon {
-            transform: scale(1.20); /* Aumenta o ícone em 10% */
-        }
-        #pessoasBtn {
-            transition: transform 0.2s ease-in-out;
-            transform-origin: center; /* Faz o zoom ser centralizado */
-            background: none;
-            border: none;
-            cursor: pointer;
-            padding: 5px; /* Dá espaço para o zoom */
-        }
-
-
-          .face-icon {
-            width: 60px; /* Ajuste o tamanho da imagem conforme necessário */
-            height: 60px; /* Ajuste o tamanho da imagem conforme necessário */
-        }
-        #faceBtn:hover {
-            transform: scale(1.20); /* Aumenta em 10% */
-        }
-        #faceBtn:hover .face-icon {
-            transform: scale(1.20); /* Aumenta o ícone em 10% */
-        }
-        #faceBtn {
-            transition: transform 0.2s ease-in-out;
-            transform-origin: center; /* Faz o zoom ser centralizado */
-            background: none;
-            border: none;
-            cursor: pointer;
-            padding: 5px; /* Dá espaço para o zoom */
-        }
-
-        .cinza-icon {
-            width: 60px; /* Ajuste o tamanho da imagem conforme necessário */
-            height: 60px; /* Ajuste o tamanho da imagem conforme necessário */
-        }
-        #grayBtn:hover {
-            transform: scale(1.20); /* Aumenta em 10% */
-        }
-        #grayBtn:hover .cinza-icon {
-            transform: scale(1.20); /* Aumenta o ícone em 10% */
-        }
-        #grayBtn {
-            transition: transform 0.2s ease-in-out;
-            transform-origin: center; /* Faz o zoom ser centralizado */
-            background: none;
-            border: none;
-            cursor: pointer;
-            padding: 5px; /* Dá espaço para o zoom */
-        }
-
-
-        .notok-icon {
-            width: 60px; /* Ajuste o tamanho da imagem conforme necessário */
-            height: 60px; /* Ajuste o tamanho da imagem conforme necessário */
-            transform: scale(1.20); /* Aumenta o ícone em 10% */
-            position: relative;   /* Garante que fique acima do ::before */
-            z-index: 1;
-        }
-        .rna-icon {
-            width: 60px; /* Ajuste o tamanho da imagem conforme necessário */
-            height: 60px; /* Ajuste o tamanho da imagem conforme necessário */
-            transform: scale(1.20); /* Aumenta o ícone em 10% */
-            position: relative;   /* Garante que fique acima do ::before */
-            z-index: 1;
-        }
-        #referenceImgNotBtn:hover {
-            transform: scale(1.20); /* Aumenta em 10% */
-        }
-        #referenceImgNotBtn:hover .notok-icon {
-            transform: scale(1.20); /* Aumenta o ícone em 10% */
-        }
-        #referenceImgNotBtn {
-            font-size: 0px;
-            transition: transform 0.2s ease-in-out;
-            transform-origin: center; /* Faz o zoom ser centralizado */
-            background: #f20227;
-            border-radius: 50%; 
-            border: none;
-            cursor: pointer;
-            padding: 5px; /* Dá espaço para o zoom */
-
-           
-        }
-
-        #treinar_rnaBtn:hover {
-            transform: scale(1.20); /* Aumenta em 10% */
-        }
-        #treinar_rnaBtn:hover .notok-icon {
-            transform: scale(1.20); /* Aumenta o ícone em 10% */
-        }
-        #treinar_rnaBtn {
-            font-size: 0px;
-            transition: transform 0.2s ease-in-out;
-            transform-origin: center; /* Faz o zoom ser centralizado */
-            background: #040504;
-            border-radius: 50%; 
-            border: none;
-            cursor: pointer;
-            padding: 5px; /* Dá espaço para o zoom */
-
-           
-        }
-
-
-        .ok-icon {
-            width: 60px; /* Ajuste o tamanho da imagem conforme necessário */
-            height: 60px; /* Ajuste o tamanho da imagem conforme necessário */
-            transform: scale(1.20); /* Aumenta o ícone em 10% */
-            position: relative;   /* Garante que fique acima do ::before */
-            z-index: 1;
-        }
-        #referenceImgBtn:hover {
-            transform: scale(1.20); /* Aumenta em 10% */
-        }
-        #referenceImgBtn:hover .ok-icon {
-            transform: scale(1.20); /* Aumenta o ícone em 10% */
-        }
-        #referenceImgBtn {
-            font-size: 1px;
-            transition: transform 0.2s ease-in-out;
-            transform-origin: center; /* Faz o zoom ser centralizado */
-            background: #02f236;
-            border-radius: 50%; 
-            border: none;
-            cursor: pointer;
-            padding: 5px; /* Dá espaço para o zoom */
-
-           
-        }
-
-
-        .executar-icon {
-            width: 90px; /* Ajuste o tamanho da imagem conforme necessário */
-            height: 90px; /* Ajuste o tamanho da imagem conforme necessário */
-            transform: scale(1.20); /* Aumenta o ícone em 10% */
-        }
-
-        #executarBtn:hover {
-            transform: scale(1.20); /* Aumenta em 10% */
-        }
-        #executarBtn:hover .executar-icon {
-            transform: scale(1.20); /* Aumenta o ícone em 10% */
-        }
-        #executarBtn {
-            transition: transform 0.2s ease-in-out;
-            transform-origin: center; /* Faz o zoom ser centralizado */
-            background: none;
-            border: none;
-            cursor: pointer;
-            padding: 5px; /* Dá espaço para o zoom */
-        }
-        #deleteOKLabel {
-            font-weight: bold;
-            font-size: 14px;
-            color: #02f236;
-        }
-        #deleteNOKLabel {
-            font-weight: bold;
-            font-size: 14px;
-            color: #f20227;
-        }
-
-        .loading-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.6);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-          }
-          .loading-content {
-            background: #050505;
-            padding: 20px 40px;
-            border-radius: 12px;
-            text-align: center;
-            box-shadow: 0px 0px 15px rgba(0,0,0,0.4);
-          }
-          .spinner {
-            width: 50px;
-            height: 50px;
-            border: 6px solid #ddd;
-            border-top: 6px solid #3498db;
-            border-radius: 50%;
-            margin: 0 auto 15px auto;
-            animation: spin 1s linear infinite;
-          }
-          @keyframes spin {
-            100% { transform: rotate(360deg); }
-          }
-          .big-overlay {
+        .big-overlay {
             position: fixed;
             inset: 0;
             display: flex;
@@ -992,154 +490,312 @@
             opacity: 1;
             transform: scale(1);
           }
-    </style>
-</head>
-<body>
-    <div style="display: flex; align-items: center; justify-content: center;">
-        <div style="margin-right: 10px;">
-            <!-- Elemento que ficará à esquerda do h1 -->
-            <input type="radio" name="theme" value="light" onclick="setTheme('light')">
-            <input type="radio" name="theme" value="dark" onclick="setTheme('dark')"checked>
-        </div>
-        <h1 id="titulo">
-            
-             Sistema de Visão Embarcado
-        </h1>
-    </div>
+          /* Linha de cada ROI */
+            .roi-row {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                margin-bottom: 10px;
+                font-size: 14px;
+            }
 
-    <!-- Popup de Loading -->
-    <div id="loading-popup" class="loading-overlay" style="display: none;">
-    <div class="loading-content">
-      <div class="spinner"></div>
-      <p>Treinando Rede Neural Artificial, aguarde...</p>
-    </div>
-    </div>
+            /* Evita quebra estranha */
+            .roi-row span {
+                white-space: nowrap;
+            }
+            /* CADA ROI = UMA LINHA ORGANIZADA */
+            .input-field {
+                display: grid;
+                
+                grid-template-columns: 
+                    auto      /* ROI label */
+                    auto      /* texto */
+                    repeat(3, auto) /* inputs principais */
+                    auto      /* RNA Status label */
+                    auto      /* RNA input */
+                    70px;     /* OK / NOK fixo */
 
+                align-items: center;
+                column-gap: 8px;
+                row-gap: 6px;
 
-    <div id="controls">
-        <label id="camera">CAMERA:
+                margin-bottom: 10px;
+                font-size: 13px;
+            }
+
+            /* Labels mais previsíveis */
+            .input-field label {
+                white-space: nowrap;
+                font-weight: 600;
+            }
+
+            /* Inputs alinhados */
+            .input-field input {
+                margin: 0;              /* REMOVE influência lateral */
+            }
+
+            /* Badge OK / NOK sempre alinhado */
+            .status-label {
+                justify-self: end;
+                min-width: 60px;
+                text-align: center;
+            }
+            #NomePrograma {
+            position: fixed;        /* ⬅️ fixa na tela */
+            top: 12px;              /* distância do topo */
+            left: 12px;             /* distância da esquerda */
+
+            z-index: 9999;          /* fica acima de tudo */
+        }
+
+        #label-programa {
+            font-size: 16px;
+            font-weight: bold;
+            text-transform: uppercase;
+            color: white;
+
+            background: rgba(0, 0, 0, 0.6); /* opcional, melhora leitura */
+            padding: 6px 12px;
+            border-radius: 8px;
+
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        }
+
+     </style>
+    </head>
+
+    <body>
+
+      
+
+        <!-- WORKSPACE -->
+        <div id="workspace">
+            <!-- CONTROLES -->
+            <div id="controls">
                 <select id="camera-section">
-                    <option value="">-- Selecione --</option>
+                    <option value="">CAM</option>
                     <option value="1">1</option>
                     <option value="2">2</option>
                     <option value="3">3</option>
                 </select>
-        </label>
-        <button id="drawRectangleBtn" onclick="setMode('drawRectangle')"title ="Criar um Retangulo"><img src="{{ url_for('static', filename='retangulo3.png') }}" alt="" class="retangulo-icon"></button>
-        <button id="drawCircleBtn" onclick="setMode('drawCircle')"title ="Criar um Círculo"><img src="{{ url_for('static', filename='circulo3.png') }}" alt="" class="circulo-icon"></button>
-        <button id="editBtn" onclick="setMode('edit')"title ="Editar um Roi"><img src="{{ url_for('static', filename='edit.png') }}" alt="" class="editar-icon"></button>
-        <button id="deleteBtn" onclick="deleteAllROIs()"title ="Limpar a tela"><img src="{{ url_for('static', filename='limpar.png') }}" alt="" class="limpar-icon"></button>
-        <button id="zoomInBtn" onclick="zoomIn()" title ="Diminuir o Zoom"><img src="{{ url_for('static', filename='zoom_mais.png') }}" alt="" class="zoomMenos-icon"></button>
-        <button id="zoomOutBtn" onclick="zoomOut()" title ="Aumentar o Zoom"><img src="{{ url_for('static', filename='zoom_menos.png') }}" alt="" class="zoomMais-icon"></button>
-        <button id="resetZoomBtn" onclick="resetZoom()" title ="Resetar o Zoom"><img src="{{ url_for('static', filename='zoom-reset.png') }}" alt="" class="zoomReset-icon"></button>
-        <button id="togglePanMode" title ="Mover Imagem"><img src="{{ url_for('static', filename='hand.png') }}" alt="" class="pan-icon"></button>
-        <label>Contraste: <input type="number" id="contrast" step="0.1"></label>
-        <label>Brilho: <input type="number" id="brightness"></label>
-        <label>Gamma: <input type="number" id="gamma" step="0.1"></label>
-        <label>Exposição: <input type="number" id="exposure" step="0.1"></label>
-        <button id="sendDataBtn"onclick="sendData()"title ="Enviar para o Controlador"><img src="{{ url_for('static', filename='send.png') }}" alt="" class="send-icon"></button>
-        <button id="receiveDataBtn"onclick="receiveData()"title ="Receber do Controlador"><img src="{{ url_for('static', filename='receber.png') }}" alt="" class="receber-icon"></button>
-        <button id="limitesBtn"class="button-limites" onclick="ajustarLimites()"title ="Limites e Ferramentas"><img src="{{ url_for('static', filename='tool.png') }}" alt="" class="tool-icon"></button>
-        <button id="rebootBtn"class="button-reboot" onclick="reboot()"title ="Reiniciar o Sistema"><img src="{{ url_for('static', filename='reboot.png') }}" alt="" class="reboot-icon"></button>   
-    </div>
-    <div id="NomePrograma">
-        <label id ="label-programa"></label> 
-    </div>
-    <div class="flex-container">
-        <!-- Coluna com o botão e o canvas -->
-        <div>
-            <button id="executarBtn" class="button-execute" onclick="Executar()"title ="Executar"><img src="{{ url_for('static', filename='executar.png') }}" alt="" class="executar-icon"></button>
-            
-            <div class="machine-learning-group">
-                <div class="ml-header">
-                    <span>Aprendizado de Máquina</span>
-                    <img src="{{ url_for('static', filename='aprendizado.png') }}" alt="Ícone de Aprendizado de Máquina" class="ml-icon">
-                </div>
-                <div>
-                    <button id="referenceImgBtn" class="button-referenceImg" onclick="CapturarReference()" title ="Criar imagem Positiva"><img src="{{ url_for('static', filename='ok.png') }}" alt="" class="ok-icon"></button>
-                    <button class="button-imgOkDel" onclick="DelReferenceOK()" title ="Apagar Imagens Positivas">
-                        <span id="deleteOKLabel"></span>  <!-- Label dinâmica -->
-                    </button>
-                
-                
-                    <button id="referenceImgNotBtn" class="button-referenceImg_NOK" onclick="CapturarReference_NOK()" title ="Criar imagem Negativa"><img src="{{ url_for('static', filename='notok.png') }}" alt="" class="notok-icon"></button>
-                    <button class="button-imgNokDel" onclick="DelReferenceNOK()" title ="Apagar Imagens Negativas">
-                        <span id="deleteNOKLabel"></span>  <!-- Label dinâmica -->
-                    </button>
-                    <button id="treinar_rnaBtn" class="button-treinar_nra" onclick="TreinarRNA()" title ="Treinar IA"><img src="{{ url_for('static', filename='rede-neural2.png') }}" alt="" class="rna-icon"></button>
-                </div>
-            </div>
-            
-            <button id="posicaoBtn" class="button-ajustarPos" onclick="ajustarPosicaoLocalizador()"title ="Ajustar Posição"><img src="{{ url_for('static', filename='localizador2.png') }}" alt="" class="localizador-icon"></button>
-            <button id="liveBtn"class="button-live" onclick="AoVivo()"title ="Transmissão Ao Vivo"><img src="{{ url_for('static', filename='live2.png') }}" alt="" class="live-icon"></button>
-           <!--  <button id="poseBtn"class="button-pose" onclick="AoVivoYolo()"title ="Transmissão Yolo - CAM1"><img src="{{ url_for('static', filename='yolo.png') }}" alt="" class="pose-icon"></button>
-            <button id="pessoasBtn"class="button-pessoas" onclick="AoVivoPessoas()"title ="Transmissão Pessoas -CAM3"><img src="{{ url_for('static', filename='pessoas.png') }}" alt="" class="pessoas-icon"></button>
-            <button id="faceBtn"class="button-face" onclick="AoVivoFace()"title ="Transmissão Face ID - CAM2"><img src="{{ url_for('static', filename='face.png') }}" alt="" class="face-icon"></button> -->
-            <button id="grayBtn"class="button-gray" onclick="fetchImageGray()"title ="Escala de Cinza"><img src="{{ url_for('static', filename='cinza2.png') }}" alt="" class="cinza-icon"></button>
-            <canvas id="canvas" width="800" height="600"></canvas>
-        </div>
 
-        <!-- Resultados do lado direito -->
-        <div>
-            <div>
+                <button onclick="setMode('drawRectangle')" title="Retângulo">
+                    <img src="{{ url_for('static', filename='retangulo_ms.png') }}">
+                </button>
+
+                <button onclick="setMode('drawCircle')" title="Círculo">
+                    <img src="{{ url_for('static', filename='circulo_ms.png') }}">
+                </button>
+
+                <button onclick="setMode('edit')" title="Editar ROI">
+                    <img src="{{ url_for('static', filename='editar_ms.png') }}">
+                </button>
+
+                <button onclick="deleteAllROIs()" title="Limpar">
+                    <img src="{{ url_for('static', filename='limpar_ms.png') }}">
+                </button>
+
+                <button onclick="zoomIn()" title="Zoom +">
+                    <img src="{{ url_for('static', filename='zoom_mais_ms.png') }}">
+                </button>
+
+                <button onclick="zoomOut()" title="Zoom -">
+                    <img src="{{ url_for('static', filename='zoom_menos_ms.png') }}">
+                </button>
+
+                <button onclick="resetZoom()" title="Reset Zoom">
+                    <img src="{{ url_for('static', filename='zoom-reset_ms.png') }}">
+                </button>
+
+                <button id="togglePanMode" title="Mover">
+                    <img src="{{ url_for('static', filename='hand_ms.png') }}">
+                </button>
+
+                
+
             
-            <label for="programa">Selecione o programa:</label>
-                <select id="programa-section">
-                    <option value="">-- Selecione --</option>
-                    <option value="1">1</option>
-                    <option value="2">2</option>
-                    <option value="3">3</option>
-                    <option value="4">4</option>
-                    <option value="5">5</option>
-                    <option value="6">6</option>
-                    <option value="7">7</option>
-                    <option value="8">8</option>
-                    <option value="9">9</option>
-                    <option value="10">10</option>
-                </select>
-            
-             
-       
-            <label for="roi-section" id ="label-roisection">Selecione a ROI:</label>
-            <select id="roi-section">
-                <option value="">-- Selecione --</option>
-                <option value="ROI1">ROI1</option>
-                <option value="ROI2">ROI2</option>
-                <option value="ROI3">ROI3</option>
-                <option value="ROI4">ROI4</option>
-                <option value="ROI5">ROI5</option>
-                <option value="ROI6">ROI6</option>
-                <option value="ROI7">ROI7</option>
-                <option value="ROI8">ROI8</option>
-                <option value="ROI9">ROI9</option>
-                <option value="ROI10">ROI10</option>
-                <option value="ROI11">ROI11</option>
-                <option value="ROI12">ROI12</option>
-                <option value="ROI13">ROI13</option>
-                <option value="ROI14">ROI14</option>
-                <option value="ROI15">ROI15</option>
-                <option value="ROI16">ROI16</option>
-                <option value="ROI17">ROI17</option>
-                <option value="ROI18">ROI18</option>
-                <option value="ROI19">ROI19</option>
-                <option value="ROI20">ROI20</option>
-            </select>
-         
-        </div>   
-            <div id="results">Resultados aparecerão aqui</div>
-            <div id="coordinates"></div>
-            <div id="logo_sve"><img src="{{ url_for('static', filename='sve5.png') }}" alt=""></div>
-            <!-- Label no rodapé inferior direito -->
-            <div class="footer-label">
-               Sistema de Visão Embarcado.
+
             </div>
-          <!--   <button class="button-reboot" onclick="reboot()">Reiniciar Controlador</button> -->
-        </div>
-    </div>
-    <div id="overlay" class="big-overlay">
-        <div id="overlayText" class="big-overlay__text"></div>
-      </div>
-    <!-- Incluindo o arquivo JavaScript da pasta static -->
+            <div id="canvas-container">
+                <div class="canvas-stack">
+
+                    <!-- OVERLAY SUPERIOR -->
+                    <div id="canvas-top-controls">
+
+                        <div class="top-control">
+                            <label for="programa-section">Programa</label>
+                            <select id="programa-section">
+                                <option value="">-- Selecione --</option>
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                                <option value="6">6</option>
+                                <option value="7">7</option>
+                                <option value="8">8</option>
+                                <option value="9">9</option>
+                                <option value="10">10</option>
+                            </select>
+                        </div>
+
+                        <div class="top-control">
+                            <label for="roi-section">ROI</label>
+                            <select id="roi-section">
+                                <option value="">-- Selecione --</option>
+                                <option value="ROI1">ROI1</option>
+                                <option value="ROI2">ROI2</option>
+                                <option value="ROI3">ROI3</option>
+                                <option value="ROI4">ROI4</option>
+                                <option value="ROI5">ROI5</option>
+                                <option value="ROI6">ROI6</option>
+                                <option value="ROI7">ROI7</option>
+                                <option value="ROI8">ROI8</option>
+                                <option value="ROI9">ROI9</option>
+                                <option value="ROI10">ROI10</option>
+                                <option value="ROI11">ROI11</option>
+                                <option value="ROI12">ROI12</option>
+                                <option value="ROI13">ROI13</option>
+                                <option value="ROI14">ROI14</option>
+                                <option value="ROI15">ROI15</option>
+                                <option value="ROI16">ROI16</option>
+                                <option value="ROI17">ROI17</option>
+                                <option value="ROI18">ROI18</option>
+                                <option value="ROI19">ROI19</option>
+                                <option value="ROI20">ROI20</option>
+                            </select>
+                        </div>
+
+                    </div>
+
+                    <!-- CANVAS -->
+                    <canvas id="canvas" width="800" height="600"></canvas>
+
+                            <!-- CONTROLES INFERIORES -->
+                            <div id="image-controls">
+                                <div class="control-group">
+                                    <label>Contraste</label>
+                                    <input type="number" id="contrast" step="0.1">
+                                </div>
+
+                                <div class="control-group">
+                                    <label>Brilho</label>
+                                    <input type="number" id="brightness">
+                                </div>
+
+                                <div class="control-group">
+                                    <label>Gamma</label>
+                                    <input type="number" id="gamma" step="0.1">
+                                </div>
+
+                                <div class="control-group">
+                                    <label>Exposição</label>
+                                    <input type="number" id="exposure" step="0.1">
+                                </div> 
+                                
+                                <div id = controls_IA>
+                                    <button onclick="CapturarReference()" title ="Criar imagem Positiva" >
+                                    <img src="{{ url_for('static', filename='positiva_ms.png') }}"> 
+                                    </button>
+                                    <button  onclick="DelReferenceOK()" title ="Apagar Imagens Positivas" class="btn-with-overlay">
+                                        <img src="{{ url_for('static', filename='apagar_ok_ms.png') }}"> 
+                                        <span id="deleteOKLabel"></span>  <!-- Label dinâmica -->
+                                    </button>
+                                    <button onclick="CapturarReference_NOK()" title ="Criar imagem Negativa">
+                                        <img src="{{ url_for('static', filename='negativas_ms.png') }}">
+                                    </button>
+                                    <button onclick="DelReferenceNOK()" title ="Apagar Imagens Negativas"  class="btn-with-overlay">
+                                        <img src="{{ url_for('static', filename='apagar_nok_ms.png') }}">
+                                        <span id="deleteNOKLabel"></span>  <!-- Label dinâmica -->
+                                     <button onclick="TreinarRNA()" title="Treinar IA">
+                                        <img src="{{ url_for('static', filename='neural_ms.png') }}">
+                                    </button>
+                                </div>    
+
+                                
+                            </div>
+
+                        </div>
+                </div>
+
+                <!-- CONTROLES DA DIREITA -->
+                <div id="controls_right">
+
+                    <button onclick="Executar()" title="Executar">
+                        <img src="{{ url_for('static', filename='executar_ms.png') }}">
+                    </button>
+
+                    <button onclick="ajustarPosicaoLocalizador()" title="Ajustar Posição">
+                        <img src="{{ url_for('static', filename='localizador_ms.png') }}">
+                    </button>
+
+                    <button onclick="AoVivo()" title="Transmissão Ao Vivo">
+                        <img src="{{ url_for('static', filename='live_ms.png') }}">
+                    </button>
+
+                    <button onclick="fetchImageGray()" title="Escala de Cinza">
+                        <img src="{{ url_for('static', filename='cinza2.png') }}">
+                    </button>
+                    
+                    <button onclick="sendData()" title="Enviar">
+                        <img src="{{ url_for('static', filename='send_ms.png') }}">
+                    </button>
+
+                    <button onclick="receiveData()" title="Receber">
+                        <img src="{{ url_for('static', filename='receber_ms.png') }}">
+                    </button>
+
+                    <button class="button-limites" onclick="ajustarLimites()" title="Ferramentas">
+                        <img src="{{ url_for('static', filename='tools_ms.png') }}">
+                    </button>
+
+                    <button class="button-reboot" onclick="reboot()" title="Reboot">
+                        <img src="{{ url_for('static', filename='reboot.png') }}">
+                    </button>
+
+                </div>
+                
+                <!-- DIVISOR VERTICAL -->
+                <div id="vertical-divider"></div>
+                
+                <!-- PAINEL DIREITO (RESULTADOS + COORDENADAS) -->
+                <div id="right-panel">
+
+                    <div id="results">Resultados aparecerão aqui</div>
+
+                    <div id="coordinates"></div>
+
+                </div>
+
+                <!-- Rodapé permanece fora (position: fixed) -->
+                <div class="footer-label">
+                    MS Vision Tools.
+                </div>
+                <div id="NomePrograma">
+                        <label id ="label-programa"></label> 
+                </div>
+
+           <div id="loading-popup" class="loading-overlay" style="display:none;">
+                <div class="loading-content">
+                    <div class="spinner"></div>
+
+                    <p id="training-text">
+                    Treinando Rede Neural Artificial, aguarde...
+                    </p>
+
+                    <div style="width:100%;background:#333;border-radius:8px;margin-top:10px;">
+                    <div id="training-bar"
+                        style="height:12px;width:0%;background:#3498db;border-radius:8px;">
+                    </div>
+                    </div>
+
+                    <p id="training-percent" style="margin-top:6px;">0%</p>
+                </div>
+            </div>
+         <div id="overlay" class="big-overlay">
+                <div id="overlayText" class="big-overlay__text"></div>
+         </div>
+     <!-- Incluindo o arquivo JavaScript da pasta static -->
     <script src="{{ url_for('static', filename='js/fabric.min.js') }}"></script> 
    
     <script src="{{ url_for('static', filename='servidor.js') }}"></script>
@@ -1160,7 +816,6 @@
               el.textContent = "";
             }, opts.duration || 1500);
           }
-        setTheme('dark'); // Define o tema escuro como padrão
         const canvas = new fabric.Canvas('canvas', {
             selection: false,
         });
@@ -1171,30 +826,7 @@
         let startX, startY;
         let imageScaleX = 1, imageScaleY = 1;
         
-        function setTheme(theme) {
-            const h1 = document.getElementById('titulo');
-            const controles = document.getElementById('controls');
-            const resultados = document.getElementById('results'); 
-            const coordenadas = document.getElementById('coordinates');
-          
-            if (theme === 'dark') {
-                document.body.style.backgroundColor = '#000000';
-                document.body.style.color = 'white';
-                h1.style.color = 'white'; 
-                controles.style.backgroundColor =  '#333232';
-                resultados.style.backgroundColor =  '#333232';
-                coordenadas.style.backgroundColor =  '#333232';
-                //controlesInput.style.color = 'white'
-            } else {
-                document.body.style.backgroundColor = '#000000';
-                document.body.style.color = '#333';
-                h1.style.color = '#333'; 
-                controles.style.backgroundColor =  '#fff';
-                resultados.style.backgroundColor =  '#fff';
-                coordenadas.style.backgroundColor =  '#fff';
-                
-            }
-        }
+        
 
         async function loadImage(url) {
             fabric.Image.fromURL(url, function(img) {
@@ -1465,60 +1097,49 @@
         
         function updateCoordinates() {
             const coordinatesDiv = document.getElementById('coordinates');
-            const selectedSection = document.getElementById('roi-section').value;
-            coordinatesDiv.innerHTML = '<strong>Coordenadas das ROIs:</strong><br>';
-         
+
+            // 1️⃣ LIMPA A TELA PRIMEIRO
+            coordinatesDiv.innerHTML = '';
+
             clearLabels();
+
+            // 2️⃣ Cabeçalho
+            let html = '<strong>Coordenadas das ROIs:</strong><br>';
+
+            // 3️⃣ Percorre objetos do canvas
             canvas.getObjects().forEach(obj => {
                 if (obj.type === 'rect' || obj.type === 'circle') {
                     const adjusted = getAdjustedCoordinates(obj);
-        
-                    if (adjusted) {
-                        if (obj.type === 'rect') {
-                            coordinatesDiv.innerHTML += `Retângulo - x: ${adjusted.x}, y: ${adjusted.y}, width: ${adjusted.width}, height: ${adjusted.height}<br>`;
-                            /*
-                            // 🔹 Label para retângulo
-                            const bounds = obj.getBoundingRect();
-                            const label = new fabric.Text(selectedSection, {
-                                left: bounds.left + bounds.width + 10,   // à direita
-                                top: bounds.top + bounds.height / 2,    // centralizado verticalmente
-                                fontSize: 12,
-                                fill: 'white',
-                                fontWeight: 'regular',
-                                selectable: false,
-                                evented: false,
-                            });
-                            // 🔹 Marca como label
-                            label.isLabel = true;
-                            canvas.add(label);
-                            canvas.bringToFront(label); */
-        
-                        } else if (obj.type === 'circle') {
-                            coordinatesDiv.innerHTML += `Círculo - centerX: ${adjusted.centerX}, centerY: ${adjusted.centerY}, radiusX: ${adjusted.radiusX}, radiusY: ${adjusted.radiusY}<br>`;
-                        
-                        /*
-                            // 🔹 Label para círculo
-                            const bounds = obj.getBoundingRect();
-                            const label = new fabric.Text(selectedSection, {
-                                left: bounds.left + bounds.width + 10,   // à direita
-                                top: bounds.top + bounds.height / 2,    // centralizado verticalmente
-                                fontSize: 12,
-                                fill: 'yellow',
-                                fontWeight: 'bold',
-                                selectable: false,
-                                evented: false,
-                            });
+                    if (!adjusted) return;
 
-                           // 🔹 Marca como label
-                            label.isLabel = true;
-                            canvas.add(label);
-                            canvas.bringToFront(label); */
-                        }
+                    if (obj.type === 'rect') {
+                        html += `
+                            Retângulo → 
+                            x: ${adjusted.x}, 
+                            y: ${adjusted.y}, 
+                            w: ${adjusted.width}, 
+                            h: ${adjusted.height}
+                            <br>
+                        `;
+                    }
+
+                    if (obj.type === 'circle') {
+                        html += `
+                            Círculo → 
+                            cx: ${adjusted.centerX}, 
+                            cy: ${adjusted.centerY}, 
+                            rx: ${adjusted.radiusX}, 
+                            ry: ${adjusted.radiusY}
+                            <br>
+                        `;
                     }
                 }
             });
+
+            // 4️⃣ ESCREVE UMA ÚNICA VEZ
+            coordinatesDiv.innerHTML = html;
         }
-        
+                
 
         async function sendParamGray() {
             //const rois = canvas.getObjects().filter(obj => obj.type === 'rect' || obj.type === 'circle').map(getAdjustedCoordinates);
@@ -1605,35 +1226,75 @@
             try {
                 const selectedProgram = document.getElementById('programa-section').value;
                 const selectedValue = parseInt(selectedProgram, 10);
+
                 const selectedCamera = document.getElementById('camera-section').value;
                 const selectedValueCam = parseInt(selectedCamera, 10);
-        
+
                 // Mostra o popup
                 document.getElementById("loading-popup").style.display = "flex";
-        
-                const response = await fetch(`${SERVER_URL}/treinar`, {
+
+                // Reseta UI
+                document.getElementById("training-bar").style.width = "0%";
+                document.getElementById("training-percent").innerText = "0%";
+                document.getElementById("training-text").innerText =
+                    "Iniciando treinamento...";
+
+                // 👉 Dispara o treino (NÃO aguardamos terminar)
+                fetch(`${SERVER_URL}/treinar`, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ programa: selectedValue, camera: selectedValueCam })
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        programa: selectedValue,
+                        camera: selectedValueCam
+                    })
                 });
-        
-                // Aqui você pode verificar o resultado da requisição
-                if (!response.ok) {
-                    throw new Error("Falha no treinamento da RNA");
-                }
-        
-                // Sucesso → fecha popup
-                document.getElementById("loading-popup").style.display = "none";
-                alert("Treinamento finalizado com sucesso!");
+
+                // 👉 Começa a acompanhar o progresso
+                acompanharProgressoTreino();
+
             } catch (error) {
                 document.getElementById("loading-popup").style.display = "none";
-                resultsContainer.innerHTML = 'Erro ao iniciar o treinamento da RNA!';
                 console.error(error);
+                alert("Erro ao iniciar o treinamento da RNA!");
             }
         }
-        
+        function acompanharProgressoTreino() {
+            const interval = setInterval(async () => {
+                try {
+                    const response = await fetch(`${SERVER_URL}/training_status`);
+                    const data = await response.json();
+
+                    if (!data.running) {
+                        clearInterval(interval);
+
+                        document.getElementById("training-bar").style.width = "100%";
+                        document.getElementById("training-percent").innerText = "100%";
+                        document.getElementById("training-text").innerText =
+                            "Treinamento concluído!";
+
+                        setTimeout(() => {
+                            document.getElementById("loading-popup").style.display = "none";
+                            alert("Treinamento finalizado com sucesso!");
+                        }, 800);
+
+                        return;
+                    }
+
+                    // Atualiza UI
+                    document.getElementById("training-bar").style.width =
+                        data.progress + "%";
+
+                    document.getElementById("training-percent").innerText =
+                        data.progress + "%";
+
+                    document.getElementById("training-text").innerText =
+                        data.mensagem || "Treinando...";
+
+                } catch (err) {
+                    console.error("Erro ao consultar progresso:", err);
+                }
+            }, 1000);
+        }
         async function CapturarReference(){
             
             //const response = await fetch(`${SERVER_URL}/capture_reference`);
@@ -1708,7 +1369,8 @@
                 
                 // Atualiza a label com a contagem
                 if(`${data.count}` == "0"){
-                    deleteOKLabel.textContent = "Pendente criar imagem OK" ; 
+                   // deleteOKLabel.textContent = "Pendente criar imagem OK" ; 
+                     deleteOKLabel.textContent = "0";
                 }
                  else{
                     deleteOKLabel.textContent = `${data.count}`;
@@ -1742,7 +1404,8 @@
                 
                 // Atualiza a label com a contagem
                 if(`${data.count}` == "0"){
-                    deleteNOKLabel.textContent = "Pendente criar imagem NOK" ; 
+                   // deleteNOKLabel.textContent = "Pendente criar imagem NOK" ; 
+                    deleteNOKLabel.textContent = "0";
                 }
                  else{
                     deleteNOKLabel.textContent = `${data.count}`;
@@ -1877,7 +1540,7 @@
                     const mediaRoiLabel = document.createElement('label');
                     mediaRoiLabel.classList.add('label-title');
                     mediaRoiLabel.textContent = 'Media Pixel: ';
-                    mediaRoiLabel.style.marginLeft = '50px'; // Margem à esquerda de 10px
+                    //mediaRoiLabel.style.marginLeft = '50px'; // Margem à esquerda de 10px
                     resultDiv.appendChild(mediaRoiLabel);
 
                     const mediaRoiInput = document.createElement('input');
@@ -1901,7 +1564,7 @@
                     const mediaTexturaLabel = document.createElement('label');
                     mediaTexturaLabel.classList.add('label-title');
                     mediaTexturaLabel.textContent = 'Media Textura: ';
-                    mediaTexturaLabel.style.marginLeft = '10px'; // Margem à esquerda de 10px
+                    //mediaTexturaLabel.style.marginLeft = '10px'; // Margem à esquerda de 10px
                     resultDiv.appendChild(mediaTexturaLabel);
 
                     const mediaTexturaInput = document.createElement('input');
@@ -1925,7 +1588,7 @@
                     const parafusoLabel = document.createElement('label');
                     parafusoLabel.classList.add('label-title');
                     parafusoLabel.textContent = 'Parafuso: ';
-                    parafusoLabel.style.marginLeft = '10px'; // Margem à esquerda de 10px
+                    //parafusoLabel.style.marginLeft = '10px'; // Margem à esquerda de 10px
                     resultDiv.appendChild(parafusoLabel);
 
                     const parafusoInput = document.createElement('input');
@@ -1969,7 +1632,7 @@
                         const pontoLabel = document.createElement('label');
                         pontoLabel.classList.add('label-title');
                         pontoLabel.textContent = 'Ponto: ';
-                        pontoLabel.style.marginLeft = '10px'; // Margem à esquerda de 10px
+                       // pontoLabel.style.marginLeft = '10px'; // Margem à esquerda de 10px
                         resultDiv.appendChild(pontoLabel);
     
                         const pontoInput = document.createElement('input');
@@ -2013,7 +1676,7 @@
                         const posicaoLabel = document.createElement('label');
                         posicaoLabel.classList.add('label-title');
                         posicaoLabel.textContent = 'Posicao: ';
-                        posicaoLabel.style.marginLeft = '10px'; // Margem à esquerda de 10px
+                        //posicaoLabel.style.marginLeft = '10px'; // Margem à esquerda de 10px
                         resultDiv.appendChild(posicaoLabel);
     
                         const posicaoInput = document.createElement('input');
@@ -2039,7 +1702,7 @@
                     const corStatusLabel = document.createElement('label');
                     corStatusLabel.classList.add('label-title');
                     corStatusLabel.textContent = 'Cor Status: ';
-                    corStatusLabel.style.marginLeft = '10px'; // Margem à esquerda de 10px
+                    //corStatusLabel.style.marginLeft = '10px'; // Margem à esquerda de 10px
                     resultDiv.appendChild(corStatusLabel);
                     
 
@@ -2067,7 +1730,7 @@
                         const rnaStatusLabel = document.createElement('label');
                         rnaStatusLabel.classList.add('label-title');
                         rnaStatusLabel.textContent = 'RNA Status: ';
-                        rnaStatusLabel.style.marginLeft = '10px'; // Margem à esquerda de 10px
+                       // rnaStatusLabel.style.marginLeft = '10px'; // Margem à esquerda de 10px
                         resultDiv.appendChild(rnaStatusLabel);
                         
     
@@ -2091,23 +1754,23 @@
                          }
                          
                      
-                     
-
+                    // Container da linha da ROI
                     const statusLabel = document.createElement('span');
                     statusLabel.classList.add('status-label');
                     if (roi.status) {
                         statusLabel.textContent = 'OK';
                         statusLabel.classList.add('status-ok');
-                        statusLabel.style.marginLeft = '50px'; // Margem à esquerda de 10px
+                        //statusLabel.style.marginLeft = '50px'; // Margem à esquerda de 10px
                         const statusOK = document.getElementById('coordinates');
                         statusOK.innerHTML = '<strong></strong><br>';
                         statusOK.innerHTML = '<strong>Teste Aprovado!</strong><br>';
 
                         
                     } else {
+                        
                         statusLabel.textContent = 'NOK';
                         statusLabel.classList.add('status-nok');
-                        statusLabel.style.marginLeft = '50px'; // Margem à esquerda de 10px
+                        //statusLabel.style.marginLeft = '50px'; // Margem à esquerda de 10px
 
                          
                         if(ExecStatus == true)ExecStatus = false
@@ -2136,6 +1799,12 @@
                     resultDiv.appendChild(statusLabel);
 
                     resultsContainer.appendChild(resultDiv);
+                    // Montagem da linha
+                    //roiRow.appendChild(roiText);
+                    //roiRow.appendChild(statusLabel);
+
+                    // Adiciona no results
+                    //document.getElementById('results').appendChild(roiRow);
                 });
                 
             } catch (error) {
@@ -2993,8 +2662,7 @@
        
         count_OK_files();
         count_NOK_files();
-    </script>
-    
-</body>
-</html>
+    </script>       
 
+    </body>
+</html>

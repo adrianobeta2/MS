@@ -3,4 +3,4 @@ import multiprocessing as mp
 
 if __name__ == "__main__":
     mp.freeze_support()   # seguro no Windows
-    gerar_modelo_resnet50(2, 1)
+    gerar_dataset_resnet(1, 1)

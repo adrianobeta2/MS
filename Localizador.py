@@ -8,12 +8,26 @@ def ajustePosicao(template, roi_busca_templ,frame,ref_posXY_templ,roi_produto):
     # Carregar a imagem modelo (template) da peça
     #template = cv2.imread('template.png', 0)
 
-    if len(template.shape) > 2:
-        template = cv2.cvtColor(template, cv2.COLOR_BGR2GRAY)
-    if len(frame.shape) > 2:
-        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        # TEMPLATE
+    if len(template.shape) == 3:
+        if template.shape[2] == 3:
+            template = cv2.cvtColor(template, cv2.COLOR_BGR2GRAY)
+        elif template.shape[2] == 4:
+            template = cv2.cvtColor(template, cv2.COLOR_BGRA2GRAY)
+        elif template.shape[2] == 1:
+            template = template[:, :, 0]
 
-    w, h = template.shape[::-1]
+    # FRAME
+    if len(frame.shape) == 3:
+        if frame.shape[2] == 3:
+            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        elif frame.shape[2] == 4:
+            frame = cv2.cvtColor(frame, cv2.COLOR_BGRA2GRAY)
+        elif frame.shape[2] == 1:
+            frame = frame[:, :, 0]
+
+    # DIMENSÕES SEGURAS
+    h, w = template.shape
 
     # Capturar imagem da câmera (ou carregar uma imagem de exemplo)
     #frame = cv2.imread('ref_programa1.png', 0)
