@@ -243,7 +243,7 @@
             display: flex;
             align-items: flex-start; /* ⬅️ ALINHA NO TOPO */
             background:  #00050a;
-            padding-top: 50px;   /* ⬅️ MARGEM SUPERIOR GLOBAL */
+            padding-top: 20px;   /* ⬅️ MARGEM SUPERIOR GLOBAL */
         }
 
         /* Canvas container agora só cuida do canvas */
@@ -322,6 +322,15 @@
             box-shadow: 0 4px 10px rgba(0,0,0,0.2);
             z-index: 10;
         }
+         #canvas-top-controls-rigth {
+            position: absolute;
+            top: 12px;
+            right: 24px;   /* ⬅️ AGORA é direita */
+
+            display: flex;
+            z-index: 10;
+        }
+
 
         
 
@@ -541,7 +550,7 @@
                 text-align: center;
             }
             #NomePrograma {
-            position: fixed;        /* ⬅️ fixa na tela */
+            position: relative;        /* ⬅️ fixa na tela */
             top: 12px;              /* distância do topo */
             left: 12px;             /* distância da esquerda */
 
@@ -554,11 +563,40 @@
             text-transform: uppercase;
             color: white;
 
-            background: rgba(0, 0, 0, 0.6); /* opcional, melhora leitura */
+            background: rgba(0, 0, 0, 0.4); 
             padding: 6px 12px;
             border-radius: 8px;
 
             box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        }
+         #togglePanMode:hover {
+            transform: scale(1.20); /* Aumenta em 10% */
+        }
+        #togglePanMode:hover .pan-icon {
+            transform: scale(1.20); /* Aumenta o ícone em 10% */
+        }
+        #togglePanMode {
+            transition: transform 0.2s ease-in-out;
+            transform-origin: center; /* Faz o zoom ser centralizado */
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 5px; /* Dá espaço para o zoom */
+        }
+         /* Estilo padrão do botão */
+        #togglePanMode {
+            background-color: #4CAF50; /* Verde */
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        /* Estilo quando o modo "pan" estiver ativo */
+        #togglePanMode.pan-active {
+            background-color: #f44336; /* Vermelho */
         }
 
      </style>
@@ -667,9 +705,13 @@
                         </div>
 
                     </div>
-
+                    <div id="canvas-top-controls-rigth">   
+                          <div id="NomePrograma">
+                               <label id ="label-programa"></label> 
+                          </div>
+                    </div>   
                     <!-- CANVAS -->
-                    <canvas id="canvas" width="800" height="600"></canvas>
+                    <canvas id="canvas" width="1024" height="768"></canvas>
 
                             <!-- CONTROLES INFERIORES -->
                             <div id="image-controls">
@@ -708,7 +750,7 @@
                                         <img src="{{ url_for('static', filename='apagar_nok_ms.png') }}">
                                         <span id="deleteNOKLabel"></span>  <!-- Label dinâmica -->
                                      <button onclick="TreinarRNA()" title="Treinar IA">
-                                        <img src="{{ url_for('static', filename='neural_ms.png') }}">
+                                        <img src="{{ url_for('static', filename='rede_neural_6.png') }}">
                                     </button>
                                 </div>    
 
@@ -771,9 +813,7 @@
                 <div class="footer-label">
                     MS Vision Tools.
                 </div>
-                <div id="NomePrograma">
-                        <label id ="label-programa"></label> 
-                </div>
+              
 
            <div id="loading-popup" class="loading-overlay" style="display:none;">
                 <div class="loading-content">
@@ -830,8 +870,8 @@
 
         async function loadImage(url) {
             fabric.Image.fromURL(url, function(img) {
-                img.scaleToWidth(800);
-                img.scaleToHeight(600);
+                img.scaleToWidth(1024);
+                img.scaleToHeight(768);
                 img.selectable = false;
                 img.evented = false;
                 imageScaleX = img.scaleX;

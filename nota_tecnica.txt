@@ -27,6 +27,8 @@ scp "imagem@192.168.1.110:/home/imagem/Documentos/visionEmbarcado/templates/conf
 scp "imagem@192.168.1.110:/home/imagem/Documentos/visionEmbarcado/servidor.py" /home/adriano/Documentos/visionEmbarcado/
 
 
+### inverso windows #####
+scp sve@192.168.1.100:~/sve/templates/configuracoes.html "C:\Users\adriano\Documents\"
 
 
 

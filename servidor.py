@@ -261,6 +261,7 @@ cam2_encoded = urllib.parse.quote(cam_2, safe='')
 cam3_encoded = urllib.parse.quote(cam_3, safe='')
 
 cam_tipo = config.get("CAMERAS", "tipo")
+cam_basler_conexao = config.get("CAMERAS", "communication")
 serial_number_1 = config.get("CAMERAS","serial_number_basler_1")
 serial_number_2 = config.get("CAMERAS","serial_number_basler_2")
 serial_number_3 = config.get("CAMERAS","serial_number_basler_3")
@@ -279,8 +280,8 @@ last_frame = None
 
 
 # Configuração de tamanho da imagem
-TARGET_WIDTH = 800  # Largura desejada antiga 640
-TARGET_HEIGHT = 600  # Altura desejada        480
+TARGET_WIDTH = 1024  # Largura desejada antiga 640
+TARGET_HEIGHT = 768  # Altura desejada        480
 JPEG_QUALITY = 80  # Qualidade do JPEG (0 a 100, menor = mais rápido)
 
 
@@ -433,9 +434,7 @@ def get_latest_webcam_frame_url(url):
         frame = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
     return frame
 
-
-
-def initialize_all_cameras_basler():
+def initialize_all_cameras_basler_usb():
     """ Inicializa watchdogs para todas as câmeras configuradas """
     for serial in CAMERA_SERIALS:
         cameras[serial] = {
@@ -447,6 +446,21 @@ def initialize_all_cameras_basler():
             "ociosa": False  # Flag de ociosidade
         }
         threading.Thread(target=camera_watchdog_loop, args=(serial,), daemon=True).start()
+        
+
+def initialize_all_cameras_basler_gige():
+    """ Inicializa watchdogs para todas as câmeras configuradas """
+    for serial in CAMERA_SERIALS:
+        cameras[serial] = {
+            "camera": None,
+            "last_frame": None,
+            "lock": threading.Lock(),
+            "capture_thread_running": False,
+            "ultima_atividade": datetime.datetime.now(),  # Nova chave
+            "ociosa": False  # Flag de ociosidade
+        }
+        #threading.Thread(target=camera_watchdog_loop, args=(serial,), daemon=True).start()
+        threading.Thread(target=camera_watchdog_loop_gige, args=(serial,), daemon=True).start()
 
 def camera_watchdog_loop(serial_number):
     """ Watchdog que mantém a câmera ativa e reconecta se necessário """
@@ -510,6 +524,90 @@ def camera_watchdog_loop(serial_number):
             cameras[serial_number]["capture_thread_running"] = False
             time.sleep(3)  # Espera e tenta novamente
 
+def set_node_if_exists(camera, node_name, value):
+    try:
+        node = camera.GetNodeMap().GetNode(node_name)
+        if node and node.IsWritable():
+            node.SetValue(value)
+            return True
+    except:
+        pass
+    return False
+
+def camera_watchdog_loop_gige(camera_id):
+    tl_factory = pylon.TlFactory.GetInstance()
+
+    while not modo_treino:
+
+        cam_data = cameras.get(camera_id)
+        if cam_data and cam_data.get("ociosa", False):
+            time.sleep(3)
+            continue
+
+        try:
+            devices = tl_factory.EnumerateDevices()
+            camera_device = None
+
+            for device in devices:
+                if device.GetDeviceClass() == "BaslerGigE":
+                    if device.GetUserDefinedName() == camera_id:
+                        camera_device = device
+                        break
+
+            if camera_device is None:
+                print(f"[WATCHDOG {camera_id}] Câmera GigE não encontrada.")
+                time.sleep(3)
+                continue
+
+            print(f"[WATCHDOG {camera_id}] Câmera GigE encontrada. Iniciando...")
+
+            camera = pylon.InstantCamera(
+                tl_factory.CreateDevice(camera_device)
+            )
+
+            camera.Open()
+            try:
+                camera.TriggerSelector.Value = "FrameStart"
+                camera.TriggerMode.Value = "Off"
+            except:
+                pass
+            camera.AcquisitionMode.Value = "Continuous"
+
+            set_node_if_exists(camera, "TriggerSelector", "FrameStart")
+            set_node_if_exists(camera, "TriggerMode", "Off")
+
+            set_node_if_exists(camera, "AcquisitionFrameRateEnable", True)
+            set_node_if_exists(camera, "AcquisitionFrameRate", 16.0)
+
+            camera.StartGrabbing(pylon.GrabStrategy_LatestImageOnly)
+
+            converter = pylon.ImageFormatConverter()
+            converter.OutputPixelFormat = pylon.PixelType_BGR8packed
+            converter.OutputBitAlignment = pylon.OutputBitAlignment_MsbAligned
+
+            cameras[camera_id]["camera"] = camera
+            cameras[camera_id]["capture_thread_running"] = True
+
+            camera_loop_basler_gige(camera_id, converter)
+
+        except Exception as e:
+            print(f"[WATCHDOG {camera_id}] Erro: {e}")
+
+            try:
+                cam = cameras[camera_id]["camera"]
+                if cam and cam.IsGrabbing():
+                    cam.StopGrabbing()
+                if cam:
+                    cam.Close()
+            except:
+                pass
+
+            cameras[camera_id]["camera"] = None
+            cameras[camera_id]["capture_thread_running"] = False
+            time.sleep(3)
+
+
+
 def camera_loop_basler(serial_number, converter):
     """ Captura frames continuamente da câmera especificada """
     cam_data = cameras[serial_number]
@@ -525,6 +623,42 @@ def camera_loop_basler(serial_number, converter):
 
         try:
             grabResult = camera.RetrieveResult(500, pylon.TimeoutHandling_ThrowException)
+
+            if grabResult.GrabSucceeded():
+                image = converter.Convert(grabResult)
+                frame = image.GetArray()
+
+                frame = cv2.resize(frame, (TARGET_WIDTH, TARGET_HEIGHT), interpolation=cv2.INTER_AREA)
+
+                with cam_data["lock"]:
+                    cam_data["last_frame"] = frame
+                    #cam_data["ultima_atividade"] = datetime.now() #*
+
+            grabResult.Release()
+            time.sleep(0.01)
+
+        except Exception as e:
+            print(f"[CAPTURA {serial_number}] Erro ao capturar: {e}")
+            cam_data["capture_thread_running"] = False
+            break
+
+    print(f"[CAPTURA {serial_number}] Thread finalizada.")
+
+def camera_loop_basler_gige(serial_number, converter):
+    """ Captura frames continuamente da câmera especificada """
+    cam_data = cameras[serial_number]
+    camera = cam_data["camera"]
+
+    #while cam_data["capture_thread_running"] and camera.IsGrabbing():
+    while (
+        cam_data["capture_thread_running"]
+        and camera
+        and camera.IsGrabbing()
+        and not modo_treino
+    ):
+
+        try:
+            grabResult = camera.RetrieveResult(2000, pylon.TimeoutHandling_ThrowException)
 
             if grabResult.GrabSucceeded():
                 image = converter.Convert(grabResult)
@@ -754,10 +888,15 @@ logging.basicConfig(
 def reiniciar_ms_vision(delay=5):
     logging.info(f"Reboot autorizado. Reiniciando em {delay} segundos")
     time.sleep(delay)
+    ps1_path = r"reboot.ps1"
     subprocess.run(
-        ["restart.bat"],
-        shell=True,
-        check=False
+        [
+            "powershell.exe",
+            "-ExecutionPolicy", "Bypass",
+            "-NoProfile",
+            "-File", ps1_path
+        ],
+        creationflags=subprocess.CREATE_NO_WINDOW
     )
 
 @app.route("/reboot", methods=["POST"])
@@ -884,12 +1023,18 @@ def executar_treino_async(camera, programa, tipo_neural):
 
     finally:
         modo_treino = False
-        initialize_all_cameras_basler()
+        if cam_tipo == "basler":
+            if cam_basler_conexao == "usb":
+                initialize_all_cameras_basler_usb()
+            else:
+                initialize_all_cameras_basler_gige()
+        else:
+            initialize_all_webcams()
 
 
 
 
-from threading import Thread
+
 
 from threading import Thread
 from training_state import write_status
@@ -1039,14 +1184,7 @@ def processResult():
         
         ultima_atividade = datetime.datetime.now()
 
-        # Verifica se a câmera está ociosa e reinicializa se necessário
-        if (camera_ociosa):
-            camera_ociosa = False
-            if(cam_tipo == "basler"):
-                initialize_all_cameras_basler()
-            else:
-                initialize_camera()
-           
+        
         
         tick_start = cv2.getTickCount()
         # Obtém a data e hora atuais
@@ -3022,6 +3160,11 @@ if __name__ == '__main__':
        
        
     else:
-       initialize_all_cameras_basler()  # Inicia a câmera antes de rodar o servidor Flask
+       if (cam_tipo == "basler"):
+           if(cam_basler_conexao == "usb"): 
+                initialize_all_cameras_basler_usb() 
+           else:
+                initialize_all_cameras_basler_gige()
+            
     app.run(host='0.0.0.0', port=6001, use_reloader=False) 
 
