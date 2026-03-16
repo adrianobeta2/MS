@@ -84,8 +84,22 @@
             margin-bottom: 40px;
             font-size:larger;
         }
+
+         #rna-section{
+            
+            border: 2px solid #007bff;
+            border-radius: 8px;
+            margin-right: 20px;
+            margin-top: 50px;
+            margin-bottom: 40px;
+            font-size:larger;
+        }
         
         #label-roisection{
+            color: #bfbbbb;
+            margin-left: 10px;
+        }
+         #label-rna{
             color: #bfbbbb;
             margin-left: 10px;
         }
@@ -197,7 +211,14 @@
 
     </div
     <div class="roi-group">
-        
+        <label for="rna-section" id ="label-rna">Selecione:</label>
+                <select id="rna-section">
+                    <option value="">Selecione:</option>
+                    <option value="resnet">resnet</option>
+                    <option value="yolo">yolo</option>
+                    
+                </select>
+     
         <label for="roi-section" id ="label-roisection">Selecione a seção ROI:</label>
         <select id="roi-section">
             <option value="">-- Selecione --</option>
@@ -421,6 +442,7 @@
  
                  const data_2 = await response_2.json();
                  
+
                  
                  // Atualiza os checkboxes conforme os valores do servidor
                 
@@ -433,6 +455,15 @@
                 document.getElementById("ponto_xy").checked = data_2.ponto_xy;
                 document.getElementById("rna").checked = data_2.rede_neural_artificial;
                 document.getElementById("n_rois").value = parseInt(data_2.n_rois, 10);
+
+
+                const response_3 = await fetch(`${SERVER_URL}/modelos?programa=${encodeURIComponent(programaSelect)}&camera=${encodeURIComponent(camera)}`);
+                if (!response_3.ok) {
+                    console.error("Erro ao obter os dados do servidor:", await response_3.text());
+                    return; 
+                }
+                const data_3 = await response_3.json();
+                document.getElementById("rna-section").value = data_3.tipo_rede_neural_artificial;
 
                   
 
@@ -516,16 +547,35 @@
                 n_rois: document.getElementById("n_rois").value
             };
             const url_ferramentas = `${SERVER_URL}/ferramentas`;
-            fetch(url_ferramentas, {
+            const responseFerramentas = await fetch(url_ferramentas, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify(config)
-            })
-            .then(response => response.json())
-            .then(data => alert(data.message))
-            .catch(error => console.error("Erro:", error))
+            });
+
+            const resultFerramentas = await responseFerramentas.json();
+           // console.log(resultFerramentas);
+
+
+            const config_modelos = {
+                camera: camera, // camera selecionado
+                programa: programaSelect, // Programa selecionado
+                tipo_rede_neural_artificial: document.getElementById("rna-section").value
+            };
+            const url_modelos = `${SERVER_URL}/modelos`;
+            const responseModelos = await fetch(url_modelos, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(config_modelos)
+            });
+
+            const resultModelos = await responseModelos.json();
+            //console.log(resultModelos);
+            alert(resultModelos.message);
         }
 
 

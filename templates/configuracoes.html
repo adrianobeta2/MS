@@ -15,7 +15,7 @@
         body {
             height: 100vh;
             display: flex;
-            background:  #00050a;
+            background:  #121212; 
         }
         @keyframes spin {
         from { transform: rotate(0deg); }
@@ -46,7 +46,7 @@
     }
 
     .loading-content {
-        background: #050505;
+        background:#121212; 
         padding: 20px 40px;
         border-radius: 12px;
         text-align: center;
@@ -63,7 +63,7 @@
            =============================== */
         #controls {
             width: 90px;
-            background: hsl(0, 2%, 12%);
+           /* background: hsl(0, 2%, 12%); */
             box-shadow: -2px 0 10px rgba(0,0,0,0.15); /* sombra correta */
             display: flex;
             flex-direction: column;
@@ -86,9 +86,9 @@
         #controls button {
             width: 60px;
             height: 60px;
-            border: 1px solid hwb(279 4% 4%);
+            border: 2px solid  #3498db;
             border-radius: 15px;
-            background: #00050a;
+            background:   #3498db;
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -111,13 +111,14 @@
            =============================== */
        #controls_right {
         width: 90px;
-        background: hsl(0, 2%, 12%);
+       /* background: hsl(0, 2%, 12%);*/
         box-shadow: -2px 0 10px rgba(0,0,0,0.15); /* sombra correta */
         display: flex;
         flex-direction: column;
         align-items: center;
-        padding: 10px 5px;
+        padding: 10px 5px; /* padding correto */
         gap: 8px;
+      
         
       }
 
@@ -133,14 +134,15 @@
         #controls_right button {
             width: 65px;
             height: 65px;
-            border: 1px solid hwb(66 4% 4%);
+            border: 2px solid  #3498db;
             border-radius: 15px;
-            background: #00050a;
+            background: #3498db;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             transition: 0.25s;
+          
         }
 
         #controls_right button:hover {
@@ -159,8 +161,9 @@
             flex-direction: row;
             gap: 8px;
             align-items: center;
-            background: hsl(0, 2%, 12%);
-                
+            border-radius: 15px;
+           /* background: hsl(0, 2%, 12%);*/
+           /* border: 2px solid   #3498db; */    
             padding: 8px 10px;           /* justo aos botões */
             
             
@@ -181,13 +184,13 @@
             height: 65px;
            
             border-radius: 15px;
-            background: #00050a;
+            background: black; 
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             transition: 0.25s;
-            border: 1px solid hsl(209, 93%, 50%);
+            border: 2px solid   #3498db; 
         }
 
         #controls_IA button:hover {
@@ -242,8 +245,10 @@
             flex: 1;
             display: flex;
             align-items: flex-start; /* ⬅️ ALINHA NO TOPO */
-            background:  #00050a;
+            background:  #121212; 
             padding-top: 20px;   /* ⬅️ MARGEM SUPERIOR GLOBAL */
+            padding-left: 40px;  /* ⬅️ MARGEM ESQUERDA GLOBAL */
+           
         }
 
         /* Canvas container agora só cuida do canvas */
@@ -254,7 +259,7 @@
         }
 
         #canvas {
-            border: 1px solid hsl(33, 93%, 50%);
+            border: 2px solid   #494B4E;
             border-radius: 15px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.4);
             background: #000;
@@ -362,7 +367,7 @@
         =============================== */
          #vertical-divider {
                     width: 3px;                 /* espessura da linha */
-                    background: rgba(0,0,0,0.15);
+                    background:  #494B4E;
                     margin: 0 12px;              /* espaço lateral */
                     
                     /* acompanha a altura do workspace */
@@ -430,12 +435,32 @@
             padding: 5px 10px; /* Espaçamento interno */
             border-radius: 5px; /* Borda arredondada */
         } 
+          #logo_ms img {
+            width: 50px; /* ou height: 30px; */
+            object-fit: contain; /* mantém a proporção */
+             opacity: 0.15;
+        }
 
+        #watermark {
+            position: fixed;
+            bottom: 10px;     /* distância do fundo */
+            right: 20px;      /* distância da direita */
+
+            z-index: 1;       /* atrás dos overlays principais */
+            pointer-events: none;  /* não bloqueia clique */
+
+            opacity: 0.1;    /* efeito marca d’água */
+        }
+
+        #watermark img {
+            width: 100px;     /* controla tamanho */
+            height: auto;
+        }
         /* ===============================
         PAINEL DIREITO (RESULTS + COORDINATES)
         =============================== */
         #right-panel {
-            width: 260px;                /* largura do painel */
+            width: 580px;                /* largura do painel */
             display: flex;
             flex-direction: column;
             align-items: center;         /* ⬅️ CENTRALIZA HORIZONTALMENTE */
@@ -446,7 +471,7 @@
            /* border: 2px solid #007bff;*/
             width: 100%;
             max-width: 100%;
-            font-size: 14px;
+            font-size: 18px;
             color:  #dad3d3f4;
             margin-top: 20px;
          
@@ -463,6 +488,7 @@
             padding: 8px 12px;
             border-radius: 20px;
             font-weight: bold;
+            font-size: 18px;
             color: rgb(255, 255, 255);
             display: inline-block;
         }
@@ -597,6 +623,93 @@
         /* Estilo quando o modo "pan" estiver ativo */
         #togglePanMode.pan-active {
             background-color: #f44336; /* Vermelho */
+        }
+        .popup{
+            position: absolute;
+            background: #121212;              /* fundo preto */
+            border: 2px solid#494B4E;      /* contorno lilás */
+            padding: 18px;
+            border-radius: 10px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.5);
+            z-index: 1000;
+            min-width: 180px;
+            text-align: center;
+            color: white;
+        }
+
+        .popup h3{
+            margin-top: 0;
+            margin-bottom: 10px;
+            color:  #dad3d3f4;                  /* lilás claro */
+            font-size: 18px;
+        }
+
+        .popup button{
+            padding: 8px 18px;
+            margin: 5px;
+            font-size: 14px;
+            border-radius: 6px;
+            border: 2px solid#494B4E;       /* contorno lilás */
+            background: transparent;
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .popup button:hover{
+            background: #494B4E;
+            color: white;
+        }
+
+        /* BIG EXECUTAR */
+        #btn-executar-big{
+            width: 100%;
+            height: 80px;
+
+            background:black; 
+            color: white;
+
+            font-size: 40px;
+            font-weight: bold;
+            letter-spacing: 3px;
+
+            border: 2px solid   #3498db; 
+            border-radius: 14px;
+
+            cursor: pointer;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;  
+
+            position: relative;       
+
+            padding: 0 25px; /* espaço lateral */
+
+            box-shadow: 0 8px 18px rgba(0,0,0,0.5);
+
+            transition: all 0.2s ease;
+        }
+        #btn-executar-big img{
+            width: 80px;
+            height: 80px;
+        }
+
+
+        #btn-executar-big:hover{
+            background:rgb(40, 38, 38); 
+            transform: scale(1.03);
+        }
+
+        #btn-executar-big:active{
+            transform: scale(0.97);
+        }
+        /* DIVISOR HORIZONTAL ENTRE BOTÃO EXECUTAR E RESULTADOS */
+        #horizontal-divider{
+            width: 100%;
+            height: 3px;           /* mesma espessura da vertical */
+            background: #494B4E;   /* mesma cor */
+            margin: 12px 0;        /* espaço acima e abaixo */
         }
 
      </style>
@@ -749,9 +862,10 @@
                                     <button onclick="DelReferenceNOK()" title ="Apagar Imagens Negativas"  class="btn-with-overlay">
                                         <img src="{{ url_for('static', filename='apagar_nok_ms.png') }}">
                                         <span id="deleteNOKLabel"></span>  <!-- Label dinâmica -->
-                                     <button onclick="TreinarRNA()" title="Treinar IA">
-                                        <img src="{{ url_for('static', filename='rede_neural_6.png') }}">
                                     </button>
+                                    <!-- <button onclick="TreinarRNA()" title="Treinar IA">
+                                        <img src="{{ url_for('static', filename='rede_neural_14.png') }}">
+                                    </button> -->
                                 </div>    
 
                                 
@@ -802,6 +916,11 @@
                 
                 <!-- PAINEL DIREITO (RESULTADOS + COORDENADAS) -->
                 <div id="right-panel">
+                    <button id="btn-executar-big" onclick="TreinarRNA()">
+                        <span>Treinar Modelo</span>
+                         <img src="{{ url_for('static', filename='rede_neural_14.png') }}">
+                    </button>
+                    <div id="horizontal-divider"></div>
 
                     <div id="results">Resultados aparecerão aqui</div>
 
@@ -810,8 +929,8 @@
                 </div>
 
                 <!-- Rodapé permanece fora (position: fixed) -->
-                <div class="footer-label">
-                    MS Vision Tools.
+                <div id="watermark">
+                    <img src="{{ url_for('static', filename='ms.png') }}">
                 </div>
               
 
@@ -832,9 +951,17 @@
                     <p id="training-percent" style="margin-top:6px;">0%</p>
                 </div>
             </div>
+            <div id="annotationPopup" class="popup" style="display:none;">
+                <h3 id="roi-title"></h3>
+                
+                <br><br>
+                <button onclick="saveAnnotation()">Salvar</button>
+                <button onclick="closePopup()">Cancelar</button>
+            </div>
          <div id="overlay" class="big-overlay">
                 <div id="overlayText" class="big-overlay__text"></div>
          </div>
+         
      <!-- Incluindo o arquivo JavaScript da pasta static -->
     <script src="{{ url_for('static', filename='js/fabric.min.js') }}"></script> 
    
@@ -842,8 +969,37 @@
     
     <script>
 
-     
-        
+        let currentShape = null;
+
+        function openAnnotationPopup(x, y, shape){
+
+            currentShape = shape;
+
+            const popup = document.getElementById("annotationPopup");
+            
+            const selectedSection = document.getElementById('roi-section').value;
+            document.getElementById('roi-title').innerText = `${selectedSection}`;
+         
+            popup.style.left = x + 50 + "px";
+            popup.style.top = y + 50 + "px";
+            popup.style.display = "block";
+
+           
+        }
+
+        function saveAnnotation(){
+
+            
+            sendData(); // Envia os dados para o servidor
+            
+
+            closePopup();
+        }
+
+        function closePopup(){
+            document.getElementById("annotationPopup").style.display = "none";
+            
+        }
 
         function showOverlayMessage(message, opts = {}) {
             const el = document.getElementById("overlayText");
@@ -970,6 +1126,8 @@
             } else if (currentMode === 'edit') { 
                 return; // Modo de edição, não faz nada
             } else {
+
+                deleteAllROIs();
                 // Modo de desenho: inicia o desenho de formas
                 isDrawing = true;
                 const pointer = canvas.getPointer(event.e);
@@ -1053,8 +1211,12 @@
                 // Modo de desenho: finaliza o desenho
                 isDrawing = false;
                 shape.set({ selectable: true, evented: true });
-                updateCoordinates();
+                //updateCoordinates();
                 canvas.renderAll();
+
+                const pointer = canvas.getPointer(event.e);
+
+                openAnnotationPopup(pointer.x, pointer.y, shape);
             }
         });
                 // Alterar a cor depois
@@ -1236,14 +1398,14 @@
                     canvas.add(circle);
                 }
             });
-            updateCoordinates();
+          //  updateCoordinates();
         }
 
         function deleteAllROIs() {
             const rois = canvas.getObjects().filter(obj => obj.type === 'rect' || obj.type === 'circle');
             rois.forEach(roi => canvas.remove(roi));
             clearLabels();
-            updateCoordinates();
+           // updateCoordinates();
         }
 
         function zoomIn() {
@@ -1573,6 +1735,7 @@
                     roiLabel.classList.add('label-title');
                     roiLabel.textContent = `ROI${roi.roi_index}: `;
                     roiLabel.style.fontWeight = 'bold'; // Texto em negrito
+                    roiLabel.style.fontSize = '18px'; // Tamanho da fonte
                     resultDiv.appendChild(roiLabel);
                     
                     if(pixel_on){
@@ -1770,15 +1933,18 @@
                         const rnaStatusLabel = document.createElement('label');
                         rnaStatusLabel.classList.add('label-title');
                         rnaStatusLabel.textContent = 'RNA Status: ';
+                        rnaStatusLabel.style.fontSize = '18px'; // Tamanho da fonte
                        // rnaStatusLabel.style.marginLeft = '10px'; // Margem à esquerda de 10px
                         resultDiv.appendChild(rnaStatusLabel);
                         
-    
+                        /*
                         const rnaStatusInput = document.createElement('input');
                         rnaStatusInput.type = 'text';
                         rnaStatusInput.style.color = 'white';
+                        rnaStatusInput.style.fontSize = '18px'; // Tamanho da fonte
                         rnaStatusInput.value = roi.rna_status;
                         rnaStatusInput.readOnly = true;
+                        
                         if(roi.rna_status){
                             rnaStatusInput.classList.add('status-ok');
                         }
@@ -1787,10 +1953,10 @@
                         }
                         
                         // Definir tamanho da caixa de entrada
-                        rnaStatusInput.style.width = '50px'; // largura
-                        rnaStatusInput.style.height = '20px'; // altura
+                        rnaStatusInput.style.width = '60px'; // largura
+                        rnaStatusInput.style.height = '30px'; // altura
                         
-                        resultDiv.appendChild(rnaStatusInput);
+                        resultDiv.appendChild(rnaStatusInput); */
                          }
                          
                      

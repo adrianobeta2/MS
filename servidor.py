@@ -723,7 +723,50 @@ def get_latest_frame(serial_number):
         with cameras[serial_number]["lock"]:
             return cameras[serial_number]["last_frame"]
     return None
+def get_png_frame():
+    """
+    Retorna um frame a partir de um arquivo PNG.
+    Pode usar o serial_number para escolher a imagem.
+    """
 
+    # Exemplo de caminho da imagem
+    image_path = "teste_sve.png"
+
+    if not os.path.exists(image_path):
+        print(f"Imagem não encontrada: {image_path}")
+        return None
+
+    frame = cv2.imread(image_path)
+
+    if frame is None:
+        print("Erro ao carregar a imagem.")
+        return None
+
+    return frame
+
+@app.route('/upload_png', methods=['POST'])
+def upload_png():
+
+    if 'file' not in request.files:
+        return jsonify({"erro": "Nenhum arquivo enviado"}), 400
+
+    file = request.files['file']
+
+    if file.filename == "":
+        return jsonify({"erro": "Nome de arquivo vazio"}), 400
+
+    if not file.filename.lower().endswith(".png"):
+        return jsonify({"erro": "Apenas arquivos PNG são permitidos"}), 400
+
+    caminho = os.path.join("", "teste_sve.png")
+
+    # salva sobrescrevendo
+    file.save(caminho)
+
+    return jsonify({
+        "status": "ok",
+        "arquivo_salvo": caminho
+    })
 
 
 
@@ -1028,8 +1071,10 @@ def executar_treino_async(camera, programa, tipo_neural):
                 initialize_all_cameras_basler_usb()
             else:
                 initialize_all_cameras_basler_gige()
-        else:
+        elif cam_tipo == "webcam":
             initialize_all_webcams()
+        else:
+            print("Modo Simulacao: Nenhuma câmera real será inicializada. O servidor servirá imagens estáticas para teste.")  
 
 
 
@@ -1241,7 +1286,12 @@ def processResult():
         #response = requests.get(url_cam)
         
            
-        frame = get_latest_frame(serial_camera)
+        if(cam_tipo == "basler"):
+           frame = get_latest_frame(serial_camera)
+        elif(cam_tipo == "webcam"):
+           frame = get_latest_webcam_frame(serial_camera)
+        else:
+           frame = get_png_frame()
         img = frame.copy() if frame is not None else None
        
         #atualizar_atividade_camera(serial_camera)
@@ -1777,6 +1827,27 @@ def capture_frame():
         else:
             return jsonify({"error": "Nenhum frame disponível"}), 500
 
+@app.route('/capture_png', methods=['GET'])
+def capture_png():
+    """Retorna frame a partir de um PNG"""
+
+    frame = get_png_frame()
+
+    if frame is not None:
+
+        frame = cv2.resize(
+            frame,
+            (TARGET_WIDTH, TARGET_HEIGHT),
+            interpolation=cv2.INTER_AREA
+        )
+
+        _, buffer = cv2.imencode('.jpg', frame)
+
+        return Response(buffer.tobytes(), content_type='image/jpeg')
+
+    else:
+        return jsonify({"error": "Imagem PNG não encontrada"}), 500
+
 @app.route('/capture/<serial_number>', methods=['GET'])
 def capture_frame_new(serial_number):
     """Captura o frame mais recente da câmera especificada"""
@@ -1788,8 +1859,10 @@ def capture_frame_new(serial_number):
                         (TARGET_WIDTH, TARGET_HEIGHT),
                         interpolation=cv2.INTER_AREA
                     )
-    else:
+    elif(cam_tipo == "basler"):
         frame = get_latest_frame(serial_number)
+    else:
+        frame = get_png_frame()
     
 
     if frame is not None:
@@ -2628,6 +2701,45 @@ def get_ferramenta_config():
         "posicao": config['Ferramentas'].get('posicao', 'false') == 'true',
         "n_rois": config.getint('Ferramentas', 'n_rois')
     })
+
+
+# Endpoint POST para alterar os parâmetros de configuração
+@app.route('/modelos', methods=['POST'])
+def update_modelo_config():
+    
+
+    data = request.json
+
+    programa = data.get('programa')  # Pegando o valor de 'programa' do JSON
+    camera = data.get('camera')  # Pegando o valor de 'programa' do JSON
+
+    PATH = f'config_{camera}_{programa}.ini'
+    
+    config = load_config(PATH)
+    # Atualiza os valores gerais se fornecidos, garantindo que sejam armazenados como "true"/"false"
+    if 'tipo_rede_neural_artificial' in data:
+        config['Modelos']['tipo_rede_neural_artificial'] = str(data['tipo_rede_neural_artificial']).lower()
+
+    # Salva as alterações no arquivo INI
+    save_config(PATH,config)
+    return jsonify({"message": "Configuração atualizada com sucesso!"})
+
+@app.route('/modelos', methods=['GET'])
+def get_modelo_config():
+    
+    #exemple de endpoint http://localhost:6001/modelos?programa=1&camera=1.
+    programa = request.args.get('programa')  # Usando query string para GET
+    camera = request.args.get('camera')  # Usando query string para GET
+
+    PATH = f'config_{camera}_{programa}.ini'
+    # Carrega as configurações atuais
+    config = load_config(PATH)
+
+    # Retorna os valores de cada configuração
+    return jsonify({
+        "tipo_rede_neural_artificial": config['Modelos'].get('tipo_rede_neural_artificial')
+    })
+
 # Endpoint POST para acessar os parâmetros de configuração
 @app.route('/get_cameras', methods=['GET'])
 def get_cameras_config():
@@ -2824,8 +2936,10 @@ def video_feed_new(serial_number):
                         (TARGET_WIDTH, TARGET_HEIGHT),
                         interpolation=cv2.INTER_AREA
                     )
-            else:
+            elif (cam_tipo == "basler"):
                 frame = get_latest_frame(serial_number)
+            else:
+                frame = get_png_frame()
             
             if frame is not None:
                 _, buffer = cv2.imencode('.jpg', frame)
@@ -2869,8 +2983,10 @@ def video_feed_new_webcam(serial_number):
                         interpolation=cv2.INTER_AREA
                     )
                 #frame = monitorar_movimentos.monitor_movimento(frame)
-            else:
+            elif cam_tipo == "basler":
                 frame = get_latest_frame(cam_key)
+            else:
+                frame = get_png_frame()
 
             if frame is not None:
                 _, buffer = cv2.imencode('.jpg', frame)
@@ -3159,12 +3275,13 @@ if __name__ == '__main__':
        initialize_all_webcams()  # Inicializa a câmera antes de iniciar o servidor
        
        
-    else:
+    elif(cam_tipo == "basler"):
        if (cam_tipo == "basler"):
            if(cam_basler_conexao == "usb"): 
                 initialize_all_cameras_basler_usb() 
            else:
                 initialize_all_cameras_basler_gige()
-            
+    else:
+       print("Modo Simulacao: Nenhuma câmera real será inicializada. O servidor servirá imagens estáticas para teste.")      
     app.run(host='0.0.0.0', port=6001, use_reloader=False) 
 

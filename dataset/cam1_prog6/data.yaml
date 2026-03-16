@@ -1,0 +1,7 @@
+path: C:\Users\adriano\Documents\visionEmbarcado\dataset\cam1_prog6
+train: images/train
+val: images/val
+
+names:
+  0: ok
+  1: nok

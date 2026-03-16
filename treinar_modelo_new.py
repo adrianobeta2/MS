@@ -332,7 +332,7 @@ def limpar_dataset(camera, programa):
 from ultralytics import YOLO
 MODEL_BASE = "yolo8n.pt"   # leve e rápido
 #DATA_YAML = "dataset/data.yaml"
-EPOCHS = 100
+EPOCHS = 60
 IMG_SIZE_YOLO = 640
 
 from pathlib import Path
@@ -524,7 +524,7 @@ def gerar_dataset_resnet(camera, programa):
         roi = (x, y, w, h)
 
         for classe in ["OK", "NOK"]:
-            for idx in range(0, 100):
+            for idx in range(0, 200):
                 nome = f'cam{camera}_ref_programa{programa}_{classe}_{idx if idx > 0 else ""}.png'
                 caminho = os.path.join(IMG_DIR, nome)
 
@@ -843,45 +843,51 @@ def classificar_roi(model, device, frame, roi):
 
     x, y, w, h = roi
     crop = frame[y:y+h, x:x+w]
-    #print("Shape crop:", crop.shape)
-    #print("Tipo:", crop.dtype)
+
+    print("Shape crop:", crop.shape)
+    print("Tipo:", crop.dtype)
 
     if crop.size == 0:
-        return "erro", 0.0
-    
-    #crop = cv2.cvtColor(crop, cv2.COLOR_BGR2RGB)
-    cv2.imwrite("teste_nok.jpg", crop)
+        return False
 
-  
+    # debug imagem original
+    cv2.imwrite("teste_bgr.jpg", crop)
 
-    img = TRANSFORM_INFER(crop).unsqueeze(0).to(device)
-    # 🔎 DEBUG DE DEVICE
-    #print("Model device:", next(model.parameters()).device)
-    #print("Image device:", img.device)
+    # converter para RGB (modelo foi treinado em RGB)
+    crop = cv2.cvtColor(crop, cv2.COLOR_BGR2RGB)
 
+    # converter para PIL
+    img_pil = Image.fromarray(crop)
+
+    # debug RGB correto
+    img_pil.save("teste_rgb.jpg")
+
+    # aplicar transform igual ao treino
+    img = TRANSFORM_INFER(img_pil).unsqueeze(0).to(device)
+
+    # debug device
+    print("Model device:", next(model.parameters()).device)
+    print("Image device:", img.device)
 
     with torch.no_grad():
         output = model(img)
         probs = torch.softmax(output, dim=1)
         conf, pred = torch.max(probs, 1)
-    
-    
-    if conf.item() < 0.80: 
-      return False  # tratar como NOK por segurança
-    
 
-    classe = "nok" if pred.item() == 0 else "ok"
+    conf_val = conf.item()
+    pred_val = pred.item()
 
-   # print("Classe:", classe, "Conf:", conf.item())
+    print("Pred:", pred_val, "Conf:", conf_val)
 
-    if classe == "ok":
-        status_rna = True
-    elif classe == "nok":
-        status_rna = False
-    else:
-        status_rna = True
+    # threshold de segurança
+    if conf_val < 0.70:
+        return False
 
-    return status_rna
+    # classes do ImageFolder
+    # 0 = nok
+    # 1 = ok
+    return pred_val == 1
+
 
 
 

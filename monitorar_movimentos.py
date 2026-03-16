@@ -865,15 +865,7 @@ def enviar_alerta(cluster_id, roi, duration, frame_id):
 #modelo_cabo = YOLO("cabo_flex.pt")
 
 def analise_cabo_flex(modelo_cabo, classe_ok, classe_nok, imagem, coordenadas, tolerancia=0.7):
-    """
-    Analisa cabo flex usando YOLO em uma ROI específica
 
-    :param imagem: frame OpenCV (BGR)
-    :param coordenadas: (x, y, w, h) da ROI
-    :param tolerancia: confiança mínima para aceitar a predição
-    :return: status (True=OK / False=NOK), classe, confiança
-    """
-    annotated =imagem
     x, y, w, h = coordenadas
 
     # --- Proteção de limites ---
@@ -883,50 +875,46 @@ def analise_cabo_flex(modelo_cabo, classe_ok, classe_nok, imagem, coordenadas, t
     w = min(w, w_img - x)
     h = min(h, h_img - y)
 
-    roi = imagem[y:y+h, x:x+w]
-
-    if roi.size == 0:
-        return False, "roi_invalida", 0.0
-
-    # --- Inferência YOLO ---
-    results = modelo_cabo(
-        roi,
-        conf=tolerancia,
-        iou=0.5,
-        verbose=False
-    )
+    # Inferência YOLO na imagem inteira
+    results = modelo_cabo(imagem, conf=0.25, verbose=False)
 
     melhor_conf = 0.0
     melhor_classe = "nenhum"
-    status = False  # default seguro = NOK
-    # Inferência
-    results = modelo_cabo(imagem, conf=0.25, verbose=True)
+    status = False
+
     for r in results:
+
         if r.boxes is None:
             continue
 
         for box in r.boxes:
+
             cls_id = int(box.cls[0])
             conf = float(box.conf[0])
             classe = modelo_cabo.names[cls_id]
 
-            # Guarda melhor detecção (para debug)
-            if conf > melhor_conf:
-                melhor_conf = conf
-                melhor_classe = classe
+            # coordenadas da box detectada
+            x1, y1, x2, y2 = box.xyxy[0]
 
-            # Regra crítica
-            if classe == classe_nok and conf >= 0.4:
-                status = False
-                break 
-                
-                
-            if classe == classe_ok and conf >= 0.4:
-                status = True
-                break
-    #annotated = results[0].plot()
+            # centro da detecção
+            cx = (x1 + x2) / 2
+            cy = (y1 + y2) / 2
+
+            # verificar se a detecção está dentro da ROI
+            if x <= cx <= x + w and y <= cy <= y + h:
+
+                if conf > melhor_conf:
+                    melhor_conf = conf
+                    melhor_classe = classe
+
+                # regra NOK tem prioridade
+                if classe == classe_nok and conf >= 0.5:
+                    return False
+
+                if classe == classe_ok and conf >= 0.45:
+                    status = True
+
     return status
-
    # ===== BANCO =====
 #db = get_db()
 #cursor = db.cursor()

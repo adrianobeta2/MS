@@ -15,11 +15,11 @@
         body {
             height: 100vh;
             display: flex;
-            background:  #ffffff;
+            background: #121212; 
         }
-         @keyframes spin {
-            0%   { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        @keyframes spin {
+        from { transform: rotate(0deg); }
+        to   { transform: rotate(360deg); }
         }
 
     .spinner {
@@ -46,7 +46,7 @@
     }
 
     .loading-content {
-        background: #050505;
+        background:#121212; 
         padding: 20px 40px;
         border-radius: 12px;
         text-align: center;
@@ -63,13 +63,14 @@
            =============================== */
         #controls {
             width: 90px;
-            background: #ffffff;
+           /* background: hsl(0, 2%, 12%); */
             box-shadow: -2px 0 10px rgba(0,0,0,0.15); /* sombra correta */
             display: flex;
             flex-direction: column;
             align-items: center;
             padding: 10px 5px;
             gap: 8px;
+          
             
         }
 
@@ -85,9 +86,9 @@
         #controls button {
             width: 60px;
             height: 60px;
-            border: none;
+            border: 2px solid  #494B4E; 
             border-radius: 15px;
-            background: #00050a;
+            background:   #494B4E; 
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -96,8 +97,8 @@
         }
 
         #controls button:hover {
-            background: #676a6e;
-            transform: scale(1.05);
+            background: #00050a;
+            transform: scale(1.2);
         }
 
         #controls button img {
@@ -110,13 +111,15 @@
            =============================== */
        #controls_right {
         width: 90px;
-        background: #ffffff;
+       /* background: hsl(0, 2%, 12%);*/
         box-shadow: -2px 0 10px rgba(0,0,0,0.15); /* sombra correta */
         display: flex;
         flex-direction: column;
         align-items: center;
-        padding: 10px 5px;
+        padding: 10px 5px; /* padding correto */
         gap: 8px;
+      
+        
       }
 
         #controls_right select {
@@ -131,19 +134,20 @@
         #controls_right button {
             width: 65px;
             height: 65px;
-            border: none;
+            border: 2px solid #494B4E; 
             border-radius: 15px;
-            background: #00050a;
+            background: #494B4E;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             transition: 0.25s;
+          
         }
 
         #controls_right button:hover {
-            background: #676a6e;
-            transform: scale(1.05);
+            background:  #00050a;
+            transform: scale(1.2);
         }
 
         #controls_right button img {
@@ -157,10 +161,10 @@
             flex-direction: row;
             gap: 8px;
             align-items: center;
-
-            background:#8d8a8a;        
+           /* background: hsl(0, 2%, 12%);*/
+                
             padding: 8px 10px;           /* justo aos botões */
-            border-radius: 14px;         /* acabamento */
+            
             
             box-shadow: 0 2px 6px rgba(0,0,0,0.25);
         }
@@ -175,26 +179,27 @@
         }
 
         #controls_IA button {
-            width: 60px;
-            height: 60px;
-            border: none;
+            width: 65px;
+            height: 65px;
+           
             border-radius: 15px;
-            background: #00050a;
+            background: black; 
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             transition: 0.25s;
+            border: 1px solid  black; 
         }
 
         #controls_IA button:hover {
-            background: #676a6e;
-            transform: scale(1.05);
+            background: #00050a;
+            transform: scale(1.2);
         }
 
         #controls_IA button img {
-            width: 55px;
-            height: 55px;
+            width: 60px;
+            height: 60px;
         }
 
 
@@ -239,8 +244,10 @@
             flex: 1;
             display: flex;
             align-items: flex-start; /* ⬅️ ALINHA NO TOPO */
-            background: #ffffff;
-            padding-top: 50px;   /* ⬅️ MARGEM SUPERIOR GLOBAL */
+            background:  #121212; 
+            padding-top: 20px;   /* ⬅️ MARGEM SUPERIOR GLOBAL */
+            padding-left: 40px;  /* ⬅️ MARGEM ESQUERDA GLOBAL */
+           
         }
 
         /* Canvas container agora só cuida do canvas */
@@ -251,7 +258,7 @@
         }
 
         #canvas {
-            border: 1px solid #333232;
+            border: 2px solid   #494B4E;
             border-radius: 15px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.4);
             background: #000;
@@ -278,13 +285,15 @@
         }
 
         #image-controls .control-group label {
-            font-size: 10px;
+            font-size: 12px;
+            color: #dad3d3f4;
         }
 
         #image-controls .control-group input {
             width: 55px;
             padding: 3px 5px;
             font-size: 11px;
+            color: #000;
         }
 
         /* Ajuste visual fino */
@@ -317,6 +326,15 @@
             box-shadow: 0 4px 10px rgba(0,0,0,0.2);
             z-index: 10;
         }
+         #canvas-top-controls-rigth {
+            position: absolute;
+            top: 12px;
+            right: 24px;   /* ⬅️ AGORA é direita */
+
+            display: flex;
+            z-index: 10;
+        }
+
 
         
 
@@ -347,24 +365,65 @@
         DIVISOR VERTICAL ENTRE CONTROLS_RIGHT 
         =============================== */
          #vertical-divider {
-                    width: 3px;                 /* espessura da linha */
-                    background: rgba(0,0,0,0.15);
+                    width: 6px;                 /* espessura da linha */
+                    background: rgba(94, 92, 92, 0.15);
                     margin: 0 12px;              /* espaço lateral */
                     
                     /* acompanha a altura do workspace */
                     align-self: stretch;
         }
-         #deleteOKLabel {
-            font-weight: bold;
-            font-size: 14px;
-            color: #02f236;
-        }
-        #deleteNOKLabel {
-            font-weight: bold;
-            font-size: 14px;
-            color: #f20227;
-        }
         
+        #deleteOKLabel {
+        position: absolute;
+        bottom: 4px;        /* ⬅️ posição sobre a imagem */
+        right: 6px;
+
+        min-width: 18px;
+        height: 18px;
+        padding: 0 4px;
+
+        background: #069b26;
+        color: #fff;
+        font-size: 12px;
+        font-weight: bold;
+
+        border-radius: 10px;
+        line-height: 18px;
+        text-align: center;
+
+        pointer-events: none; /* ⬅️ não atrapalha clique */
+    }
+        #deleteNOKLabel {   
+        position: absolute;
+        bottom: 4px;        /* ⬅️ posição sobre a imagem */
+        right: 6px;
+        min-width: 18px;    
+        height: 18px;  
+        padding: 0 4px;
+        background: #f20202;
+        color: #fff;
+        font-size: 12px;
+        font-weight: bold;
+        border-radius: 10px;
+        line-height: 18px;
+        text-align: center;
+        pointer-events: none; /* ⬅️ não atrapalha clique */
+        }
+        /* Botão vira referência */
+        .btn-with-overlay {
+            position: relative;   /* ⬅️ base do overlay */
+            width: 60px;
+            height: 60px;
+            padding: 0;
+            border-radius: 15px;
+        }
+
+        /* Imagem normal */
+        .btn-with-overlay img {
+            width: 48px;
+            height: 48px;
+        }
+
         .footer-label {
             position: fixed;  /* Fixo na tela */
             bottom: 10px;     /* Distância do fundo */
@@ -375,7 +434,27 @@
             padding: 5px 10px; /* Espaçamento interno */
             border-radius: 5px; /* Borda arredondada */
         } 
+          #logo_ms img {
+            width: 50px; /* ou height: 30px; */
+            object-fit: contain; /* mantém a proporção */
+             opacity: 0.15;
+        }
 
+        #watermark {
+            position: fixed;
+            bottom: 30px;     /* distância do fundo */
+            right: 40px;      /* distância da direita */
+
+            z-index: 1;       /* atrás dos overlays principais */
+            pointer-events: none;  /* não bloqueia clique */
+
+            opacity: 0.1;    /* efeito marca d’água */
+        }
+
+        #watermark img {
+            width: 200px;     /* controla tamanho */
+            height: auto;
+        }
         /* ===============================
         PAINEL DIREITO (RESULTS + COORDINATES)
         =============================== */
@@ -391,21 +470,24 @@
            /* border: 2px solid #007bff;*/
             width: 100%;
             max-width: 100%;
-         
+            font-size: 18px;
+            color:  #dad3d3f4;
             margin-top: 20px;
          
         }
-             #coordinates {
+        #coordinates {
             width: 100%;
             padding: 10px 4px;     /* ⬅️ menos compressão lateral */
-            background: transparent; /* ⬅️ REMOVE A CAIXA BRANCA */
-            box-shadow: none;
+         
             border-radius: 0;
+            font-size: 14px;
+            color:  #dad3d3f4;
         }
                 .status-label {
             padding: 8px 12px;
             border-radius: 20px;
             font-weight: bold;
+            font-size: 18px;
             color: rgb(255, 255, 255);
             display: inline-block;
         }
@@ -492,6 +574,91 @@
                 min-width: 60px;
                 text-align: center;
             }
+            #NomePrograma {
+            position: relative;        /* ⬅️ fixa na tela */
+            top: 12px;              /* distância do topo */
+            left: 12px;             /* distância da esquerda */
+
+            z-index: 9999;          /* fica acima de tudo */
+        }
+
+        #label-programa {
+            font-size: 16px;
+            font-weight: bold;
+            text-transform: uppercase;
+            color: white;
+
+            background: rgba(0, 0, 0, 0.4); 
+            padding: 6px 12px;
+            border-radius: 8px;
+
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        }
+         #togglePanMode:hover {
+            transform: scale(1.20); /* Aumenta em 10% */
+        }
+        #togglePanMode:hover .pan-icon {
+            transform: scale(1.20); /* Aumenta o ícone em 10% */
+        }
+        #togglePanMode {
+            transition: transform 0.2s ease-in-out;
+            transform-origin: center; /* Faz o zoom ser centralizado */
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 5px; /* Dá espaço para o zoom */
+        }
+         /* Estilo padrão do botão */
+        #togglePanMode {
+            background-color: #4CAF50; /* Verde */
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        /* Estilo quando o modo "pan" estiver ativo */
+        #togglePanMode.pan-active {
+            background-color: #f44336; /* Vermelho */
+        }
+        .popup{
+            position: absolute;
+            background: #121212;              /* fundo preto */
+            border: 2px solid#494B4E;      /* contorno lilás */
+            padding: 18px;
+            border-radius: 10px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.5);
+            z-index: 1000;
+            min-width: 180px;
+            text-align: center;
+            color: white;
+        }
+
+        .popup h3{
+            margin-top: 0;
+            margin-bottom: 10px;
+            color:  #dad3d3f4;                  /* lilás claro */
+            font-size: 18px;
+        }
+
+        .popup button{
+            padding: 8px 18px;
+            margin: 5px;
+            font-size: 14px;
+            border-radius: 6px;
+            border: 2px solid#494B4E;       /* contorno lilás */
+            background: transparent;
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .popup button:hover{
+            background: #494B4E;
+            color: white;
+        }
 
      </style>
     </head>
@@ -599,9 +766,13 @@
                         </div>
 
                     </div>
-
+                    <div id="canvas-top-controls-rigth">   
+                          <div id="NomePrograma">
+                               <label id ="label-programa"></label> 
+                          </div>
+                    </div>   
                     <!-- CANVAS -->
-                    <canvas id="canvas" width="800" height="600"></canvas>
+                    <canvas id="canvas" width="1024" height="768"></canvas>
 
                             <!-- CONTROLES INFERIORES -->
                             <div id="image-controls">
@@ -624,22 +795,23 @@
                                     <label>Exposição</label>
                                     <input type="number" id="exposure" step="0.1">
                                 </div> 
+                                
                                 <div id = controls_IA>
-                                    <button onclick="CapturarReference()" title ="Criar imagem Positiva">
+                                    <button onclick="CapturarReference()" title ="Criar imagem Positiva" >
                                     <img src="{{ url_for('static', filename='positiva_ms.png') }}"> 
                                     </button>
-                                    <button  onclick="DelReferenceOK()" title ="Apagar Imagens Positivas">
+                                    <button  onclick="DelReferenceOK()" title ="Apagar Imagens Positivas" class="btn-with-overlay">
                                         <img src="{{ url_for('static', filename='apagar_ok_ms.png') }}"> 
                                         <span id="deleteOKLabel"></span>  <!-- Label dinâmica -->
                                     </button>
                                     <button onclick="CapturarReference_NOK()" title ="Criar imagem Negativa">
                                         <img src="{{ url_for('static', filename='negativas_ms.png') }}">
                                     </button>
-                                    <button onclick="DelReferenceNOK()" title ="Apagar Imagens Negativas">
+                                    <button onclick="DelReferenceNOK()" title ="Apagar Imagens Negativas"  class="btn-with-overlay">
                                         <img src="{{ url_for('static', filename='apagar_nok_ms.png') }}">
                                         <span id="deleteNOKLabel"></span>  <!-- Label dinâmica -->
                                      <button onclick="TreinarRNA()" title="Treinar IA">
-                                        <img src="{{ url_for('static', filename='rede-neural2.png') }}">
+                                        <img src="{{ url_for('static', filename='rede_neural_14.png') }}">
                                     </button>
                                 </div>    
 
@@ -699,21 +871,39 @@
                 </div>
 
                 <!-- Rodapé permanece fora (position: fixed) -->
-                <div class="footer-label">
-                    MS Vision Tools.
+                <div id="watermark">
+                    <img src="{{ url_for('static', filename='ms.png') }}">
                 </div>
+              
 
-           <!-- Popup de Loading -->
-            <div id="loading-popup" class="loading-overlay" style="display: none;">
-            <div class="loading-content">
-            <div class="spinner"></div>
-            <p>Treinando Rede Neural Artificial, aguarde...</p>
+           <div id="loading-popup" class="loading-overlay" style="display:none;">
+                <div class="loading-content">
+                    <div class="spinner"></div>
+
+                    <p id="training-text">
+                    Treinando Rede Neural Artificial, aguarde...
+                    </p>
+
+                    <div style="width:100%;background:#333;border-radius:8px;margin-top:10px;">
+                    <div id="training-bar"
+                        style="height:12px;width:0%;background:#3498db;border-radius:8px;">
+                    </div>
+                    </div>
+
+                    <p id="training-percent" style="margin-top:6px;">0%</p>
+                </div>
             </div>
-            </div>      
+            <div id="annotationPopup" class="popup" style="display:none;">
+                <h3 id="roi-title"></h3>
+                
+                <br><br>
+                <button onclick="saveAnnotation()">Salvar</button>
+                <button onclick="closePopup()">Cancelar</button>
             </div>
          <div id="overlay" class="big-overlay">
                 <div id="overlayText" class="big-overlay__text"></div>
          </div>
+         
      <!-- Incluindo o arquivo JavaScript da pasta static -->
     <script src="{{ url_for('static', filename='js/fabric.min.js') }}"></script> 
    
@@ -721,8 +911,37 @@
     
     <script>
 
-     
-        
+        let currentShape = null;
+
+        function openAnnotationPopup(x, y, shape){
+
+            currentShape = shape;
+
+            const popup = document.getElementById("annotationPopup");
+            
+            const selectedSection = document.getElementById('roi-section').value;
+            document.getElementById('roi-title').innerText = `${selectedSection}`;
+         
+            popup.style.left = x + 50 + "px";
+            popup.style.top = y + 50 + "px";
+            popup.style.display = "block";
+
+           
+        }
+
+        function saveAnnotation(){
+
+            
+            sendData(); // Envia os dados para o servidor
+            
+
+            closePopup();
+        }
+
+        function closePopup(){
+            document.getElementById("annotationPopup").style.display = "none";
+            
+        }
 
         function showOverlayMessage(message, opts = {}) {
             const el = document.getElementById("overlayText");
@@ -749,8 +968,8 @@
 
         async function loadImage(url) {
             fabric.Image.fromURL(url, function(img) {
-                img.scaleToWidth(800);
-                img.scaleToHeight(600);
+                img.scaleToWidth(1024);
+                img.scaleToHeight(768);
                 img.selectable = false;
                 img.evented = false;
                 imageScaleX = img.scaleX;
@@ -932,8 +1151,12 @@
                 // Modo de desenho: finaliza o desenho
                 isDrawing = false;
                 shape.set({ selectable: true, evented: true });
-                updateCoordinates();
+                //updateCoordinates();
                 canvas.renderAll();
+
+                const pointer = canvas.getPointer(event.e);
+
+                openAnnotationPopup(pointer.x, pointer.y, shape);
             }
         });
                 // Alterar a cor depois
@@ -1016,60 +1239,49 @@
         
         function updateCoordinates() {
             const coordinatesDiv = document.getElementById('coordinates');
-            const selectedSection = document.getElementById('roi-section').value;
-            coordinatesDiv.innerHTML = '<strong>Coordenadas das ROIs:</strong><br>';
-         
+
+            // 1️⃣ LIMPA A TELA PRIMEIRO
+            coordinatesDiv.innerHTML = '';
+
             clearLabels();
+
+            // 2️⃣ Cabeçalho
+            let html = '<strong>Coordenadas das ROIs:</strong><br>';
+
+            // 3️⃣ Percorre objetos do canvas
             canvas.getObjects().forEach(obj => {
                 if (obj.type === 'rect' || obj.type === 'circle') {
                     const adjusted = getAdjustedCoordinates(obj);
-        
-                    if (adjusted) {
-                        if (obj.type === 'rect') {
-                            coordinatesDiv.innerHTML += `Retângulo - x: ${adjusted.x}, y: ${adjusted.y}, width: ${adjusted.width}, height: ${adjusted.height}<br>`;
-                            /*
-                            // 🔹 Label para retângulo
-                            const bounds = obj.getBoundingRect();
-                            const label = new fabric.Text(selectedSection, {
-                                left: bounds.left + bounds.width + 10,   // à direita
-                                top: bounds.top + bounds.height / 2,    // centralizado verticalmente
-                                fontSize: 12,
-                                fill: 'white',
-                                fontWeight: 'regular',
-                                selectable: false,
-                                evented: false,
-                            });
-                            // 🔹 Marca como label
-                            label.isLabel = true;
-                            canvas.add(label);
-                            canvas.bringToFront(label); */
-        
-                        } else if (obj.type === 'circle') {
-                            coordinatesDiv.innerHTML += `Círculo - centerX: ${adjusted.centerX}, centerY: ${adjusted.centerY}, radiusX: ${adjusted.radiusX}, radiusY: ${adjusted.radiusY}<br>`;
-                        
-                        /*
-                            // 🔹 Label para círculo
-                            const bounds = obj.getBoundingRect();
-                            const label = new fabric.Text(selectedSection, {
-                                left: bounds.left + bounds.width + 10,   // à direita
-                                top: bounds.top + bounds.height / 2,    // centralizado verticalmente
-                                fontSize: 12,
-                                fill: 'yellow',
-                                fontWeight: 'bold',
-                                selectable: false,
-                                evented: false,
-                            });
+                    if (!adjusted) return;
 
-                           // 🔹 Marca como label
-                            label.isLabel = true;
-                            canvas.add(label);
-                            canvas.bringToFront(label); */
-                        }
+                    if (obj.type === 'rect') {
+                        html += `
+                            Retângulo → 
+                            x: ${adjusted.x}, 
+                            y: ${adjusted.y}, 
+                            w: ${adjusted.width}, 
+                            h: ${adjusted.height}
+                            <br>
+                        `;
+                    }
+
+                    if (obj.type === 'circle') {
+                        html += `
+                            Círculo → 
+                            cx: ${adjusted.centerX}, 
+                            cy: ${adjusted.centerY}, 
+                            rx: ${adjusted.radiusX}, 
+                            ry: ${adjusted.radiusY}
+                            <br>
+                        `;
                     }
                 }
             });
+
+            // 4️⃣ ESCREVE UMA ÚNICA VEZ
+            coordinatesDiv.innerHTML = html;
         }
-        
+                
 
         async function sendParamGray() {
             //const rois = canvas.getObjects().filter(obj => obj.type === 'rect' || obj.type === 'circle').map(getAdjustedCoordinates);
@@ -1126,14 +1338,14 @@
                     canvas.add(circle);
                 }
             });
-            updateCoordinates();
+          //  updateCoordinates();
         }
 
         function deleteAllROIs() {
             const rois = canvas.getObjects().filter(obj => obj.type === 'rect' || obj.type === 'circle');
             rois.forEach(roi => canvas.remove(roi));
             clearLabels();
-            updateCoordinates();
+           // updateCoordinates();
         }
 
         function zoomIn() {
@@ -1156,35 +1368,75 @@
             try {
                 const selectedProgram = document.getElementById('programa-section').value;
                 const selectedValue = parseInt(selectedProgram, 10);
+
                 const selectedCamera = document.getElementById('camera-section').value;
                 const selectedValueCam = parseInt(selectedCamera, 10);
-        
+
                 // Mostra o popup
                 document.getElementById("loading-popup").style.display = "flex";
-        
-                const response = await fetch(`${SERVER_URL}/treinar`, {
+
+                // Reseta UI
+                document.getElementById("training-bar").style.width = "0%";
+                document.getElementById("training-percent").innerText = "0%";
+                document.getElementById("training-text").innerText =
+                    "Iniciando treinamento...";
+
+                // 👉 Dispara o treino (NÃO aguardamos terminar)
+                fetch(`${SERVER_URL}/treinar`, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ programa: selectedValue, camera: selectedValueCam })
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        programa: selectedValue,
+                        camera: selectedValueCam
+                    })
                 });
-        
-                // Aqui você pode verificar o resultado da requisição
-                if (!response.ok) {
-                    throw new Error("Falha no treinamento da RNA");
-                }
-        
-                // Sucesso → fecha popup
-                document.getElementById("loading-popup").style.display = "none";
-                alert("Treinamento finalizado com sucesso!");
+
+                // 👉 Começa a acompanhar o progresso
+                acompanharProgressoTreino();
+
             } catch (error) {
                 document.getElementById("loading-popup").style.display = "none";
-                resultsContainer.innerHTML = 'Erro ao iniciar o treinamento da RNA!';
                 console.error(error);
+                alert("Erro ao iniciar o treinamento da RNA!");
             }
         }
-        
+        function acompanharProgressoTreino() {
+            const interval = setInterval(async () => {
+                try {
+                    const response = await fetch(`${SERVER_URL}/training_status`);
+                    const data = await response.json();
+
+                    if (!data.running) {
+                        clearInterval(interval);
+
+                        document.getElementById("training-bar").style.width = "100%";
+                        document.getElementById("training-percent").innerText = "100%";
+                        document.getElementById("training-text").innerText =
+                            "Treinamento concluído!";
+
+                        setTimeout(() => {
+                            document.getElementById("loading-popup").style.display = "none";
+                            alert("Treinamento finalizado com sucesso!");
+                        }, 800);
+
+                        return;
+                    }
+
+                    // Atualiza UI
+                    document.getElementById("training-bar").style.width =
+                        data.progress + "%";
+
+                    document.getElementById("training-percent").innerText =
+                        data.progress + "%";
+
+                    document.getElementById("training-text").innerText =
+                        data.mensagem || "Treinando...";
+
+                } catch (err) {
+                    console.error("Erro ao consultar progresso:", err);
+                }
+            }, 1000);
+        }
         async function CapturarReference(){
             
             //const response = await fetch(`${SERVER_URL}/capture_reference`);
@@ -1259,7 +1511,8 @@
                 
                 // Atualiza a label com a contagem
                 if(`${data.count}` == "0"){
-                    deleteOKLabel.textContent = "Pendente criar imagem OK" ; 
+                   // deleteOKLabel.textContent = "Pendente criar imagem OK" ; 
+                     deleteOKLabel.textContent = "0";
                 }
                  else{
                     deleteOKLabel.textContent = `${data.count}`;
@@ -1293,7 +1546,8 @@
                 
                 // Atualiza a label com a contagem
                 if(`${data.count}` == "0"){
-                    deleteNOKLabel.textContent = "Pendente criar imagem NOK" ; 
+                   // deleteNOKLabel.textContent = "Pendente criar imagem NOK" ; 
+                    deleteNOKLabel.textContent = "0";
                 }
                  else{
                     deleteNOKLabel.textContent = `${data.count}`;
@@ -1421,6 +1675,7 @@
                     roiLabel.classList.add('label-title');
                     roiLabel.textContent = `ROI${roi.roi_index}: `;
                     roiLabel.style.fontWeight = 'bold'; // Texto em negrito
+                    roiLabel.style.fontSize = '18px'; // Tamanho da fonte
                     resultDiv.appendChild(roiLabel);
                     
                     if(pixel_on){
@@ -1618,15 +1873,18 @@
                         const rnaStatusLabel = document.createElement('label');
                         rnaStatusLabel.classList.add('label-title');
                         rnaStatusLabel.textContent = 'RNA Status: ';
+                        rnaStatusLabel.style.fontSize = '18px'; // Tamanho da fonte
                        // rnaStatusLabel.style.marginLeft = '10px'; // Margem à esquerda de 10px
                         resultDiv.appendChild(rnaStatusLabel);
                         
-    
+                        /*
                         const rnaStatusInput = document.createElement('input');
                         rnaStatusInput.type = 'text';
                         rnaStatusInput.style.color = 'white';
+                        rnaStatusInput.style.fontSize = '18px'; // Tamanho da fonte
                         rnaStatusInput.value = roi.rna_status;
                         rnaStatusInput.readOnly = true;
+                        
                         if(roi.rna_status){
                             rnaStatusInput.classList.add('status-ok');
                         }
@@ -1635,10 +1893,10 @@
                         }
                         
                         // Definir tamanho da caixa de entrada
-                        rnaStatusInput.style.width = '50px'; // largura
-                        rnaStatusInput.style.height = '20px'; // altura
+                        rnaStatusInput.style.width = '60px'; // largura
+                        rnaStatusInput.style.height = '30px'; // altura
                         
-                        resultDiv.appendChild(rnaStatusInput);
+                        resultDiv.appendChild(rnaStatusInput); */
                          }
                          
                      
