@@ -169,6 +169,12 @@
         .output {
             margin-top: 20px;
         }
+        #label-cor, #label-textura, #label-pixel, #label-ponto_parafuso {
+            display: none !important;
+        }
+        #pixel-slider {
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -176,25 +182,25 @@
     <h1>Ajuste de Limites e Ferramentas</h1>
     
     <div class="checkbox-container">
-        <label>
+        <label id="label-cor">
             <input type="checkbox" id="cor"> Cor
         </label>
-        <label>
+        <label id="label-textura">
             <input type="checkbox" id="textura"> Textura
         </label>
-        <label>
+        <label id="label-pixel">
             <input type="checkbox" id="pixel"> Pixel
         </label>
-        <label>
+        <label id="label-ponto_parafuso">
             <input type="checkbox" id="ponto_parafuso"> Ponto Parafuso
         </label>
-        <label>
+        <label id="label-ponto_xy">
             <input type="checkbox" id="ponto_xy"> Ponto XY
         </label>
-        <label>
+        <label id="label-rna">
             <input type="checkbox" id="rna"> RNA
         </label>
-        <label>
+        <label id="label-posicao">
             <input type="checkbox" id="posicao"> Ajuste de Posição
         </label>
         <label>
@@ -214,9 +220,20 @@
         <label for="rna-section" id ="label-rna">Selecione:</label>
                 <select id="rna-section">
                     <option value="">Selecione:</option>
-                    <option value="resnet">resnet</option>
-                    <option value="yolo">yolo</option>
+                    <option value="resnet50">resnet50</option>
+                    <option value="yolo8n">yolo8n</option>
+                    <option value="yolo11n">yolo11n</option>
                     
+                </select>
+                <select id="image-size-section">
+                    <option value="">Tamanho Imagem:</option>
+                    <option value="224">224x224</option>
+                    <option value="416,384">416x384</option>
+                    <option value="416">416x416</option>
+                    <option value="512">512x512</option>
+                    <option value="512,416">512x416</option>
+                    <option value="640">640x640</option>
+                    <option value="1024">1024x1024</option>                   
                 </select>
      
         <label for="roi-section" id ="label-roisection">Selecione a seção ROI:</label>
@@ -245,7 +262,8 @@
            
         </select>
         
-        <div class="slider-container">
+         <!-- <div class="slider-container"></div> -->
+        <div class="slider-container" id="pixel-slider">
             <div class="labels">
                 <span id="outputLowerPixel1">80</span>
                 <span id="outputUpperPixel1">170</span>
@@ -254,12 +272,12 @@
             <div class="slider-range" id="sliderRangePixel1"></div>
             <div class="thumb" id="thumbLowerPixel1"></div>
             <div class="thumb" id="thumbUpperPixel1"></div>
-               <!-- Label abaixo do slider -->
+               
             <label for="sliderRangePixel1" style="display: block; color: white;margin-top: 8px; text-align: center;">Tolerância Pixels</label>
         </div>
         
 
-        <div class="slider-container">
+         <div class="slider-container" id="pixel-slider">
             <div class="labels">
                 <span id="outputLowerTextura1">30</span>
                 <span id="outputUpperTextura1">90</span>
@@ -271,7 +289,7 @@
             <label for="sliderRangeTextura1" style="display: block; color: white;margin-top: 8px; text-align: center;">Tolerância Textura</label>
         </div>
         
-        <div class="slider-container">
+         <div class="slider-container" id="pixel-slider">
             <div class="labels">
                 <span id="outputLowerCor1">80</span>
                 <span id="outputUpperCor1">170</span>
@@ -284,7 +302,7 @@
         </div>
 
 
-        <div class="slider-container">
+         <div class="slider-container" id="pixel-slider">
             <div class="labels">
                 <span id="outputLowerPonto1">80</span>
                 <span id="outputUpperPonto1">170</span>
@@ -464,6 +482,7 @@
                 }
                 const data_3 = await response_3.json();
                 document.getElementById("rna-section").value = data_3.tipo_rede_neural_artificial;
+                document.getElementById("image-size-section").value = data_3.image_size;
 
                   
 
@@ -558,11 +577,24 @@
             const resultFerramentas = await responseFerramentas.json();
            // console.log(resultFerramentas);
 
+            let modelo = document.getElementById("rna-section").value;
+            if(modelo == "yolo8n"){
+                modelo = "yolo8n.pt";
+            }else if(modelo == "yolo11n"){
+                modelo = "yolo11n.pt";
+            }else if(modelo == "resnet50"){
+                modelo = "resnet50.pt";
+            }else{
+                modelo = "";
+            }
 
             const config_modelos = {
                 camera: camera, // camera selecionado
                 programa: programaSelect, // Programa selecionado
-                tipo_rede_neural_artificial: document.getElementById("rna-section").value
+                tipo_rede_neural_artificial: document.getElementById("rna-section").value,
+                image_size: document.getElementById("image-size-section").value,
+                modelo_base: modelo
+                
             };
             const url_modelos = `${SERVER_URL}/modelos`;
             const responseModelos = await fetch(url_modelos, {

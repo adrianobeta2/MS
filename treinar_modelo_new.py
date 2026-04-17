@@ -204,7 +204,7 @@ def yolo_label(x, y, w, h, iw, ih, class_id):
 
 
 
-def gerar_dataset_yolo(camera, programa):
+def gerar_dataset_yolo(camera, programa, incremental=False):
 
     config = configparser.ConfigParser()
     config.read(f'config_{camera}_{programa}.ini')
@@ -213,23 +213,32 @@ def gerar_dataset_yolo(camera, programa):
 
     template_ok = [
         f'cam{camera}_ref_programa{programa}_OK_{i if i > 0 else ""}.png'
-        for i in range(0, 100)
+        for i in range(0, 200)
     ]
-
     template_nok = [
         f'cam{camera}_ref_programa{programa}_NOK_{i if i > 0 else ""}.png'
-        for i in range(0, 100)
+        for i in range(0, 200)
     ]
-
-    amostras = []
 
     dataset_dir = get_dataset_dir(camera, programa)
 
-    for p in [
-        "images/train", "images/val",
-        "labels/train", "labels/val"
-    ]:
+    for p in ["images/train", "images/val", "labels/train", "labels/val"]:
         (dataset_dir / p).mkdir(parents=True, exist_ok=True)
+
+    # ✅ Descobre quais imagens JÁ existem no dataset
+    if incremental:
+        imagens_existentes = set(
+            f.stem.rsplit("_", 1)[0]  # remove o sufixo _idx
+            for f in (dataset_dir / "images" / "train").glob("*.jpg")
+        ) | set(
+            f.stem.rsplit("_", 1)[0]
+            for f in (dataset_dir / "images" / "val").glob("*.jpg")
+        )
+        print(f"[INFO] Modo incremental — {len(imagens_existentes)} imagens já no dataset")
+    else:
+        imagens_existentes = set()
+
+    amostras = []
 
     for i in range(1, n_rois + 1):
         sec = f'ROI{i}'
@@ -240,32 +249,41 @@ def gerar_dataset_yolo(camera, programa):
         y = int(config[sec].get('y', config[sec].get('y_anterior')))
         w = int(config[sec].get('width', config[sec].get('width_anterior')))
         h = int(config[sec].get('height', config[sec].get('height_anterior')))
-
         roi = (x, y, w, h)
 
         for fname in template_ok:
             caminho = os.path.join(IMG_DIR, fname)
             if os.path.exists(caminho):
+                nome_base = Path(fname).stem
+                # ✅ Ignora se já foi processada
+                if incremental and nome_base in imagens_existentes:
+                    print(f"[SKIP] Já existe: {fname}")
+                    continue
                 amostras.append((caminho, roi, CLASSES["ok"]))
-                print(
-                f"[INFO] Cam={camera} Prog={programa} "
-                f"ROI={i} Classe=OK Img={fname}"
-            )
 
         for fname in template_nok:
             caminho = os.path.join(IMG_DIR, fname)
             if os.path.exists(caminho):
+                nome_base = Path(fname).stem
+                if incremental and nome_base in imagens_existentes:
+                    print(f"[SKIP] Já existe: {fname}")
+                    continue
                 amostras.append((caminho, roi, CLASSES["nok"]))
-                print(
-                f"[INFO] Cam={camera} Prog={programa} "
-                f"ROI={i} Classe=NOK Img={fname}"
-            )
+
+    if not amostras:
+        print("[INFO] Nenhuma imagem nova encontrada. Dataset já está atualizado.")
+        return
+
+    print(f"[INFO] {len(amostras)} novas amostras para adicionar")
+
+    # ✅ Conta índice a partir do que já existe para não sobrescrever
+    idx_offset = len(list((dataset_dir / "images" / "train").glob("*.jpg"))) + \
+                 len(list((dataset_dir / "images" / "val").glob("*.jpg")))
 
     random.shuffle(amostras)
     split = int(len(amostras) * TRAIN_SPLIT)
 
     for idx, (img_path, roi, class_id) in enumerate(amostras):
-
         subset = "train" if idx < split else "val"
 
         img = cv2.imread(img_path)
@@ -273,13 +291,12 @@ def gerar_dataset_yolo(camera, programa):
             continue
 
         h_img, w_img = img.shape[:2]
-        img_name = f"{Path(img_path).stem}_{idx}.jpg"
+        img_name = f"{Path(img_path).stem}_{idx + idx_offset}.jpg"  # ✅ índice único
 
         out_img = dataset_dir / "images" / subset / img_name
         cv2.imwrite(str(out_img), img)
 
         x, y, w, h = roi
-
         x = max(0, min(x, w_img - 1))
         y = max(0, min(y, h_img - 1))
         w = min(w, w_img - x)
@@ -289,16 +306,15 @@ def gerar_dataset_yolo(camera, programa):
             print(f"[WARN] ROI inválida ignorada | Cam={camera} Prog={programa}")
             continue
 
-
         label = yolo_label(x, y, w, h, w_img, h_img, class_id)
-
         out_lbl = dataset_dir / "labels" / subset / f"{Path(img_name).stem}.txt"
         with open(out_lbl, "w") as f:
             f.write(label + "\n")
 
         print(f"[CAM{camera} PROG{programa}] {subset} -> {img_name}")
 
-    print("\n✅ Dataset YOLO gerado com sucesso!")
+    print(f"\n✅ Dataset atualizado — {len(amostras)} novas imagens adicionadas!")
+
 
 
 
@@ -332,7 +348,8 @@ def limpar_dataset(camera, programa):
 from ultralytics import YOLO
 MODEL_BASE = "yolo8n.pt"   # leve e rápido
 #DATA_YAML = "dataset/data.yaml"
-EPOCHS = 60
+EPOCHS = 50
+EPOCHS_FINETUNE = 20
 IMG_SIZE_YOLO = 640
 
 from pathlib import Path
@@ -356,7 +373,7 @@ def on_epoch_end(trainer):
 
     print(f"[CALLBACK] Epoch {epoch}/{total}")
 
-def criar_modelo(camera, programa):
+def criar_modelo(camera, programa, img_size,modelo_base, incremental=False):
     # Diretório do dataset (Path é 100% compatível com Windows)
     dataset_dir = Path(get_dataset_dir(camera, programa))
     data_yaml = dataset_dir / "data.yaml"
@@ -364,14 +381,26 @@ def criar_modelo(camera, programa):
     # Seleção automática de device
     device = 0 if torch.cuda.is_available() else "cpu"
 
-    # Carrega modelo base
-    model = YOLO(MODEL_BASE)
+    modelo_existente = Path("runs/detect/treinos") / f"cam{camera}_prog{programa}" / "weights" / "best.pt"
+
+    if incremental and modelo_existente.exists():
+        print(f"🔄 Treinamento incremental com: {modelo_existente}")
+        model = YOLO(str(modelo_existente))
+        epocas = EPOCHS_FINETUNE          # ✅ AQUI está a economia
+       
+        paciencia = 15                      
+    else:
+        print(f"🚀 Treinamento do zero com: {modelo_base}")
+        model = YOLO(modelo_base)
+        epocas = EPOCHS
+        
+        paciencia = 10
     from training_state import write_status
 
     write_status({
         "running": True,
         "epoch": 0,
-        "total_epochs": EPOCHS,
+        "total_epochs": epocas,
         "progress": 0,
         "mensagem": "Iniciando treinamento..."
     })
@@ -380,8 +409,8 @@ def criar_modelo(camera, programa):
     # Treinamento
     model.train(
         data=str(data_yaml),      
-        epochs=EPOCHS,
-        imgsz=IMG_SIZE_YOLO,
+        epochs=epocas,
+        imgsz=img_size,
         project="treinos",        
         name=f"cam{camera}_prog{programa}",
         batch=16,
@@ -390,8 +419,8 @@ def criar_modelo(camera, programa):
     )
     write_status({
         "running": False,
-        "epoch": EPOCHS,
-        "total_epochs": EPOCHS,
+        "epoch": epocas,
+        "total_epochs": epocas,
         "progress": 100,
         "mensagem": "Treinamento concluído"
     })
@@ -399,12 +428,6 @@ def criar_modelo(camera, programa):
 
 from pathlib import Path
 from ultralytics import YOLO
-import subprocess
-import torch
-import shutil
-
-
-from pathlib import Path
 import subprocess
 import torch
 import shutil
@@ -486,12 +509,16 @@ def exportar_modelo_trt(camera: int, programa: int, workspace: int = 4096):
     print("✅ Exportação concluída com sucesso!")
 
 
-def gerar_modelo(camera, programa):
-    limpar_dataset(camera, programa)
-    limpar_treino(camera, programa)   
-    arquivo_dataset(camera, programa)
-    gerar_dataset_yolo(camera, programa)
-    criar_modelo(camera, programa)
+def gerar_modelo(camera, programa,img_size, modelo_base, incremental=False):
+    if incremental:
+        print(f"🔄 Iniciando treinamento incremental para Cam={camera} Prog={programa}")
+    else:
+        print(f"🚀 Iniciando treinamento do zero para Cam={camera} Prog={programa}")
+        limpar_dataset(camera, programa)
+        limpar_treino(camera, programa)
+        arquivo_dataset(camera, programa)
+    gerar_dataset_yolo(camera, programa, incremental=incremental)
+    criar_modelo(camera, programa, img_size,modelo_base, incremental=incremental)
 
 ### rede resnet18 ou mobilenetv2 (mais leve) para comparar com o yolo (que é mais complexo mas pode ser mais preciso e rápido na inferência)
 
@@ -564,14 +591,14 @@ import torch.nn as nn
 import torchvision.models as models
 from torchvision import datasets, transforms
 from torch.utils.data import DataLoader
-EPOCHS_RESNET = 20
+EPOCHS_RESNET = 40
 
-def treinar_resnet(camera, programa):
+def treinar_resnet(camera, programa, img_size):
 
     dataset_dir = get_dataset_dir(camera, programa)
 
     transform = transforms.Compose([
-        transforms.Resize((224, 224)),
+        transforms.Resize((img_size, img_size)),
         transforms.ToTensor(),
         transforms.Normalize(
             mean=[0.485, 0.456, 0.406],
@@ -665,90 +692,142 @@ def treinar_resnet(camera, programa):
     print("🎯 Modelo ResNet treinado!")
     
 
-def gerar_modelo_resnet(camera, programa):
+def gerar_modelo_resnet(camera, programa,img_size):
     limpar_dataset(camera, programa)
     gerar_dataset_resnet(camera, programa)
-    treinar_resnet(camera, programa)
+    treinar_resnet(camera, programa, img_size)
 
 
-def gerar_modelo_resnet50(camera, programa):
+def gerar_modelo_resnet50(camera, programa, img_size):
     limpar_dataset(camera, programa)
     gerar_dataset_resnet(camera, programa)
-    treinar_resnet50(camera, programa)
+    treinar_resnet50(camera, programa, img_size)
 
 #######################################resnet50 treinamento##############
 
-def treinar_resnet50(camera, programa):
+def treinar_resnet50(camera, programa, img_size):
 
     dataset_dir = get_dataset_dir(camera, programa)
 
-    transform = transforms.Compose([
-        transforms.Resize((224, 224)),
+    # ✅ Augmentation no treino
+    train_transform = transforms.Compose([
+        transforms.Resize((img_size + 32, img_size + 32)),
+        transforms.RandomCrop(img_size),
+        transforms.RandomHorizontalFlip(),
+        transforms.RandomVerticalFlip(),
+        transforms.ColorJitter(brightness=0.3, contrast=0.3, saturation=0.2),
+        transforms.RandomRotation(15),
         transforms.ToTensor(),
-        transforms.Normalize(
-            mean=[0.485, 0.456, 0.406],
-            std=[0.229, 0.224, 0.225]
-       )
+        transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                             std=[0.229, 0.224, 0.225])
     ])
 
+    # ✅ Validação sem augmentation
+    val_transform = transforms.Compose([
+        transforms.Resize((img_size, img_size)),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                             std=[0.229, 0.224, 0.225])
+    ])
 
-    train_dataset = datasets.ImageFolder(dataset_dir / "train", transform=transform)
-    val_dataset = datasets.ImageFolder(dataset_dir / "val", transform=transform)
+    train_dataset = datasets.ImageFolder(dataset_dir / "train", transform=train_transform)
+    val_dataset   = datasets.ImageFolder(dataset_dir / "val",   transform=val_transform)
 
-    train_loader = DataLoader(
-        train_dataset,
-        batch_size=32,       # RTX 4050 aguenta
-        shuffle=True,
-        num_workers=4,
-        pin_memory=True,
-        persistent_workers=True
+    # ✅ Class weights para desbalanceamento
+    class_counts  = torch.tensor(
+        [train_dataset.targets.count(i) for i in range(2)], dtype=torch.float
     )
+    class_weights = (1.0 / class_counts)
+    class_weights = class_weights / class_weights.sum()
 
-    val_loader = DataLoader(val_dataset, batch_size=16)
+    train_loader = DataLoader(train_dataset, batch_size=16, shuffle=True,
+                              num_workers=4, pin_memory=True, persistent_workers=True)
+    val_loader   = DataLoader(val_dataset, batch_size=16)
 
     model = models.resnet50(pretrained=True)
-    model.fc = nn.Linear(model.fc.in_features, 2)
+
+    # ✅ Congelar backbone, treinar só o topo primeiro
+    for param in model.parameters():
+        param.requires_grad = False
+
+    model.fc = nn.Sequential(
+        nn.Dropout(0.3),
+        nn.Linear(model.fc.in_features, 2)
+    )
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model.to(device)
+    class_weights = class_weights.to(device)
 
-    criterion = nn.CrossEntropyLoss()
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
-    scaler = torch.amp.GradScaler("cuda")
-    for epoch in range(20):
+    criterion = nn.CrossEntropyLoss(weight=class_weights)  # ✅ com peso
+
+    # ✅ Fase 1 — treina só o fc (5 épocas, lr alto)
+    optimizer = torch.optim.Adam(model.fc.parameters(), lr=0.001)
+    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=3, gamma=0.5)
+    scaler    = torch.amp.GradScaler("cuda")
+    write_status({
+        "running": True,
+        "epoch": 0,
+        "total_epochs": EPOCHS_RESNET,
+        "progress": 0,
+        "mensagem": "Iniciando treinamento ResNet..."
+    })
+    print("🔒 Fase 1 — treinando só o classificador...")
+    for epoch in range(5):
         model.train()
         total_loss = 0
-
         for imgs, labels in train_loader:
-            imgs = imgs.to(device, non_blocking=True)
-            labels = labels.to(device, non_blocking=True)
-
+            imgs, labels = imgs.to(device, non_blocking=True), labels.to(device, non_blocking=True)
             optimizer.zero_grad()
-
             with torch.amp.autocast("cuda"):
-                outputs = model(imgs)
-                loss = criterion(outputs, labels)
-
+                loss = criterion(model(imgs), labels)
             scaler.scale(loss).backward()
             scaler.step(optimizer)
             scaler.update()
-
             total_loss += loss.item()
+        scheduler.step()
+        print(f"  Epoch {epoch+1}/5 | Loss: {total_loss:.4f}")
 
-        print(f"Epoch {epoch+1} | Loss: {total_loss:.4f}")
-    
-    print("Train size:", len(train_dataset))
-    print("Val size:", len(val_dataset))
-   
-    from sklearn.metrics import classification_report
-    # Avaliação final  
+    # ✅ Fase 2 — desbloqueia toda a rede com lr baixo
+    for param in model.parameters():
+        param.requires_grad = True
+
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.0001)  # ✅ lr 10x menor
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=35)
+
+    print("\n🔓 Fase 2 — fine-tuning completo...")
+    for epoch in range(35):
+        model.train()
+        total_loss = 0
+        for imgs, labels in train_loader:
+            imgs, labels = imgs.to(device, non_blocking=True), labels.to(device, non_blocking=True)
+            optimizer.zero_grad()
+            with torch.amp.autocast("cuda"):
+                loss = criterion(model(imgs), labels)
+            scaler.scale(loss).backward()
+            scaler.step(optimizer)
+            scaler.update()
+            total_loss += loss.item()
+        scheduler.step()
+        print(f"  Epoch {epoch+1}/35 | Loss: {total_loss:.4f}")
+        progress = int(((epoch + 1) / EPOCHS_RESNET) * 100)
+        write_status({
+            "running": True,
+            "epoch": epoch + 1,
+            "total_epochs": EPOCHS_RESNET,
+            "progress": progress,
+            "mensagem": f"Epoch {epoch + 1}/{EPOCHS_RESNET} | Loss: {total_loss:.4f}"
+        })
+
+
+    print(f"\nTrain size: {len(train_dataset)} | Val size: {len(val_dataset)}")
+
+    from sklearn.metrics import classification_report, confusion_matrix
     labels_real, preds = avaliar_modelo(model, val_loader, device)
-    from sklearn.metrics import confusion_matrix
     print("\n📊 Relatório detalhado:")
     print(classification_report(labels_real, preds, target_names=["nok", "ok"]))
+    print(confusion_matrix(labels_real, preds))
 
-    cm = confusion_matrix(labels_real, preds)
-    print(cm)
     torch.save(model.state_dict(), dataset_dir / "modelo_resnet50.pth")
     print(train_dataset.class_to_idx)
     print("🎯 Modelo ResNet treinado!")
@@ -805,12 +884,16 @@ def carregar_modelo(model_path):
         model = torch.compile(model)
 
     return model, device
-
 def carregar_modelo_resnet50(model_path):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     model = models.resnet50(weights=None)
-    model.fc = nn.Linear(model.fc.in_features, 2)
+
+    # ✅ Mesma arquitetura usada no treino
+    model.fc = nn.Sequential(
+        nn.Dropout(0.3),
+        nn.Linear(model.fc.in_features, 2)
+    )
 
     state_dict = torch.load(
         model_path,
@@ -822,7 +905,6 @@ def carregar_modelo_resnet50(model_path):
     model.eval()
     model.to(device)
 
-    # 🚫 torch.compile NÃO no Windows
     if platform.system() != "Windows":
         model = torch.compile(model)
 

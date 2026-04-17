@@ -313,6 +313,9 @@ python -m venv venv
 🔹 CMD
 venv\Scripts\activate
 
+* PowerShell
+.venv\Scripts\activate.ps1
+
 
 ########################################3 procedimentos para a GPU #############################
 
@@ -412,3 +415,8 @@ sc query SVE // status do serviço
 sc edit SVE  // editar
 
 
+//////////////////////////////////////////////////////////////////////////////////////////
+conversao do arquivo cripto pyc
+
+
+& c:\ms\venv\Scripts\python.exe c:/ms/setupCompile.py build_ext --inplace  

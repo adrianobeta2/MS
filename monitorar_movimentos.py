@@ -864,18 +864,20 @@ def enviar_alerta(cluster_id, roi, duration, frame_id):
 
 #modelo_cabo = YOLO("cabo_flex.pt")
 
-def analise_cabo_flex(modelo_cabo, classe_ok, classe_nok, imagem, coordenadas, tolerancia=0.7):
+
+def analise_cabo_flex(modelo_cabo, classe_ok, classe_nok, imagem, coordenadas, tolerancia=0.7, salvar_confianca=False):
 
     x, y, w, h = coordenadas
-
+   
     # --- Proteção de limites ---
     h_img, w_img = imagem.shape[:2]
     x = max(0, x)
     y = max(0, y)
     w = min(w, w_img - x)
     h = min(h, h_img - y)
-
-    # Inferência YOLO na imagem inteira
+    print(modelo_cabo.device)
+    # Inferência YOLO na imagem inteir
+    
     results = modelo_cabo(imagem, conf=0.25, verbose=False)
 
     melhor_conf = 0.0
@@ -906,18 +908,61 @@ def analise_cabo_flex(modelo_cabo, classe_ok, classe_nok, imagem, coordenadas, t
                 if conf > melhor_conf:
                     melhor_conf = conf
                     melhor_classe = classe
+                
+                print(f"Detecção dentro da ROI: classe={classe}, conf={conf:.2f}")
+
+                if salvar_confianca:
+                  salvar_confianca_csv(classe, conf, classe_ok, classe_nok)
 
                 # regra NOK tem prioridade
                 if classe == classe_nok and conf >= 0.5:
                     return False
 
-                if classe == classe_ok and conf >= 0.45:
+                if classe == classe_ok and conf >= 0.7:
                     status = True
 
     return status
-   # ===== BANCO =====
-#db = get_db()
-#cursor = db.cursor()
+
+
+import csv
+import os
+from datetime import datetime
+
+CSV_FILE = "nivel_conf.csv"
+LIMITE_LINHAS = 500
+
+def salvar_confianca_csv(classe, conf, classe_ok, classe_nok):
+    
+    # Verifica quantas linhas já existem e limpa se atingiu o limite
+    if os.path.exists(CSV_FILE):
+        with open(CSV_FILE, "r") as f:
+            total_linhas = sum(1 for _ in f) - 1  # desconta o cabeçalho
+        
+        if total_linhas >= LIMITE_LINHAS:
+            os.remove(CSV_FILE)  # apaga o arquivo para recriar do zero
+
+    # Cria o arquivo com cabeçalho se não existir
+    if not os.path.exists(CSV_FILE):
+        with open(CSV_FILE, "w", newline="") as f:
+            writer = csv.writer(f)
+            writer.writerow(["timestamp", "classe_ok_conf", "classe_nok_conf", "resultado"])
+
+    # Captura os valores de confiança por classe
+    conf_ok  = conf if classe == classe_ok  else None
+    conf_nok = conf if classe == classe_nok else None
+
+    # Determina o resultado
+    if classe == classe_nok and conf >= 0.5:
+        resultado = "NOK"
+    elif classe == classe_ok and conf >= 0.45:
+        resultado = "OK"
+    else:
+        resultado = "INCERTO"
+
+    with open(CSV_FILE, "a", newline="") as f:
+        writer = csv.writer(f)
+        writer.writerow([datetime.now().isoformat(), conf_ok, conf_nok, resultado])
+
 
 
 

@@ -35,6 +35,7 @@ from ultralytics import YOLO
 from tensorflow.keras.models import load_model
 from tensorflow.keras import mixed_precision
 import datetime
+import machine_guide
 
 #from db import get_db
 
@@ -145,12 +146,12 @@ def get_serial():
         print(f"Erro ao obter serial: {e}")
         return None
 
-# ✅ Substitua com o serial autorizado do seu Jetson (pegue com 'cat /sys/firmware/devicetree/base/serial-number')
-serial_autorizado = None #"2bfa9f2a43fe3e38"
+
+serial_autorizado = machine_guide.serial_autorizado()
 
 @app.before_request
 def verificar_serial():
-    serial_atual = get_serial()
+    serial_atual = machine_guide.get_machine_guid() 
     if serial_atual != serial_autorizado:
         abort(403, description="Acesso negado! Dispositivo não autorizado")
 
@@ -177,25 +178,54 @@ def salvar_imagem_com_log(image, base_dir='log_imagens'):
     cv2.imwrite(caminho_imagem, image)
     print(f"Imagem salva em: {caminho_imagem}")
 
-import os
 
 import os
 from datetime import datetime
 import cv2
 
-import os
-from datetime import datetime
-import cv2
+def get_pendrive_path(usuario="seu_usuario", nome_pendrive="PENDRIVE"):
+    sistema = platform.system()
+  
+    if sistema == "Linux":
+        return f"/media/{usuario}/{nome_pendrive}"
+    elif sistema == "Windows":
+        # Procura automaticamente o pendrive pela letra do drive
+        import string
+        import ctypes
+        drives = []
+        bitmask = ctypes.windll.kernel32.GetLogicalDrives()
+        for letra in string.ascii_uppercase:
+            if bitmask & 1:
+                drives.append(f"{letra}:\\")
+            bitmask >>= 1
+        # Retorna o primeiro drive removível encontrado
+        for drive in drives:
+            tipo = ctypes.windll.kernel32.GetDriveTypeW(drive)
+            if tipo == 2:  # DRIVE_REMOVABLE = 2
+                return drive
+    return None
 
-def salvar_imagem_no_pendrive(camera,image, pendrive_path='/media/usb'):
-    print(f"[DEBUG] Verificando ponto de montagem: {pendrive_path}")
-    print(f"[DEBUG] Resultado ismount: {os.path.ismount(pendrive_path)}")
+def salvar_imagem_no_pendrive(camera,image, pendrive_path=None):
+    if pendrive_path is None:
+        pendrive_path = get_pendrive_path()
     
-    if not os.path.ismount(pendrive_path):
+    if pendrive_path is None:
+        print("Erro: Nenhum pendrive encontrado.")
+        return
+    
+    # Ajusta a verificação de montagem por SO
+    if platform.system() == "Windows":
+        montado = os.path.exists(pendrive_path)
+    else:
+        montado = os.path.ismount(pendrive_path)
+    
+    if not montado:
         print("Erro: Pendrive não montado.")
         return
-
+    
+    from datetime import datetime 
     agora = datetime.now()
+    
     ano = agora.strftime("%Y")
     mes = agora.strftime("%m")
     dia = agora.strftime("%d")
@@ -241,11 +271,7 @@ def get_serial():
 # Defina o Serial Number da câmera desejada
 # serial_number = "22900012"  # Altere para o número da sua câmera
 
-@app.before_request
-def verificar_serial():
-    serial_atual = get_serial()
-    if serial_atual != serial_autorizado:
-        abort(403, description="Acesso negado! Dispositivo não autorizado.")
+
 
 config = configparser.ConfigParser()
 config.read("cameras.ini")
@@ -1030,19 +1056,30 @@ def training_status_api():
 
 from training_state import write_status
 
-def executar_treino_async(camera, programa, tipo_neural):
+def executar_treino_async(camera, programa, tipo_neural,img_size, modelo_base, incremental=False):
     global modo_treino
 
     try:
-        if tipo_neural == "yolo":
+        if tipo_neural == "yolo8n":
             treinar_modelo_new.gerar_modelo(
                 camera=camera,
-                programa=programa
+                programa=programa,
+                img_size=img_size,
+                modelo_base= modelo_base,
+                incremental=incremental
             )
-        elif tipo_neural == "resnet":
-            treinar_modelo_new.gerar_modelo_resnet(camera, programa)
+        elif tipo_neural == "yolo11n":
+             treinar_modelo_new.gerar_modelo(
+                camera=camera,
+                programa=programa,
+                img_size=img_size,
+                modelo_base= modelo_base,
+                incremental=incremental
+            )
+        elif tipo_neural == "resnet34":
+            treinar_modelo_new.gerar_modelo_resnet(camera, programa, img_size)
         elif tipo_neural == "resnet50":
-            treinar_modelo_new.gerar_modelo_resnet50(camera, programa)
+            treinar_modelo_new.gerar_modelo_resnet50(camera, programa, img_size)
         elif tipo_neural == "mobilenetv2":
             treinar_modelo_new.gerar_modelo_mobilenet(camera, programa)
 
@@ -1091,10 +1128,19 @@ def treinar():
     data = request.get_json()
     programa = data.get("programa")
     camera = data.get("camera")
+    incremental = data.get("incremental", False)
 
     config = configparser.ConfigParser()
     config.read(f'config_{camera}_{programa}.ini')
     tipo_neural = str(config['Modelos']['tipo_rede_neural_artificial'])
+    img_size = config.get("Modelos", "image_size")
+    if "," in str(img_size):
+        w, h = map(int, str(img_size).split(","))
+        img_size = (w, h)
+    else:
+        img_size = int(str(img_size))   
+        
+    modelo_base = str(config['Modelos']['modelo_base'])
 
     modo_treino = True
 
@@ -1116,7 +1162,7 @@ def treinar():
     # ✅ THREAD DE TREINO
     Thread(
         target=executar_treino_async,
-        args=(camera, programa, tipo_neural),
+        args=(camera, programa, tipo_neural, img_size,modelo_base,incremental),
         daemon=True
     ).start()
 
@@ -1125,6 +1171,22 @@ def treinar():
         "status": "sucesso",
         "mensagem": "Treinamento iniciado"
     })
+
+from flask import send_from_directory, render_template
+
+@app.route('/treino_resultado/<camera>/<programa>')
+def treino_resultado(camera, programa):
+    return render_template(
+        "resultado_treino.html",
+        camera=camera,
+        programa=programa
+    )
+
+@app.route('/treino_imagem/<camera>/<programa>/<filename>')
+def treino_imagem(camera, programa, filename):
+    path = f"runs/detect/treinos/cam{camera}_prog{programa}"
+    return send_from_directory(path, filename)
+
 ########################################################################################################
 
 url = "http://127.0.0.1:6001/capture"
@@ -1166,10 +1228,10 @@ def get_modelo(camera, programa, tipo_neural):
     if key in MODELOS_CACHE:
         return MODELOS_CACHE[key]
     
-    if tipo_neural == "resnet":
-      
+    if tipo_neural == "resnet34":
         path = f"dataset/cam{camera}_prog{programa}/modelo_resnet34.pth"
         model, device = treinar_modelo_new.carregar_modelo(path)
+
     elif tipo_neural == "resnet50":
         path = f"dataset/cam{camera}_prog{programa}/modelo_resnet50.pth"
         model, device = treinar_modelo_new.carregar_modelo_resnet50(path)
@@ -1177,7 +1239,8 @@ def get_modelo(camera, programa, tipo_neural):
     elif tipo_neural == "mobilenetv2":
         path = f"dataset/cam{camera}_prog{programa}/modelo_mobilenetv2.pth"
         model, device = treinar_modelo_new.carregar_modelo_mobilenet(path)
-    elif tipo_neural == "yolo":
+
+    elif tipo_neural == "yolo8n" or tipo_neural == "yolo11n" or tipo_neural =="yolo":
         model = YOLO(f"runs/detect/treinos/cam{camera}_prog{programa}/weights/best.pt").to("cuda")
         device = "cuda" if torch.cuda.is_available() else "cpu"
 
@@ -1310,8 +1373,8 @@ def processResult():
             tipo_neural = str(config['Modelos']['tipo_rede_neural_artificial'])
             
 
-            if tipo_neural == "resnet":
-                modelo_resnet, device = get_modelo(camera, programa, "resnet")
+            if tipo_neural == "resnet34":
+                modelo_resnet, device = get_modelo(camera, programa, "resnet34")
 
             elif tipo_neural == "resnet50":
                 modelo_resnet, device = get_modelo(camera, programa, "resnet50")
@@ -1320,7 +1383,7 @@ def processResult():
                 file_modelo = f"dataset/cam{camera}_prog{programa}/modelo_mobilenetv2.pth"
                 modelo_mobilenet, device = get_modelo(camera, programa, "mobilenetv2")
 
-            elif tipo_neural == "yolo":
+            elif tipo_neural == "yolo8n" or tipo_neural == "yolo11n" or tipo_neural =="yolo":
                 modelo_yol , device = get_modelo(camera, programa, "yolo")
                 classe_ok = str(config['Modelos']['peca_ok'])
                 classe_nok = str(config['Modelos']['peca_nok'])
@@ -1349,6 +1412,8 @@ def processResult():
         posicao = config.getboolean('Ferramentas', 'posicao')
         n_rois = config.getint('Ferramentas', 'n_rois')
         nome_programa =  config.get('Ferramentas', 'nome_programa')
+        salvar_imagem = config.getboolean('Ferramentas', 'salvar_imagem')
+        salvar_confianca = config.getboolean('Ferramentas', 'salvar_confianca')
 
 
         if(posicao):
@@ -1447,9 +1512,9 @@ def processResult():
                 #status_rna = predizer_frame_new(camera,programa,roi_idex,img,coordenadas,0.45)
                 #imagem_anotada = None
                 
-                if tipo_neural == "yolo":
-                  status_rna  = monitorar_movimentos.analise_cabo_flex(modelo_yol,classe_ok,classe_nok,image,coordenadas,0.7)
-                elif tipo_neural == "resnet" or tipo_neural == "resnet50":
+                if tipo_neural == "yolo8n" or tipo_neural == "yolo11n" or tipo_neural =="yolo":
+                  status_rna  = monitorar_movimentos.analise_cabo_flex(modelo_yol,classe_ok,classe_nok,image,coordenadas,0.7, salvar_confianca)
+                elif tipo_neural == "resnet34" or tipo_neural == "resnet50":
                   status_rna  = treinar_modelo_new.classificar_roi(modelo_resnet,device,image,coordenadas)
                 elif tipo_neural == "mobilenetv2":
                   status_rna  = treinar_modelo_new.classificar_roi_mobilenetv2(modelo_mobilenet,device,image,coordenadas)
@@ -1613,7 +1678,8 @@ def processResult():
         else:
             cv2.imwrite(f'imagem_status_{camera}.jpg', image)
         
-        salvar_imagem_no_pendrive(camera,image)
+        if(salvar_imagem):
+          salvar_imagem_no_pendrive(camera,image)
         resultado_geral = all(status_list)  # Verifica se todos os status são True
         
         tick_end = cv2.getTickCount()
@@ -2719,6 +2785,10 @@ def update_modelo_config():
     # Atualiza os valores gerais se fornecidos, garantindo que sejam armazenados como "true"/"false"
     if 'tipo_rede_neural_artificial' in data:
         config['Modelos']['tipo_rede_neural_artificial'] = str(data['tipo_rede_neural_artificial']).lower()
+    if 'image_size' in data:
+        config['Modelos']['image_size'] = str(data['image_size']).lower()
+    if 'modelo_base' in data:
+        config['Modelos']['modelo_base'] = str(data['modelo_base']).lower()
 
     # Salva as alterações no arquivo INI
     save_config(PATH,config)
@@ -2737,7 +2807,8 @@ def get_modelo_config():
 
     # Retorna os valores de cada configuração
     return jsonify({
-        "tipo_rede_neural_artificial": config['Modelos'].get('tipo_rede_neural_artificial')
+        "tipo_rede_neural_artificial": config['Modelos'].get('tipo_rede_neural_artificial'),
+        "image_size": config['Modelos'].get('image_size')
     })
 
 # Endpoint POST para acessar os parâmetros de configuração
@@ -3253,7 +3324,7 @@ def converter_tempo_para_decimal(tempo_str):
     except Exception:
         return 0
 
-
+import sys
 
 
 
@@ -3261,7 +3332,6 @@ def converter_tempo_para_decimal(tempo_str):
 @app.route('/formulario_cadastro')
 def formulario_cadastro():
     return render_template("form.html")
-
 
 
 

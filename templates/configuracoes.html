@@ -442,14 +442,11 @@
         }
 
         #watermark {
-            position: fixed;
-            bottom: 10px;     /* distância do fundo */
-            right: 20px;      /* distância da direita */
-
-            z-index: 1;       /* atrás dos overlays principais */
-            pointer-events: none;  /* não bloqueia clique */
-
-            opacity: 0.1;    /* efeito marca d’água */
+            position: absolute;
+            bottom: 14px;
+            right: 16px;
+            z-index: 1;
+            pointer-events: none;
         }
 
         #watermark img {
@@ -660,7 +657,42 @@
             background: #494B4E;
             color: white;
         }
+        #btn-executar-incremental{
+            width: 60%;
+            height: 40px;
 
+            background:rgb(40, 38, 38); 
+            color: white;
+
+            font-size: 18px;
+            font-weight: bold;
+            letter-spacing: 3px;
+
+            border: 2px solid   #3498db; 
+            border-radius: 14px;
+
+            cursor: pointer;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;  
+
+            position: relative;       
+
+            padding: 0 25px; /* espaço lateral */
+
+            box-shadow: 0 8px 18px rgba(0,0,0,0.5);
+
+            transition: all 0.2s ease;
+        }
+          #btn-executar-incremental:hover{
+            background:rgb(40, 38, 38); 
+            transform: scale(1.03);
+        }
+
+        #btn-executar-incremental:active{
+            transform: scale(0.97);
+        }
         /* BIG EXECUTAR */
         #btn-executar-big{
             width: 100%;
@@ -712,6 +744,456 @@
             margin: 12px 0;        /* espaço acima e abaixo */
         }
 
+        /* ===============================
+        TEMA MODERNO OFFLINE
+        =============================== */
+        :root {
+            --bs-body-bg: #0f172a;
+            --bs-body-color: #e5eef8;
+            --bs-surface: #111827;
+            --bs-border: rgba(148, 163, 184, 0.22);
+            --bs-primary: #6b7280;
+            --bs-primary-soft: #94a3b8;
+            --bs-panel: #111827;
+            --bs-panel-2: #1f2937;
+            --bs-shadow: 0 18px 40px rgba(0, 0, 0, 0.28);
+            --bs-radius: 22px;
+        }
+
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(14, 165, 233, 0.45) transparent;
+        }
+
+        body {
+            min-height: 100vh;
+            overflow-x: auto;
+            overflow-y: auto;
+            color: var(--bs-body-color);
+            background:
+                radial-gradient(circle at top left, rgba(14, 165, 233, 0.18), transparent 26%),
+                radial-gradient(circle at top right, rgba(59, 130, 246, 0.15), transparent 22%),
+                linear-gradient(135deg, #08101d 0%, #0f172a 48%, #0a1220 100%);
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background:
+                linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+            background-size: 28px 28px;
+            mask-image: linear-gradient(to bottom, rgba(0,0,0,0.35), rgba(0,0,0,0.05));
+        }
+
+        #workspace {
+            width: 100%;
+            min-height: 100vh;
+            gap: 12px;
+            padding: 14px 16px;
+            align-items: flex-start;
+        }
+
+        #controls,
+        #controls_right {
+            width: 88px;
+            padding: 14px 9px;
+            gap: 9px;
+            border: 1px solid var(--bs-border);
+            border-radius: var(--bs-radius);
+            background: linear-gradient(180deg, rgba(17, 24, 39, 0.94), rgba(15, 23, 42, 0.84));
+            box-shadow: var(--bs-shadow);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        #controls select,
+        #controls_right select,
+        .top-control select,
+        .control-group input {
+            border: 1px solid rgba(148, 163, 184, 0.32);
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.96);
+            box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.08);
+        }
+
+        #controls select,
+        #controls_right select {
+            width: 100%;
+            min-height: 42px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #0f172a;
+        }
+
+        #controls button,
+        #controls_right button,
+        #controls_IA button {
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            background: linear-gradient(180deg, #4b5563 0%, #374151 100%);
+            box-shadow: 0 10px 20px rgba(15, 23, 42, 0.22), inset 0 1px 0 rgba(255,255,255,0.14);
+        }
+
+        #controls button::before,
+        #controls_right button::before,
+        #controls_IA button::before {
+            content: "";
+            position: absolute;
+            inset: 1px;
+            border-radius: inherit;
+            background: linear-gradient(180deg, rgba(255,255,255,0.15), transparent 45%);
+            pointer-events: none;
+        }
+
+        #controls button:hover,
+        #controls_right button:hover,
+        #controls_IA button:hover,
+        #btn-executar-big:hover,
+        #btn-executar-incremental:hover {
+            background: linear-gradient(180deg, #6b7280 0%, #4b5563 100%);
+            transform: translateY(-2px) scale(1.02);
+        }
+
+        #controls button,
+        #controls_right button {
+            width: 64px;
+            height: 64px;
+            border-radius: 16px;
+        }
+
+        #controls button img,
+        #controls_right button img {
+            width: 46px;
+            height: 46px;
+            object-fit: contain;
+        }
+
+        #togglePanMode {
+            padding: 0;
+        }
+
+        #togglePanMode.pan-active {
+            background: linear-gradient(180deg, #ef4444 0%, #b91c1c 100%);
+        }
+
+        #canvas-container {
+            padding-left: 0;
+        }
+
+        .canvas-stack {
+            padding: 10px;
+            border: 1px solid var(--bs-border);
+            border-radius: 24px;
+            background: linear-gradient(180deg, rgba(15, 23, 42, 0.96), rgba(15, 23, 42, 0.78));
+            box-shadow: var(--bs-shadow);
+        }
+
+        #canvas {
+            border: 1px solid rgba(148, 163, 184, 0.18);
+            border-radius: 18px;
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.34);
+        }
+
+        #canvas-top-controls {
+            position: static;
+            width: 100%;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            top: auto;
+            left: auto;
+            gap: 12px;
+            padding: 8px;
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.12);
+            background: linear-gradient(180deg, rgba(15, 23, 42, 0.92), rgba(15, 23, 42, 0.75));
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+        }
+
+        .top-control label {
+            margin-bottom: 3px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: #cbd5e1;
+        }
+
+        .top-control {
+            flex: 1;
+        }
+
+        .top-control select {
+            width: 100%;
+            min-width: 116px;
+            min-height: 36px;
+            padding: 6px 10px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #0f172a;
+        }
+
+        #NomePrograma {
+            position: static;
+            top: auto;
+            left: auto;
+            width: 100%;
+        }
+
+        #label-programa {
+            display: block;
+            width: 100%;
+            padding: 10px 12px;
+            border-radius: 14px;
+            border: 1px solid rgba(148, 163, 184, 0.14);
+            background: linear-gradient(180deg, rgba(31, 41, 55, 0.96), rgba(17, 24, 39, 0.88));
+            color: #f8fafc;
+            letter-spacing: 0.06em;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        #image-controls {
+            width: 100%;
+            max-width: 1024px;
+            margin-top: 10px;
+            padding: 10px 12px;
+            display: grid;
+            grid-template-columns: repeat(4, minmax(74px, 86px)) 1fr;
+            align-items: end;
+            gap: 8px 12px;
+            border: 1px solid var(--bs-border);
+            border-radius: 20px;
+            background: linear-gradient(180deg, rgba(17, 24, 39, 0.96), rgba(15, 23, 42, 0.82));
+        }
+
+        #image-controls .control-group {
+            min-width: 0;
+            margin-top: 0;
+            align-items: stretch;
+            gap: 4px;
+        }
+
+        #image-controls .control-group label {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #cbd5e1;
+        }
+
+        #image-controls .control-group input {
+            width: 100%;
+            min-height: 32px;
+            padding: 6px 10px;
+            font-size: 11px;
+            font-weight: 700;
+            border-radius: 999px;
+        }
+
+        #controls_IA {
+            margin-left: 0;
+            width: 100%;
+            display: flex;
+            gap: 8px;
+            padding: 0;
+            box-shadow: none;
+            justify-content: flex-end;
+            flex-wrap: nowrap;
+            align-self: center;
+        }
+
+        #controls_IA button,
+        .btn-with-overlay {
+            width: 60px;
+            height: 60px;
+            border-radius: 16px;
+        }
+
+        #controls_IA button img,
+        .btn-with-overlay img {
+            width: 42px;
+            height: 42px;
+            object-fit: contain;
+        }
+
+        #deleteOKLabel,
+        #deleteNOKLabel {
+            right: 4px;
+            bottom: 4px;
+            min-width: 22px;
+            height: 22px;
+            line-height: 22px;
+            border-radius: 999px;
+            font-size: 11px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.28);
+        }
+
+        #vertical-divider {
+            width: 1px;
+            margin: 0 2px;
+            background: linear-gradient(180deg, transparent, rgba(148, 163, 184, 0.36), transparent);
+        }
+
+        #right-panel {
+            width: 520px;
+            padding: 12px 14px 18px;
+            position: relative;
+            border: 1px solid var(--bs-border);
+            border-radius: 22px;
+            background: linear-gradient(180deg, rgba(17, 24, 39, 0.98), rgba(19, 27, 43, 0.92));
+            box-shadow: var(--bs-shadow);
+            align-self: stretch;
+            gap: 12px;
+        }
+
+        .right-panel-header {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        #canvas-top-controls-rigth {
+            position: static;
+            display: block;
+            width: 100%;
+            z-index: auto;
+        }
+
+        #btn-executar-big,
+        #btn-executar-incremental {
+            width: 100%;
+            border-radius: 20px;
+            border: 1px solid rgba(148, 163, 184, 0.16);
+            background: linear-gradient(180deg, rgba(31, 41, 55, 0.98), rgba(17, 24, 39, 0.96));
+            color: #f8fafc;
+            text-transform: uppercase;
+            box-shadow: 0 16px 28px rgba(2, 8, 23, 0.45);
+        }
+
+        #btn-executar-big {
+            min-height: 72px;
+            justify-content: space-between;
+            padding: 0 20px;
+        }
+
+        #btn-executar-big span {
+            flex: 1;
+            text-align: center;
+            font-size: 0.88em;
+            letter-spacing: 0.1em;
+        }
+
+        #btn-executar-big img {
+            width: 48px;
+            height: 48px;
+        }
+
+        #btn-executar-incremental {
+            width: 78%;
+            min-height: 40px;
+            font-size: 14px;
+            letter-spacing: 0.14em;
+        }
+
+        #horizontal-divider {
+            width: 100%;
+            height: 1px;
+            margin: 6px 0 10px;
+            background: linear-gradient(90deg, transparent, rgba(148, 163, 184, 0.34), transparent);
+        }
+
+        #results,
+        #coordinates {
+            width: 100%;
+            padding: 16px 18px;
+            border: 1px solid rgba(148, 163, 184, 0.14);
+            border-radius: 18px;
+            background: linear-gradient(180deg, rgba(19, 27, 43, 0.92), rgba(15, 23, 42, 0.82));
+            color: #e2e8f0;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
+        }
+
+        #results {
+            min-height: 170px;
+            margin-top: 0;
+            font-size: 15px;
+            line-height: 1.6;
+        }
+
+        #coordinates {
+            min-height: 76px;
+            font-size: 12px;
+            line-height: 1.55;
+        }
+
+        .status-label {
+            border-radius: 999px;
+            font-size: 14px;
+            letter-spacing: 0.04em;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.18);
+        }
+
+        .status-ok {
+            background: linear-gradient(180deg, #22c55e, #15803d);
+        }
+
+        .status-nok {
+            background: linear-gradient(180deg, #ef4444, #b91c1c);
+        }
+
+        .loading-overlay {
+            background: rgba(2, 6, 23, 0.72);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+        }
+
+        .loading-content,
+        .popup {
+            border: 1px solid var(--bs-border);
+            background: linear-gradient(180deg, rgba(17, 24, 39, 0.98), rgba(15, 23, 42, 0.94));
+            box-shadow: var(--bs-shadow);
+        }
+
+        .popup button {
+            border-radius: 12px;
+            border: 1px solid rgba(125, 211, 252, 0.28);
+            background: rgba(14, 165, 233, 0.12);
+        }
+
+        .popup button:hover {
+            background: rgba(14, 165, 233, 0.22);
+        }
+
+        #watermark img {
+            width: 96px;
+            opacity: 0.34;
+            filter: grayscale(1) brightness(1.4);
+        }
+
+        @media (max-width: 1700px) {
+            #image-controls {
+                grid-template-columns: repeat(4, minmax(72px, 1fr));
+            }
+
+            #controls_IA {
+                grid-column: 1 / -1;
+                width: 100%;
+                justify-content: flex-end;
+                flex-wrap: wrap;
+            }
+
+            #right-panel {
+                width: 500px;
+            }
+        }
+
      </style>
     </head>
 
@@ -730,15 +1212,15 @@
                     <option value="3">3</option>
                 </select>
 
-                <button onclick="setMode('drawRectangle')" title="Retângulo">
+                <button id="drawRectangleBtn" onclick="setMode('drawRectangle')" title="Retângulo">
                     <img src="{{ url_for('static', filename='retangulo_ms.png') }}">
                 </button>
 
-                <button onclick="setMode('drawCircle')" title="Círculo">
+                <button id="drawCircleBtn" onclick="setMode('drawCircle')" title="Círculo">
                     <img src="{{ url_for('static', filename='circulo_ms.png') }}">
                 </button>
 
-                <button onclick="setMode('edit')" title="Editar ROI">
+                <button id="editBtn" onclick="setMode('edit')" title="Editar ROI">
                     <img src="{{ url_for('static', filename='editar_ms.png') }}">
                 </button>
 
@@ -770,59 +1252,6 @@
             <div id="canvas-container">
                 <div class="canvas-stack">
 
-                    <!-- OVERLAY SUPERIOR -->
-                    <div id="canvas-top-controls">
-
-                        <div class="top-control">
-                            <label for="programa-section">Programa</label>
-                            <select id="programa-section">
-                                <option value="">-- Selecione --</option>
-                                <option value="1">1</option>
-                                <option value="2">2</option>
-                                <option value="3">3</option>
-                                <option value="4">4</option>
-                                <option value="5">5</option>
-                                <option value="6">6</option>
-                                <option value="7">7</option>
-                                <option value="8">8</option>
-                                <option value="9">9</option>
-                                <option value="10">10</option>
-                            </select>
-                        </div>
-
-                        <div class="top-control">
-                            <label for="roi-section">ROI</label>
-                            <select id="roi-section">
-                                <option value="">-- Selecione --</option>
-                                <option value="ROI1">ROI1</option>
-                                <option value="ROI2">ROI2</option>
-                                <option value="ROI3">ROI3</option>
-                                <option value="ROI4">ROI4</option>
-                                <option value="ROI5">ROI5</option>
-                                <option value="ROI6">ROI6</option>
-                                <option value="ROI7">ROI7</option>
-                                <option value="ROI8">ROI8</option>
-                                <option value="ROI9">ROI9</option>
-                                <option value="ROI10">ROI10</option>
-                                <option value="ROI11">ROI11</option>
-                                <option value="ROI12">ROI12</option>
-                                <option value="ROI13">ROI13</option>
-                                <option value="ROI14">ROI14</option>
-                                <option value="ROI15">ROI15</option>
-                                <option value="ROI16">ROI16</option>
-                                <option value="ROI17">ROI17</option>
-                                <option value="ROI18">ROI18</option>
-                                <option value="ROI19">ROI19</option>
-                                <option value="ROI20">ROI20</option>
-                            </select>
-                        </div>
-
-                    </div>
-                    <div id="canvas-top-controls-rigth">   
-                          <div id="NomePrograma">
-                               <label id ="label-programa"></label> 
-                          </div>
-                    </div>   
                     <!-- CANVAS -->
                     <canvas id="canvas" width="1024" height="768"></canvas>
 
@@ -916,22 +1345,78 @@
                 
                 <!-- PAINEL DIREITO (RESULTADOS + COORDENADAS) -->
                 <div id="right-panel">
+                    <div class="right-panel-header">
+                        <div id="canvas-top-controls">
+                            <div class="top-control">
+                                <label for="programa-section">Programa</label>
+                                <select id="programa-section">
+                                    <option value="">-- Selecione --</option>
+                                    <option value="1">1</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                    <option value="4">4</option>
+                                    <option value="5">5</option>
+                                    <option value="6">6</option>
+                                    <option value="7">7</option>
+                                    <option value="8">8</option>
+                                    <option value="9">9</option>
+                                    <option value="10">10</option>
+                                </select>
+                            </div>
+
+                            <div class="top-control">
+                                <label for="roi-section">ROI</label>
+                                <select id="roi-section">
+                                    <option value="">-- Selecione --</option>
+                                    <option value="ROI1">ROI1</option>
+                                    <option value="ROI2">ROI2</option>
+                                    <option value="ROI3">ROI3</option>
+                                    <option value="ROI4">ROI4</option>
+                                    <option value="ROI5">ROI5</option>
+                                    <option value="ROI6">ROI6</option>
+                                    <option value="ROI7">ROI7</option>
+                                    <option value="ROI8">ROI8</option>
+                                    <option value="ROI9">ROI9</option>
+                                    <option value="ROI10">ROI10</option>
+                                    <option value="ROI11">ROI11</option>
+                                    <option value="ROI12">ROI12</option>
+                                    <option value="ROI13">ROI13</option>
+                                    <option value="ROI14">ROI14</option>
+                                    <option value="ROI15">ROI15</option>
+                                    <option value="ROI16">ROI16</option>
+                                    <option value="ROI17">ROI17</option>
+                                    <option value="ROI18">ROI18</option>
+                                    <option value="ROI19">ROI19</option>
+                                    <option value="ROI20">ROI20</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div id="canvas-top-controls-rigth">
+                            <div id="NomePrograma">
+                                <label id ="label-programa"></label>
+                            </div>
+                        </div>
+                    </div>
+
                     <button id="btn-executar-big" onclick="TreinarRNA()">
                         <span>Treinar Modelo</span>
                          <img src="{{ url_for('static', filename='rede_neural_14.png') }}">
+                    </button>
+                    <button id="btn-executar-incremental" onclick="TreinarRNAIncremental()">
+                        <span>Treinar Incremental</span>
                     </button>
                     <div id="horizontal-divider"></div>
 
                     <div id="results">Resultados aparecerão aqui</div>
 
                     <div id="coordinates"></div>
+                    <div id="watermark">
+                        <img src="{{ url_for('static', filename='ms.png') }}">
+                    </div>
 
                 </div>
 
-                <!-- Rodapé permanece fora (position: fixed) -->
-                <div id="watermark">
-                    <img src="{{ url_for('static', filename='ms.png') }}">
-                </div>
               
 
            <div id="loading-popup" class="loading-overlay" style="display:none;">
@@ -1431,6 +1916,7 @@
 
                 const selectedCamera = document.getElementById('camera-section').value;
                 const selectedValueCam = parseInt(selectedCamera, 10);
+                const incrementa = false;
 
                 // Mostra o popup
                 document.getElementById("loading-popup").style.display = "flex";
@@ -1447,12 +1933,55 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         programa: selectedValue,
-                        camera: selectedValueCam
+                        camera: selectedValueCam,
+                        incremental: incrementa
                     })
                 });
 
-                // 👉 Começa a acompanhar o progresso
+               
                 acompanharProgressoTreino();
+
+                
+
+            } catch (error) {
+                document.getElementById("loading-popup").style.display = "none";
+                console.error(error);
+                alert("Erro ao iniciar o treinamento da RNA!");
+            }
+        }
+         async function TreinarRNAIncremental() {
+            try {
+                const selectedProgram = document.getElementById('programa-section').value;
+                const selectedValue = parseInt(selectedProgram, 10);
+
+                const selectedCamera = document.getElementById('camera-section').value;
+                const selectedValueCam = parseInt(selectedCamera, 10);
+                const incrementa = true;
+
+                // Mostra o popup
+                document.getElementById("loading-popup").style.display = "flex";
+
+                // Reseta UI
+                document.getElementById("training-bar").style.width = "0%";
+                document.getElementById("training-percent").innerText = "0%";
+                document.getElementById("training-text").innerText =
+                    "Iniciando treinamento...";
+
+                // 👉 Dispara o treino (NÃO aguardamos terminar)
+                fetch(`${SERVER_URL}/treinar`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        programa: selectedValue,
+                        camera: selectedValueCam,
+                        incremental: incrementa
+                    })
+                });
+
+               
+                acompanharProgressoTreino();
+
+                
 
             } catch (error) {
                 document.getElementById("loading-popup").style.display = "none";
@@ -1465,6 +1994,11 @@
                 try {
                     const response = await fetch(`${SERVER_URL}/training_status`);
                     const data = await response.json();
+                    const selectedProgram = document.getElementById('programa-section').value;
+                    const selectedValue = parseInt(selectedProgram, 10);
+
+                    const selectedCamera = document.getElementById('camera-section').value;
+                    const selectedValueCam = parseInt(selectedCamera, 10);
 
                     if (!data.running) {
                         clearInterval(interval);
@@ -1477,6 +2011,11 @@
                         setTimeout(() => {
                             document.getElementById("loading-popup").style.display = "none";
                             alert("Treinamento finalizado com sucesso!");
+                             window.open(
+                                `${SERVER_URL}/treino_resultado/${selectedValueCam}/${selectedValue}`,
+                                "_blank",
+                                "width=1000,height=800"
+                            );
                         }, 800);
 
                         return;

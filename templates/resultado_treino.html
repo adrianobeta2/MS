@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Resultado do Treino</title>
+    <style>
+        body {
+            background-color: #1e1e1e;
+            color: white;
+            font-family: Arial;
+            text-align: center;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            align-items: center;
+        }
+
+        img {
+            max-width: 90%;
+            border: 2px solid #00bcd4;
+            border-radius: 10px;
+        }
+
+        h2 {
+            color: #00bcd4;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>📊 Resultado do Treino</h1>
+
+    <div class="container">
+
+        <div>
+            <h2>Resultados (Loss / Metrics)</h2>
+            <img src="/treino_imagem/{{ camera }}/{{ programa }}/results.png">
+        </div>
+
+        <div>
+            <h2>Labels (Ground Truth)</h2>
+            <img src="/treino_imagem/{{ camera }}/{{ programa }}/val_batch0_labels.jpg">
+        </div>
+
+        <div>
+            <h2>Predições</h2>
+            <img src="/treino_imagem/{{ camera }}/{{ programa }}/val_batch0_pred.jpg">
+        </div>
+
+    </div>
+
+</body>
+</html>

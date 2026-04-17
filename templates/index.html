@@ -2,338 +2,303 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <title>Status do Sistema de Visão</title>
-  <!-- Favicon para navegador -->
-  <link rel="icon" type="image/png" href="{{ url_for('static', filename='sveNEW.png') }}">
-
-  <!-- Manifest para criar ícone de app -->
-  <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MSV | Monitoramento </title>
+  
   <style>
+    :root {
+      --bg-color: #0a0f1a;
+      --glass-bg: rgba(15, 23, 42, 0.95);
+      --border-color: rgba(255, 255, 255, 0.08);
+      --primary-blue: #3b82f6;
+      --success-green: #22c55e;
+      --danger-red: #ef4444;
+      --text-main: #f8fafc;
+      --text-dim: #64748b;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
     body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      
-      background: #121212;
-      color: #f0f0f0;
-      padding: 50px 0 0 0; /* adiciona 30px de espaçamento superior */
+      font-family: -apple-system, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      line-height: 1.4;
+      overflow-x: auto;
     }
 
-    .container {
-      
-      top: 50px;
+    /* Header com Relógio */
+    nav {
+      position: fixed;
+      top: 0; width: 100%; z-index: 100;
+      background: var(--glass-bg);
+      backdrop-filter: blur(8px);
+      padding: 10px 30px;
       display: flex;
-      flex-direction: column;
+      justify-content: space-between;
       align-items: center;
-      gap: 50px;
-      padding-bottom: 50px;
-      margin-bottom: 40px; /* Espaço entre os painéis */
-      
+      border-bottom: 1px solid var(--border-color);
     }
 
-    .panel-wrapper {
+    .brand-section { display: flex; align-items: center; gap: 12px; }
+    
+    .clock-section {
+      font-family: monospace;
+      font-size: 20px;
+      font-weight: bold;
+      color: var(--primary-blue);
+      background: rgba(0,0,0,0.3);
+      padding: 5px 15px;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+    }
+
+    .config-btn {
+      background: #1e293b;
+      color: #94a3b8;
+      border: 1px solid var(--border-color);
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: bold;
+    }
+
+    /* Layout Principal */
+    main { padding: 90px 20px 40px 20px; display: flex; flex-direction: column; align-items: center; }
+    
+    .panel-cam {
+      background: var(--glass-bg);
+      border-radius: 24px;
+      padding: 25px;
       display: flex;
       flex-direction: row;
-      width: 100%;
-      max-width: 1400px;
-      border-bottom: 2px solid #333;
-      padding-bottom: 20px;
+      gap: 25px;
+      margin-bottom: 40px;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+      width: fit-content; /* Ajusta ao conteúdo (800px + laterais) */
     }
 
-    .left-panel {
-      width: 20%;
-      padding: 20px;
-      background: #121010;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      border-right: 2px solid #333;
-    }
-
-    .right-panel {
-      width: 12%;
-      padding: 12px;
-      background: #121010;
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-start;
-      align-items: center;
-      gap: 20px; /* espaçamento entre programa, status e tempo */
-      border-right: 2px solid #333;
-    }
-    
-   
-    .center-panel {
-      
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-      background: #121212;
-    }
-
-    .status-roi {
-      padding: 10px;
-      border-radius: 5px;
-      font-weight: bold;
-      color: white;
-    }
-
-    .ok {
-      background-color: #2e7d32;
-    }
-
-    .nok {
-      background-color: #c62828;
-    }
-    
-    .camera,
-    .programa,
-    .status-geral,
-    .tempo {
-      position: static; /* deixa o navegador organizar via flex */
-      transform: none;  /* remove o translate */
-      top: auto;
-      left: auto;
-    }  
-
-
-    .status-geral {
-      
-      
-      font-size: 24px;
-      font-weight: bold;
-      padding: 10px;
-      border-radius: 5px;
-      color: white;
-    }
-
-    .status-geral.ok {
-      background: #43a047;
-    }
-
-    .status-geral.nok {
-      background: #e53935;
-    }
-
-    .programa {
-     
-      
-      font-size: 18px;
-      font-weight: bold;
-      color: #bdbdbd;
-      
-      
-    }
-
-    .camera {
-      font-size: 18px;
-      font-weight: bold;
-      color: #bdbdbd;  
-    }
-
-    .nome_programa {
-      position: absolute;
+    /* ROIs */
+    .roi-section { width: 200px; flex-shrink: 0; }
+    .roi-title {
+      font-size: 10px;
       text-transform: uppercase;
-      top: 5px;
-      left: 50%;
-      transform: translateX(-50%);
-      font-size: 15px;
+      letter-spacing: 1px;
+      color: var(--text-dim);
+      margin-bottom: 15px;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 5px;
+    }
+    .roi-card {
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 10px;
       font-weight: bold;
-      color: white;
+      font-size: 12px;
+      display: flex;
+      justify-content: space-between;
+      border: 1px solid rgba(255,255,255,0.05);
     }
+    .roi-ok { background: rgba(34, 197, 94, 0.1); color: var(--success-green); }
+    .roi-nok { background: rgba(239, 68, 68, 0.1); color: var(--danger-red); }
 
-    .tempo {
-      
-      font-size: 14px;
-      color: #bdbdbd;
+    /* Container Imagem 800x600 */
+    .view-section { 
+      position: relative; 
+      width: 800px; 
+      height: 600px; 
+      flex-shrink: 0;
     }
-
-    img {
-      width: 860px;
-      height: auto;
-      border: 2px solid #444;
-      border-radius: 10px;
-    }
-
-    #logo_sve img {
-      width: 70px;
-      object-fit: contain;
-      left: 5%;
+    
+    .prog-badge {
       position: absolute;
-      border: none;
-      margin: 0;
-      padding: 0;
-      top: 5px;
+      top: 15px; left: 15px;
+      background: var(--primary-blue);
+      padding: 5px 15px;
+      border-radius: 4px;
+      font-weight: 800;
+      font-size: 13px;
+      z-index: 10;
+      text-transform: uppercase;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.5);
     }
 
-    .config-button {
-      position: fixed;
-      bottom: 20px;
-      left: 20px;
-      background: #37474f;
-      color: white;
-      text-decoration: none;
-      padding: 10px 16px;
-      border-radius: 6px;
-      font-weight: bold;
-      transition: background 0.3s;
+    .camera-img {
+      width: 800px;
+      height: 600px;
+      object-fit: cover;
+      background: #000;
+      border-radius: 15px;
+      border: 3px solid #1e293b;
     }
 
-    .config-button:hover {
-      background: #546e7a;
-    }
-    .popup{
-      display:none;
-      position:fixed;
-      top:0;
-      left:0;
-      width:100%;
-      height:100%;
-      background:rgba(0,0,0,0.6);
-      justify-content:center;
-      align-items:center;
-      z-index:1000;
+    /* Logo MS sobre a imagem */
+    .logo-ms {
+      position: absolute;
+      bottom: 15px;
+      left: 15px;
+      width: 60px;
+      opacity: 0.6;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.8));
     }
 
-    .popup-content{
-      background:#1e1e1e;
-      padding:25px;
-      border-radius:8px;
-      display:flex;
-      flex-direction:column;
-      gap:15px;
-      width:250px;
-      text-align:center;
+    /* Coluna de Status */
+    .info-section { 
+      width: 250px; 
+      flex-shrink: 0; 
+      display: flex; 
+      flex-direction: column; 
+      justify-content: space-between; 
     }
+    
+    .cam-label { font-size: 20px; font-weight: 900; color: var(--primary-blue); }
+    .status-text { font-size: 35px; font-weight: 900; line-height: 1; margin: 20px 0; }
+    .text-ok { color: var(--success-green); }
+    .text-nok { color: var(--danger-red); }
+    
+    .perf-box { background: rgba(0,0,0,0.2); padding: 20px; border-radius: 12px; border: 1px solid var(--border-color); }
+    .time-val { font-family: monospace; font-size: 18px; color: var(--primary-blue); font-weight: bold; }
 
-    .popup-content input{
-      padding:8px;
-      border:none;
-      border-radius:4px;
+    /* Modal */
+    .modal {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9);
+      z-index: 1000; align-items: center; justify-content: center;
     }
-
-    .popup-botoes{
-      display:flex;
-      justify-content:space-between;
-    }
-
-    .popup-botoes button{
-      padding:8px 12px;
-      border:none;
-      border-radius:4px;
-      cursor:pointer;
-    }
+    .modal-content { background: #1e293b; padding: 35px; border-radius: 20px; text-align: center; width: 320px; }
+    .modal-input { width: 100%; padding: 12px; margin: 15px 0; border-radius: 8px; border: none; font-size: 20px; text-align: center; }
   </style>
 </head>
 <body>
-  <a href="#" class="config-button" onclick="abrirPopupSenha()">⚙️ Configurações</a>
-  <div class="container">
 
-    <!-- Painel da câmera 1 -->
-    <div class="panel-wrapper" id="status-cam1">
-      <div class="left-panel" id="rois1"></div>
-      <div class="center-panel">
-        
-        <div class="nome_programa" id="nome_programa1"></div>
-        
-        <img id="imagemStatus1" src="" alt="Imagem de Status 1">
-        <div id="logo_sve"><img src="{{ url_for('static', filename='ms.png') }}" alt=""></div>
-       
+  <nav>
+    <div class="brand-section">
+      <img src="{{ url_for('static', filename='mstec.png') }}" alt="Logo MS" style="height: 40px; width: auto; object-fit: contain;">
+      <h1 class="brand-h1"><span style="color: var(--primary-blue);">MONITOR</span></h1>
+    </div>
+ 
+    <div class="clock-section" id="relogio">00:00:00</div>
+
+    <button class="config-btn" onclick="toggleModal(true)">⚙️ CONFIGURAÇÕES</button>
+  </nav>
+
+  <main>
+    <div class="panel-cam">
+      <div class="roi-section">
+        <div class="roi-title">Status ROIs</div>
+        <div id="rois1"></div>
       </div>
-      <div class="right-panel" id="statusG1">
-        <div class="camera" id="camera1"></div>
-        <div class="programa" id="programa1"></div>
-       <div id="statusGeral1" class="status-geral"></div>
-       <div class="tempo" id="tempoExecucao1"></div>
+      
+      <div class="view-section">
+        <div class="prog-badge" id="nome_programa1">---</div>
+        <img id="imagemStatus1" class="camera-img" src="" alt="CAM 1">
+        <img src="{{ url_for('static', filename='ms.png') }}" class="logo-ms" alt="Logo MS">
+      </div>
+      
+      <div class="info-section">
+        <div>
+          <div class="cam-label">CAMERA 01</div>
+          <div id="programa1" style="font-size: 14px; color: var(--text-dim); font-weight: bold;">ID: --</div>
+        </div>
+        <div class="status-text" id="statusGeral1">---</div>
+        <div class="perf-box">
+          <div style="font-size: 10px; color: var(--text-dim); margin-bottom: 5px;">CYCLE TIME</div>
+          <div class="time-val" id="tempoExecucao1">0.00 ms</div>
+        </div>
       </div>
     </div>
 
-    <!-- Painel da câmera 2 -->
-    <div class="panel-wrapper" id="status-cam2">
-      <div class="left-panel" id="rois2"></div>
-      <div class="center-panel">
-        
-        <div class="nome_programa" id="nome_programa2"></div>
-        
-        <img id="imagemStatus2" src="" alt="Imagem de Status 2">
-        <div id="logo_sve"><img src="{{ url_for('static', filename='ms.png') }}" alt=""></div>
-       
+    <div class="panel-cam">
+      <div class="roi-section">
+        <div class="roi-title">Status ROIs</div>
+        <div id="rois2"></div>
       </div>
-      <div class="right-panel" id="statusG2">
-        <div class="camera" id="camera2"></div>
-        <div class="programa" id="programa2"></div>
-        <div id="statusGeral2" class="status-geral"></div>
-        <div class="tempo" id="tempoExecucao2"></div>
+      
+      <div class="view-section">
+        <div class="prog-badge" id="nome_programa2">---</div>
+        <img id="imagemStatus2" class="camera-img" src="" alt="CAM 2">
+        <img src="{{ url_for('static', filename='ms.png') }}" class="logo-ms" alt="Logo MS">
+      </div>
+      
+      <div class="info-section">
+        <div>
+          <div class="cam-label">CAMERA 02</div>
+          <div id="programa2" style="font-size: 14px; color: var(--text-dim); font-weight: bold;">ID: --</div>
+        </div>
+        <div class="status-text" id="statusGeral2">---</div>
+        <div class="perf-box">
+          <div style="font-size: 10px; color: var(--text-dim); margin-bottom: 5px;">CYCLE TIME</div>
+          <div class="time-val" id="tempoExecucao2">0.00 ms</div>
+        </div>
       </div>
     </div>
+  </main>
 
+  <div id="modalSenha" class="modal">
+    <div class="modal-content">
+      <h3 style="color: white; margin-bottom: 10px;">ACESSO RESTRITO</h3>
+      <input type="password" id="senhaInput" class="modal-input" placeholder="••••">
+      <div style="display: flex; gap: 10px;">
+        <button onclick="toggleModal(false)" style="flex: 1; background: none; color: var(--text-dim); border: none; cursor: pointer;">Sair</button>
+        <button onclick="verificarSenha()" style="flex: 2; background: var(--primary-blue); color: white; padding: 12px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer;">ENTRAR</button>
+      </div>
+    </div>
   </div>
-  <div id="popupSenha" class="popup">
-    <div class="popup-content">
-      <h3>Senha de acesso</h3>
-      <input type="password" id="senhaInput" placeholder="Digite a senha">
-      <div class="popup-botoes">
-        <button onclick="verificarSenha()">Entrar</button>
-        <button onclick="fecharPopup()">Cancelar</button>
-      </div>
-    </div>
-  </div>
+
   <script>
-   function abrirPopupSenha(){
-    document.getElementById("popupSenha").style.display = "flex";
-  }
-
-  function fecharPopup(){
-    document.getElementById("popupSenha").style.display = "none";
-  }
-
-  function verificarSenha(){
-    const senha = document.getElementById("senhaInput").value;
-
-    if(senha === "sistema"){   // sua senha
-      window.location.href = "/configuracoes";
-    }else{
-      alert("Senha incorreta");
+    // Função do Relógio
+    function atualizarRelogio() {
+      const agora = new Date();
+      const h = String(agora.getHours()).padStart(2, '0');
+      const m = String(agora.getMinutes()).padStart(2, '0');
+      const s = String(agora.getSeconds()).padStart(2, '0');
+      document.getElementById('relogio').textContent = `${h}:${m}:${s}`;
     }
-  }
+    setInterval(atualizarRelogio, 1000);
+    atualizarRelogio();
+
+    function toggleModal(show) { document.getElementById("modalSenha").style.display = show ? "flex" : "none"; }
+    
+    function verificarSenha() {
+      if(document.getElementById("senhaInput").value === "sistema") window.location.href = "/configuracoes";
+      else alert("Senha incorreta");
+    }
+
     async function atualizarStatus(camera) {
       try {
         const res = await fetch(`/status.json?camera=${camera}`);
         const data = await res.json();
 
+        // ROIs
         const roisDiv = document.getElementById(`rois${camera}`);
         roisDiv.innerHTML = '';
         for (let i = 1; i <= data.n_rois; i++) {
-          const key = `parcial_p${i}`;
-          const status = data[key];
+          const status = data[`parcial_p${i}`];
           const div = document.createElement('div');
-          div.classList.add('status-roi', status ? 'ok' : 'nok');
-          div.textContent = `ROI ${i}: ${status ? 'OK' : 'NOK'}`;
+          div.className = `roi-card ${status ? 'roi-ok' : 'roi-nok'}`;
+          div.innerHTML = `<span>ROI ${i}</span> <span>${status ? 'OK' : 'FAIL'}</span>`;
           roisDiv.appendChild(div);
         }
 
-        document.getElementById(`programa${camera}`).textContent = `programa ${data.programa}`;
-        document.getElementById(`camera${camera}`).textContent = `CAM${camera}`;
-        document.getElementById(`nome_programa${camera}`).textContent = `${data.nome_programa}`;
+        document.getElementById(`programa${camera}`).textContent = `PROGRAMA: ${data.programa}`;
+        document.getElementById(`nome_programa${camera}`).textContent = data.nome_programa;
         document.getElementById(`imagemStatus${camera}`).src = `/imagem_status.jpg?camera=${camera}&t=${new Date().getTime()}`;
-        const statusGeral = document.getElementById(`statusGeral${camera}`);
-        statusGeral.textContent = data.status_geral ? 'APROVADO' : 'REJEITADO';
-        statusGeral.className = 'status-geral ' + (data.status_geral ? 'ok' : 'nok');
-        document.getElementById(`tempoExecucao${camera}`).textContent = `Tempo: ${data.tempo_execucao.toFixed(2)} ms`;
-      } catch (e) {
-        console.error(`Erro ao atualizar status da câmera ${camera}:`, e);
-      }
+        
+        const stGeral = document.getElementById(`statusGeral${camera}`);
+        if(data.status_geral) {
+            stGeral.textContent = 'APROVADO';
+            stGeral.className = 'status-text text-ok';
+        } else {
+            stGeral.textContent = 'REJEITADO';
+            stGeral.className = 'status-text text-nok';
+        }
+        document.getElementById(`tempoExecucao${camera}`).textContent = `${data.tempo_execucao.toFixed(2)} ms`;
+      } catch (e) { console.error(e); }
     }
 
-    function atualizarAmbas() {
-      atualizarStatus(1);
-      atualizarStatus(2);
-    }
-
-    setInterval(atualizarAmbas, 1000);
-    atualizarAmbas(); // Primeira chamada imediata
+    setInterval(() => { atualizarStatus(1); atualizarStatus(2); }, 1000);
+    atualizarStatus(1); atualizarStatus(2);
   </script>
 </body>
 </html>
